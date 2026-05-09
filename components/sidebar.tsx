@@ -14,6 +14,7 @@ import {
   Users,
   X,
 } from 'lucide-react';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -47,23 +48,11 @@ const PAGE_TITLES: Record<string, string> = {
   '/usuarios': 'Usuários do Sistema',
 };
 
-interface SidebarUser {
-  name: string;
-  initials: string;
-  role: string;
-}
-
-interface SidebarProps {
-  role?: 'admin' | 'protetor';
-  user?: SidebarUser;
-}
-
-export function Sidebar({
-  role = 'admin',
-  user = { name: 'Malba Vinicius', initials: 'MV', role: 'Administrador' },
-}: SidebarProps) {
-  const pathname = usePathname();
+export function Sidebar() {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const { data: user } = useCurrentUser();
   const { resolvedTheme, setTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -81,10 +70,18 @@ export function Sidebar({
 
   const toggleTheme = () => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
   const closeMobile = () => setMobileOpen(false);
+  
   const handleLogout = () => {
     closeMobile();
     router.push('/login');
   };
+
+  const initials = user?.name
+    ?.split(' ')
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <>
@@ -143,7 +140,7 @@ export function Sidebar({
 
         <nav className="flex-1 overflow-y-auto px-2 py-2.5">
           {NAV_GROUPS.map((group) => {
-            if (group.adminOnly && role !== 'admin') return null;
+            if (group.adminOnly && user?.role !== 'Administrador') return null;
             return (
               <div key={group.section} className="mb-1">
                 <p className="mb-1 px-2.5 pt-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60">
@@ -186,11 +183,11 @@ export function Sidebar({
         <div className="border-t border-border px-2 py-2.5">
           <div className="mb-0.5 flex items-center gap-2.5 rounded-[10px] px-2.5 py-2">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-orange-100 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-400">
-              {user.initials}
+              {initials ?? '—'}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-medium text-foreground">{user.name}</p>
-              <p className="text-[11px] text-muted-foreground">{user.role}</p>
+              <p className="truncate text-[13px] font-medium text-foreground">{user?.name ?? '—'}</p>
+              <p className="text-[11px] text-muted-foreground">{user?.role ?? '—'}</p>
             </div>
           </div>
 
