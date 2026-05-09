@@ -26,7 +26,7 @@ const NAV_GROUPS = [
     adminOnly: false,
     items: [
       { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { href: '/animais', label: 'Animais', icon: PawPrint },
+      { href: '/animals', label: 'Animais', icon: PawPrint },
     ],
   },
   {
@@ -42,7 +42,7 @@ const NAV_GROUPS = [
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
-  '/animais': 'Animais',
+  '/animals': 'Animais',
   '/tutores': 'Tutores',
   '/adocoes': 'Histórico de Adoções',
   '/usuarios': 'Usuários do Sistema',
