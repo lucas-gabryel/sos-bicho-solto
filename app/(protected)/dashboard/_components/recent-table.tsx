@@ -47,7 +47,7 @@ export function RecentTable({ animals }: { animals: RecentAnimal[] }) {
         {animals.map((animal) => (
           <TableRow
             key={animal.id}
-            onClick={() => router.push(`/animais/${animal.id}`)}
+            onClick={() => router.push(`/animals/${animal.id}`)}
             className="cursor-pointer border-b border-border hover:bg-orange-50/60 dark:hover:bg-orange-950/10"
           >
             <TableCell className="px-5 py-3">
@@ -71,7 +71,7 @@ export function RecentTable({ animals }: { animals: RecentAnimal[] }) {
                 size="icon-sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  router.push(`/animais/${animal.id}`);
+                  router.push(`/animals/${animal.id}`);
                 }}
               >
                 <ArrowRight className="size-3.5" />

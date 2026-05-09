@@ -64,13 +64,13 @@ export default function DashboardPage() {
       </div>
 
       <div className="overflow-hidden rounded-[14px] border border-border bg-card">
-        <div className="flex items-center justify-between border-b border-border px-5 py-[15px]">
+        <div className="flex items-center justify-between border-b border-border px-5 py-3.75">
           <div>
             <h2 className="text-sm font-semibold text-foreground">Registros recentes</h2>
             <p className="mt-0.5 text-[11px] text-muted-foreground">Últimos 5 animais cadastrados</p>
           </div>
           <Button asChild variant="outline" size="sm">
-            <Link href="/animais">
+            <Link href="/animals">
               <ArrowRight className="size-3.5" />
               Ver todos
             </Link>
