@@ -35,7 +35,7 @@ export default function DashboardPage() {
           sub="registros no sistema"
           icon={PawPrint}
           color="orange"
-          href="/animais"
+          href="/animals"
         />
         <MetricCard
           label="Em Acolhimento"
@@ -43,7 +43,7 @@ export default function DashboardPage() {
           sub="aguardando adoção"
           icon={Home}
           color="blue"
-          href="/animais"
+          href="/animals"
         />
         <MetricCard
           label="Adotados"
