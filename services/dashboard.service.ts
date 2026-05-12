@@ -1,3 +1,5 @@
+import { getTutors } from '@/services/tutor.service';
+
 export interface DashboardStats {
   totalAnimais: number;
   emAcolhimento: number;
@@ -6,12 +8,12 @@ export interface DashboardStats {
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  await new Promise((resolve) => setTimeout(resolve, 300));
+  const tutors = await getTutors();
 
   return {
     totalAnimais: 5,
     emAcolhimento: 3,
     adotados: 2,
-    tutores: 2,
+    tutores: tutors.length,
   };
 }
