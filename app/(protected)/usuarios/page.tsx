@@ -1,0 +1,195 @@
+'use client';
+
+import { LoaderCircle, Plus, Search, ShieldCheck, Trash2 } from 'lucide-react';
+import { useDeferredValue, useState } from 'react';
+
+import { AdminOnly } from '@/components/admin-only';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useCreateUser } from '@/hooks/use-create-user';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useDeleteUser } from '@/hooks/use-delete-user';
+import { useUsers } from '@/hooks/use-users';
+import { formatDateToPtBr } from '@/lib/tutor';
+import { getRoleLabel } from '@/lib/user';
+import type { CreateUserFormValues } from '@/types/user';
+import { UserFormModal } from './_components/user-form-modal';
+
+function UsersPageContent() {
+  const { data: currentUser } = useCurrentUser();
+  const { data: users = [], isLoading } = useUsers();
+  const createUser = useCreateUser();
+  const deleteUser = useDeleteUser();
+
+  const [search, setSearch] = useState('');
+  const deferredSearch = useDeferredValue(search);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const filteredUsers = users.filter((user) => {
+    const query = deferredSearch.trim().toLowerCase();
+
+    if (!query) {
+      return true;
+    }
+
+    return [user.name, user.email, getRoleLabel(user.role)].join(' ').toLowerCase().includes(query);
+  });
+
+  const handleCreateUser = async (values: CreateUserFormValues) => {
+    await createUser.mutateAsync({
+      name: values.name,
+      email: values.email,
+      role: values.role,
+      password: values.password,
+    });
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    const confirmed = window.confirm(
+      `Deseja excluir o usuario ${userName}? Essa acao remove apenas o cadastro mockado.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    await deleteUser.mutateAsync(userId);
+  };
+
+  return (
+    <>
+      <div className="p-4 md:p-7">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-[22px] font-semibold text-foreground">Usuarios do sistema</h1>
+            <p className="mt-0.5 text-[13px] text-muted-foreground">
+              Controle de acesso de administradores e protetores
+            </p>
+          </div>
+
+          <Button variant="primary" size="default" onClick={() => setIsCreateModalOpen(true)}>
+            <Plus className="size-4" />
+            Novo usuario
+          </Button>
+        </div>
+
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <div className="relative min-w-45 flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por nome, e-mail ou perfil..."
+              className="pl-9 text-[13px]"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+          </div>
+        </div>
+
+        {isLoading ? (
+          <div className="rounded-[14px] border border-border bg-card px-4 py-10 text-center text-sm text-muted-foreground">
+            Carregando usuarios...
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 rounded-[14px] border border-dashed border-border py-16 text-muted-foreground">
+            <ShieldCheck className="size-10 opacity-30" />
+            <p className="text-sm">Nenhum usuario encontrado</p>
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-[14px] border border-border bg-card">
+            <Table className="border-collapse">
+              <TableHeader>
+                <TableRow className="border-b border-border bg-muted/40 hover:bg-muted/40">
+                  {['Nome', 'E-mail', 'Perfil', 'Criado em', 'Acoes'].map((header) => (
+                    <TableHead
+                      key={header}
+                      className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground"
+                    >
+                      {header}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.map((user) => (
+                  <TableRow key={user.id} className="border-b border-border">
+                    <TableCell className="px-5 py-3">
+                      <div>
+                        <p className="text-[13px] font-medium text-foreground">{user.name}</p>
+                        <p className="text-[11px] text-muted-foreground">{user.id}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-5 py-3 text-[13px] text-foreground">{user.email}</TableCell>
+                    <TableCell className="px-5 py-3">
+                      <Badge
+                        className={
+                          user.role === 'admin'
+                            ? 'rounded-full border-transparent bg-orange-100 px-2.5 py-0.5 text-[11px] font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-400'
+                            : 'rounded-full border-transparent bg-blue-100 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700 dark:bg-blue-950/40 dark:text-blue-400'
+                        }
+                      >
+                        {getRoleLabel(user.role)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="px-5 py-3 text-[12px] text-muted-foreground">
+                      {formatDateToPtBr(user.createdAt)}
+                    </TableCell>
+                    <TableCell className="px-5 py-3">
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        disabled={deleteUser.isPending || user.id === currentUser?.id}
+                        title={
+                          user.id === currentUser?.id
+                            ? 'Nao e permitido excluir o proprio usuario com a sessao aberta.'
+                            : undefined
+                        }
+                        onClick={() => handleDeleteUser(user.id, user.name)}
+                      >
+                        <Trash2 className="size-4" />
+                        {deleteUser.isPending && deleteUser.variables === user.id ? 'Excluindo...' : 'Excluir'}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
+
+      {isCreateModalOpen ? (
+        <UserFormModal
+          open={isCreateModalOpen}
+          isPending={createUser.isPending}
+          onOpenChange={setIsCreateModalOpen}
+          onSubmit={handleCreateUser}
+        />
+      ) : null}
+
+      {createUser.isPending ? (
+        <div className="pointer-events-none fixed bottom-4 right-4 z-[60] flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground shadow-lg">
+          <LoaderCircle className="size-4 animate-spin" />
+          Criando usuario...
+        </div>
+      ) : null}
+
+      {deleteUser.isPending ? (
+        <div className="pointer-events-none fixed bottom-4 right-4 z-[60] flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground shadow-lg">
+          <LoaderCircle className="size-4 animate-spin" />
+          Excluindo usuario...
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+export default function UsersPage() {
+  return (
+    <AdminOnly>
+      <UsersPageContent />
+    </AdminOnly>
+  );
+}

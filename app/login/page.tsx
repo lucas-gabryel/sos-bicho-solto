@@ -24,6 +24,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { mutateAsync: login, isPending } = useLogin();
   const [showPassword, setShowPassword] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
@@ -32,8 +33,13 @@ export default function LoginPage() {
   } = useForm<FormData>({ resolver: yupResolver(schema) });
 
   const onSubmit = async (data: FormData) => {
-    await login(data);
-    router.push('/dashboard');
+    try {
+      setSubmitError(null);
+      await login(data);
+      router.replace('/dashboard');
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Nao foi possivel entrar.');
+    }
   };
 
   return (
@@ -96,6 +102,12 @@ export default function LoginPage() {
               </div>
               {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
             </div>
+
+            {submitError ? (
+              <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {submitError}
+              </div>
+            ) : null}
 
             <Button
               type="submit"

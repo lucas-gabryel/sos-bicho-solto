@@ -3,6 +3,7 @@
 import { LoaderCircle, Plus, Search, Users } from 'lucide-react';
 import { useDeferredValue, useState } from 'react';
 
+import { AdminOnly } from '@/components/admin-only';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCreateTutor } from '@/hooks/use-create-tutor';
@@ -23,7 +24,7 @@ const initialModalState: ModalState = {
   tutor: null,
 };
 
-export default function TutorsPage() {
+function TutorsPageContent() {
   const { data: tutors = [], isLoading } = useTutors();
   const createTutor = useCreateTutor();
   const updateTutor = useUpdateTutor();
@@ -153,5 +154,13 @@ export default function TutorsPage() {
         </div>
       ) : null}
     </>
+  );
+}
+
+export default function TutorsPage() {
+  return (
+    <AdminOnly>
+      <TutorsPageContent />
+    </AdminOnly>
   );
 }

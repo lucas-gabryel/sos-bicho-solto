@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { AdminOnly } from '@/components/admin-only';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,7 +24,7 @@ import type { TutorFormValues } from '@/types/tutor';
 import { AdoptedAnimalCard } from '../_components/adopted-animal-card';
 import { TutorFormModal } from '../_components/tutor-form-modal';
 
-export default function TutorDetailPage() {
+function TutorDetailPageContent() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const tutorId = typeof params.id === 'string' ? params.id : '';
@@ -250,5 +251,13 @@ export default function TutorDetailPage() {
         />
       ) : null}
     </>
+  );
+}
+
+export default function TutorDetailPage() {
+  return (
+    <AdminOnly>
+      <TutorDetailPageContent />
+    </AdminOnly>
   );
 }

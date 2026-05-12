@@ -5,12 +5,14 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { useAnimals } from '@/hooks/use-animals';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDashboardStats } from '@/hooks/use-dashboard-stats';
 import { MetricCard } from './_components/metric-card';
 import { RecentTable } from './_components/recent-table';
 
 export default function DashboardPage() {
   const { data: animals = [] } = useAnimals();
+  const { data: currentUser } = useCurrentUser();
   const { data: stats } = useDashboardStats();
 
   const today = new Date().toLocaleDateString('pt-BR', {
@@ -53,14 +55,16 @@ export default function DashboardPage() {
           color="green"
           href="/adocoes"
         />
-        <MetricCard
-          label="Tutores"
-          value={stats?.tutores ?? 0}
-          sub="cadastrados no sistema"
-          icon={Users}
-          color="purple"
-          href="/tutores"
-        />
+        {currentUser?.role === 'admin' ? (
+          <MetricCard
+            label="Tutores"
+            value={stats?.tutores ?? 0}
+            sub="cadastrados no sistema"
+            icon={Users}
+            color="purple"
+            href="/tutores"
+          />
+        ) : null}
       </div>
 
       <div className="overflow-hidden rounded-[14px] border border-border bg-card">
