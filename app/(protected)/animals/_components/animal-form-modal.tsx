@@ -37,6 +37,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
   const form = useForm<CreateAnimalFormData>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(createAnimalSchema) as any,
+    mode: 'onSubmit',
     defaultValues: animal
       ? {
           nome: animal.nome,
@@ -280,7 +281,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
                   <FormControl>
                     <textarea
                       placeholder="Descreva o estado de saúde, traumas, vacinas, etc."
-                      className="min-h-24 rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-950 placeholder:text-neutral-500 focus:border-neutral-950 focus:outline-none focus:ring-1 focus:ring-neutral-950"
+                      className="flex min-h-24 w-full rounded-lg border border-input bg-card px-3 py-1 text-sm shadow-xs transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
                       {...field}
                     />
                   </FormControl>

@@ -86,7 +86,7 @@ const FormLabel = React.forwardRef<React.ElementRef<'label'>, React.LabelHTMLAtt
         ref={ref}
         className={cn(
           'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
-          error && 'text-red-500',
+          error && 'text-destructive',
           className,
         )}
         htmlFor={formItemId}
@@ -119,13 +119,15 @@ const FormControl = React.forwardRef<
 FormControl.displayName = 'FormControl';
 
 const FormDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
-  ({ className, ...props }, ref) => <p ref={ref} className={cn('text-sm text-neutral-500', className)} {...props} />,
+  ({ className, ...props }, ref) => (
+    <p ref={ref} className={cn('text-sm text-muted-foreground', className)} {...props} />
+  ),
 );
 FormDescription.displayName = 'FormDescription';
 
 const FormMessage = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
   ({ className, ...props }, ref) => (
-    <p ref={ref} className={cn('text-sm font-medium text-red-500', className)} {...props} />
+    <p ref={ref} className={cn('text-sm font-medium text-destructive', className)} {...props} />
   ),
 );
 FormMessage.displayName = 'FormMessage';
