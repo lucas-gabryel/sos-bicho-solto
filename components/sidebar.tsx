@@ -5,7 +5,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useLogout } from '@/hooks/use-logout';
 import { getRoleLabel } from '@/lib/user';
 import { cn } from '@/lib/utils';
-import { HeartHandshake, LayoutDashboard, LogOut, Menu, Moon, PawPrint, Sun, UserCog, Users, X } from 'lucide-react';
+import { LayoutDashboard, LogOut, Menu, Moon, PawPrint, Sun, UserCog, Users, X } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -23,7 +23,6 @@ const NAV_GROUPS = [
     section: 'Gestão',
     items: [
       { href: '/tutores', label: 'Tutores', icon: Users },
-      { href: '/adocoes', label: 'Histórico de Adoções', icon: HeartHandshake },
       { href: '/usuarios', label: 'Usuários do Sistema', icon: UserCog, adminOnly: true },
     ],
   },
@@ -120,7 +119,9 @@ export function Sidebar() {
 
         <nav className="flex-1 overflow-y-auto px-2 py-2.5">
           {NAV_GROUPS.map((group) => {
-            const visibleItems = group.items.filter((item) => !('adminOnly' in item && item.adminOnly) || user?.role === 'admin');
+            const visibleItems = group.items.filter(
+              (item) => !('adminOnly' in item && item.adminOnly) || user?.role === 'admin',
+            );
 
             if (visibleItems.length === 0) {
               return null;
