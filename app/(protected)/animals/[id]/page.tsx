@@ -222,7 +222,7 @@ function InfoField({ label, value }: { label: string; value: string | React.Reac
   return (
     <div className="space-y-1.5">
       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
-      <p className="text-sm font-medium text-foreground">{value}</p>
+      <div className="text-sm font-medium text-foreground">{value}</div>
     </div>
   );
 }
