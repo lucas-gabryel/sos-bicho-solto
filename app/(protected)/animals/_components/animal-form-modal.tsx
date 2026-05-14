@@ -35,8 +35,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
   const mutation = isEditing ? updateMutation : createMutation;
 
   const form = useForm<CreateAnimalFormData>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(createAnimalSchema) as any,
+    resolver: zodResolver(createAnimalSchema),
     mode: 'onSubmit',
     defaultValues: animal
       ? {
@@ -65,8 +64,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
         },
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async function onSubmit(data: any) {
+  async function onSubmit(data: CreateAnimalFormData) {
     try {
       if (isEditing && animal) {
         await updateMutation.mutateAsync({
@@ -130,8 +128,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
             <FormField
               control={form.control}
               name="nome"
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              render={({ field }: any) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nome *</FormLabel>
                   <FormControl>
@@ -146,8 +143,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
             <FormField
               control={form.control}
               name="esp"
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              render={({ field }: any) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Espécie *</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
@@ -170,8 +166,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
             <FormField
               control={form.control}
               name="raca"
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              render={({ field }: any) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Raça *</FormLabel>
                   <FormControl>
@@ -186,8 +181,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
             <FormField
               control={form.control}
               name="sexo"
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              render={({ field }: any) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sexo *</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
@@ -210,8 +204,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
             <FormField
               control={form.control}
               name="cor"
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              render={({ field }: any) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Cor *</FormLabel>
                   <FormControl>
@@ -226,8 +219,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
             <FormField
               control={form.control}
               name="peso"
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              render={({ field }: any) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Peso (kg) *</FormLabel>
                   <FormControl>
@@ -242,12 +234,11 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
             <FormField
               control={form.control}
               name="pesoAt"
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              render={({ field }: any) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Peso Atual (kg)</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Ex: 8.1" step="0.1" {...field} />
+                    <Input type="number" placeholder="Ex: 8.1" step="0.1" {...field} value={field.value ?? ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -258,8 +249,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
             <FormField
               control={form.control}
               name="local"
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              render={({ field }: any) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Localização *</FormLabel>
                   <FormControl>
@@ -274,8 +264,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
             <FormField
               control={form.control}
               name="obs"
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              render={({ field }: any) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Observações</FormLabel>
                   <FormControl>
@@ -294,8 +283,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
             <FormField
               control={form.control}
               name="status"
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              render={({ field }: any) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status *</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
