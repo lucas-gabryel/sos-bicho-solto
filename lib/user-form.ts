@@ -6,10 +6,10 @@ const passwordRegex = /^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,15}$/;
 
 export const createUserSchema = z
   .object({
-    name: z.string().trim().min(1, 'Nome obrigatorio'),
-    email: z.string().trim().min(1, 'E-mail obrigatorio').email('E-mail invalido'),
+    name: z.string().trim().min(1, 'Nome obrigatório'),
+    email: z.string().trim().min(1, 'E-mail obrigatório').email('E-mail inválido'),
     role: z.enum(['admin', 'protetor'], {
-      errorMap: () => ({ message: 'Perfil obrigatorio' }),
+      errorMap: () => ({ message: 'Perfil obrigatório' }),
     }),
     password: z
       .string()

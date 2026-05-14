@@ -94,7 +94,7 @@ export async function updateTutor(id: string, values: TutorFormValues): Promise<
   });
 
   if (!updatedTutor) {
-    throw new Error('Tutor nao encontrado.');
+    throw new Error('Tutor não encontrado.');
   }
 
   return cloneTutor(updatedTutor);
@@ -106,7 +106,7 @@ export async function deleteTutor(id: string): Promise<void> {
   const exists = tutorsDb.some((tutor) => tutor.id === id);
 
   if (!exists) {
-    throw new Error('Tutor nao encontrado.');
+    throw new Error('Tutor não encontrado.');
   }
 
   tutorsDb = tutorsDb.filter((tutor) => tutor.id !== id);

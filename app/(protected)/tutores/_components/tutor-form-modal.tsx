@@ -13,29 +13,29 @@ import { formatCpf, formatPhone, isValidCpf, onlyDigits } from '@/lib/tutor';
 import type { Tutor, TutorFormValues } from '@/types/tutor';
 
 const tutorSchema = z.object({
-  nome: z.string().trim().min(1, 'Nome obrigatorio'),
+  nome: z.string().trim().min(1, 'Nome obrigatório'),
   cpf: z
     .string()
-    .min(1, 'CPF obrigatorio')
-    .refine((value) => onlyDigits(value).length === 11 && isValidCpf(value), 'CPF invalido'),
+    .min(1, 'CPF obrigatório')
+    .refine((value) => onlyDigits(value).length === 11 && isValidCpf(value), 'CPF inválido'),
   telefone: z
     .string()
-    .min(1, 'Telefone obrigatorio')
+    .min(1, 'Telefone obrigatório')
     .refine((value) => {
       const digits = onlyDigits(value);
 
       return digits.length === 10 || digits.length === 11;
-    }, 'Telefone invalido'),
-  email: z.string().trim().min(1, 'E-mail obrigatorio').email('E-mail invalido'),
-  endereco: z.string().trim().min(1, 'Endereco obrigatorio'),
+    }, 'Telefone inválido'),
+  email: z.string().trim().min(1, 'E-mail obrigatório').email('E-mail inválido'),
+  endereco: z.string().trim().min(1, 'Endereço obrigatório'),
   dataNascimento: z
     .string()
-    .min(1, 'Data de nascimento obrigatoria')
+    .min(1, 'Data de nascimento obrigatória')
     .refine((value) => {
       const date = new Date(`${value}T00:00:00`);
 
       return !Number.isNaN(date.getTime()) && date <= new Date();
-    }, 'Data de nascimento invalida'),
+    }, 'Data de nascimento inválida'),
 });
 
 const defaultValues: TutorFormValues = {
@@ -128,7 +128,7 @@ export function TutorFormModal({
       await onSubmit(values);
       onOpenChange(false);
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Nao foi possivel salvar o tutor.');
+      setSubmitError(error instanceof Error ? error.message : 'Não foi possível salvar o tutor.');
     }
   });
 
@@ -157,7 +157,7 @@ export function TutorFormModal({
               {mode === 'create' ? 'Cadastrar tutor' : 'Editar tutor'}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Preencha os dados obrigatorios para salvar o tutor no sistema.
+              Preencha os dados obrigatórios para salvar o tutor no sistema.
             </p>
           </div>
 
@@ -244,10 +244,10 @@ export function TutorFormModal({
             </div>
 
             <div className="flex flex-col gap-1.5 md:col-span-2">
-              <Label htmlFor="endereco">Endereco</Label>
+              <Label htmlFor="endereco">Endereço</Label>
               <Input
                 id="endereco"
-                placeholder="Rua, numero, bairro, cidade e estado"
+                placeholder="Rua, número, bairro, cidade e estado"
                 aria-invalid={!!errors.endereco}
                 {...register('endereco')}
               />
@@ -266,7 +266,7 @@ export function TutorFormModal({
               Cancelar
             </Button>
             <Button type="submit" variant="primary" disabled={isPending}>
-              {isPending ? 'Salvando...' : mode === 'create' ? 'Cadastrar tutor' : 'Salvar alteracoes'}
+              {isPending ? 'Salvando...' : mode === 'create' ? 'Cadastrar tutor' : 'Salvar alterações'}
             </Button>
           </div>
         </form>

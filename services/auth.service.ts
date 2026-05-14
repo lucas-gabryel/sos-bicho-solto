@@ -16,11 +16,11 @@ export async function login(credentials: LoginCredentials): Promise<CurrentUser>
   const user = getStoredUserByEmail(credentials.email);
 
   if (!user) {
-    throw new Error('E-mail ou senha invalidos.');
+    throw new Error('E-mail ou senha inválidos.');
   }
 
   if (credentials.password !== user.password) {
-    throw new Error('E-mail ou senha invalidos.');
+    throw new Error('E-mail ou senha inválidos.');
   }
 
   setCurrentUserSession(user.id);

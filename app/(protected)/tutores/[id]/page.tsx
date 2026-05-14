@@ -51,9 +51,9 @@ function TutorDetailPageContent() {
       <div className="p-4 md:p-7">
         <Card className="rounded-[16px] border border-border py-0 ring-0">
           <CardHeader className="border-b border-border px-5 py-5">
-            <CardTitle>Tutor nao encontrado</CardTitle>
+            <CardTitle>Tutor não encontrado</CardTitle>
             <CardDescription>
-              O registro solicitado nao existe mais ou nao foi encontrado na base mockada.
+              O registro solicitado não existe mais ou não foi encontrado na base mockada.
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5 py-5">
@@ -78,7 +78,7 @@ function TutorDetailPageContent() {
 
   const handleDeleteTutor = async () => {
     const confirmed = window.confirm(
-      `Deseja excluir o tutor ${tutor.nome}? Essa acao remove apenas o cadastro mockado.`,
+      `Deseja excluir o tutor ${tutor.nome}? Essa ação remove apenas o cadastro mockado.`,
     );
 
     if (!confirmed) {
@@ -153,7 +153,7 @@ function TutorDetailPageContent() {
 
               <div className="rounded-[14px] border border-border bg-muted/30 p-4">
                 <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-                  Identificacao
+                  Identificação
                 </p>
                 <div className="space-y-3 text-sm text-foreground">
                   <p>CPF {tutor.cpf}</p>
@@ -169,7 +169,7 @@ function TutorDetailPageContent() {
 
               <div className="rounded-[14px] border border-border bg-muted/30 p-4 md:col-span-2">
                 <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-                  Endereco
+                  Endereço
                 </p>
                 <div className="flex items-start gap-2 text-sm text-foreground">
                   <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
@@ -182,7 +182,7 @@ function TutorDetailPageContent() {
           <Card className="rounded-[16px] border border-border py-0 ring-0">
             <CardHeader className="border-b border-border px-5 py-5">
               <CardTitle>Resumo</CardTitle>
-              <CardDescription>Visao rapida do historico de adocoes ligado a este tutor</CardDescription>
+              <CardDescription>Visão rápida do histórico de adoções ligado a este tutor</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 px-5 py-5">
               <div className="rounded-[14px] border border-border bg-card p-4">
@@ -211,7 +211,7 @@ function TutorDetailPageContent() {
           <div>
             <h2 className="text-lg font-semibold text-foreground">Animais adotados</h2>
             <p className="mt-0.5 text-[13px] text-muted-foreground">
-              Relacao de animais vinculados ao tutor neste mock
+              Relação de animais vinculados ao tutor neste mock
             </p>
           </div>
 
