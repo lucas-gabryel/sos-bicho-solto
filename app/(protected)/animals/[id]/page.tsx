@@ -28,7 +28,7 @@ export default function AnimalDetailsPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const isProtector = currentUser?.role === 'Protetor';
+  const isProtector = currentUser?.role === 'protetor';
   const isLoading = isLoadingAnimal || isLoadingUser;
 
   const handleDelete = async () => {
