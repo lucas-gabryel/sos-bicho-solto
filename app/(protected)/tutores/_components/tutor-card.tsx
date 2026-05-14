@@ -39,7 +39,7 @@ export function TutorCard({ tutor, onEdit }: TutorCardProps) {
             className="gap-1.5 rounded-full border-transparent bg-orange-100 px-2.5 py-0.5 text-[11px] font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-400"
           >
             <PawPrint className="size-3" />
-            {adoptedCount} {adoptedCount === 1 ? 'adocao' : 'adocoes'}
+            {adoptedCount} {adoptedCount === 1 ? 'adoção' : 'adoções'}
           </Badge>
         </div>
 
@@ -72,7 +72,7 @@ export function TutorCard({ tutor, onEdit }: TutorCardProps) {
       <CardFooter className="justify-between gap-2 border-t border-border bg-muted/40 px-4 py-3">
         <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
           <UserRound className="size-3.5" />
-          <span>Responsavel por adocoes registradas</span>
+          <span>Responsável por adoções registradas</span>
         </div>
 
         <div className="flex items-center gap-2">

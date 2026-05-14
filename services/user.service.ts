@@ -248,7 +248,7 @@ export async function createUser(input: CreateUserInput): Promise<SystemUser> {
   const normalizedEmail = normalizeEmail(input.email);
 
   if (users.some((user) => user.email === normalizedEmail)) {
-    throw new Error('Ja existe um usuario com este e-mail.');
+    throw new Error('Já existe um usuário com este e-mail.');
   }
 
   const newUser: StoredUser = {
@@ -272,11 +272,11 @@ export async function deleteUser(userId: string): Promise<void> {
   const userExists = users.some((user) => user.id === userId);
 
   if (!userExists) {
-    throw new Error('Usuario nao encontrado.');
+    throw new Error('Usuário não encontrado.');
   }
 
   if (readCurrentUserId() === userId) {
-    throw new Error('Nao e permitido excluir o proprio usuario com a sessao aberta.');
+    throw new Error('Não é permitido excluir o próprio usuário com a sessão aberta.');
   }
 
   writeUsersToStorage(users.filter((user) => user.id !== userId));

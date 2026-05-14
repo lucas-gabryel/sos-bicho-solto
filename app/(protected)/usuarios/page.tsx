@@ -65,7 +65,7 @@ export default function UsersPage() {
 
   const handleDeleteUser = async (userId: string, userName: string) => {
     const confirmed = window.confirm(
-      `Deseja excluir o usuario ${userName}? Essa acao remove apenas o cadastro mockado.`,
+      `Deseja excluir o usuário ${userName}? Essa ação remove apenas o cadastro mockado.`,
     );
 
     if (!confirmed) {
@@ -79,7 +79,7 @@ export default function UsersPage() {
     return (
       <div className="flex min-h-[70vh] items-center justify-center p-6">
         <div className="rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground shadow-sm">
-          Carregando usuarios...
+          Carregando usuários...
         </div>
       </div>
     );
@@ -90,7 +90,7 @@ export default function UsersPage() {
       <div className="p-4 md:p-7">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-[22px] font-semibold text-foreground">Usuarios do sistema</h1>
+            <h1 className="text-[22px] font-semibold text-foreground">Usuários do sistema</h1>
             <p className="mt-0.5 text-[13px] text-muted-foreground">
               Controle de acesso de administradores e protetores
             </p>
@@ -98,7 +98,7 @@ export default function UsersPage() {
 
           <Button variant="primary" size="default" onClick={() => setIsCreateModalOpen(true)}>
             <Plus className="size-4" />
-            Novo usuario
+            Novo usuário
           </Button>
         </div>
 
@@ -116,19 +116,19 @@ export default function UsersPage() {
 
         {isUsersLoading ? (
           <div className="rounded-[14px] border border-border bg-card px-4 py-10 text-center text-sm text-muted-foreground">
-            Carregando usuarios...
+            Carregando usuários...
           </div>
         ) : filteredUsers.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-[14px] border border-dashed border-border py-16 text-muted-foreground">
             <ShieldCheck className="size-10 opacity-30" />
-            <p className="text-sm">Nenhum usuario encontrado</p>
+            <p className="text-sm">Nenhum usuário encontrado</p>
           </div>
         ) : (
           <div className="overflow-hidden rounded-[14px] border border-border bg-card">
             <Table className="border-collapse">
               <TableHeader>
                 <TableRow className="border-b border-border bg-muted/40 hover:bg-muted/40">
-                  {['Nome', 'E-mail', 'Perfil', 'Criado em', 'Acoes'].map((header) => (
+                  {['Nome', 'E-mail', 'Perfil', 'Criado em', 'Ações'].map((header) => (
                     <TableHead
                       key={header}
                       className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground"
@@ -170,7 +170,7 @@ export default function UsersPage() {
                         disabled={deleteUser.isPending || user.id === currentUser.id}
                         title={
                           user.id === currentUser.id
-                            ? 'Nao e permitido excluir o proprio usuario com a sessao aberta.'
+                            ? 'Não é permitido excluir o próprio usuário com a sessão aberta.'
                             : undefined
                         }
                         onClick={() => handleDeleteUser(user.id, user.name)}
@@ -197,16 +197,16 @@ export default function UsersPage() {
       ) : null}
 
       {createUser.isPending ? (
-        <div className="pointer-events-none fixed bottom-4 right-4 z-[60] flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground shadow-lg">
+        <div className="pointer-events-none fixed bottom-4 right-4 z-60 flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground shadow-lg">
           <LoaderCircle className="size-4 animate-spin" />
-          Criando usuario...
+          Criando usuário...
         </div>
       ) : null}
 
       {deleteUser.isPending ? (
-        <div className="pointer-events-none fixed bottom-4 right-4 z-[60] flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground shadow-lg">
+        <div className="pointer-events-none fixed bottom-4 right-4 z-60 flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground shadow-lg">
           <LoaderCircle className="size-4 animate-spin" />
-          Excluindo usuario...
+          Excluindo usuário...
         </div>
       ) : null}
     </>

@@ -39,10 +39,7 @@ function TutorsPageContent() {
       return true;
     }
 
-    return [tutor.nome, tutor.cpf, tutor.telefone, tutor.email, tutor.endereco]
-      .join(' ')
-      .toLowerCase()
-      .includes(query);
+    return [tutor.nome, tutor.cpf, tutor.telefone, tutor.email, tutor.endereco].join(' ').toLowerCase().includes(query);
   });
 
   const openCreateModal = () => {
@@ -86,7 +83,7 @@ function TutorsPageContent() {
           <div>
             <h1 className="text-[22px] font-semibold text-foreground">Tutores</h1>
             <p className="mt-0.5 text-[13px] text-muted-foreground">
-              Cadastro e acompanhamento de responsaveis por adocoes
+              Cadastro e acompanhamento de responsáveis por adoções
             </p>
           </div>
 
@@ -100,7 +97,7 @@ function TutorsPageContent() {
           <div className="relative min-w-45 flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nome, CPF, telefone, e-mail ou endereco..."
+              placeholder="Buscar por nome, CPF, telefone, e-mail ou endereço..."
               className="pl-9 text-[13px]"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -111,10 +108,7 @@ function TutorsPageContent() {
         {isLoading ? (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3.5">
             {Array.from({ length: 4 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-64 animate-pulse rounded-[14px] border border-border bg-card/60"
-              />
+              <div key={index} className="h-64 animate-pulse rounded-[14px] border border-border bg-card/60" />
             ))}
           </div>
         ) : filteredTutors.length === 0 ? (
@@ -147,7 +141,7 @@ function TutorsPageContent() {
       ) : null}
 
       {isPending ? (
-        <div className="pointer-events-none fixed bottom-4 right-4 z-[60] flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground shadow-lg">
+        <div className="pointer-events-none fixed bottom-4 right-4 z-60 flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground shadow-lg">
           <LoaderCircle className="size-4 animate-spin" />
           Salvando tutor...
         </div>

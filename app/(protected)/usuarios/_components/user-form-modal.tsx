@@ -43,7 +43,7 @@ export function UserFormModal({
       await onSubmit(values);
       onOpenChange(false);
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Nao foi possivel criar o usuario.');
+      setSubmitError(error instanceof Error ? error.message : 'Não foi possível criar o usuário.');
     }
   });
 
@@ -62,7 +62,7 @@ export function UserFormModal({
 
       <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-[18px] border border-border bg-card shadow-2xl">
         <div className="border-b border-border px-5 py-4">
-          <h2 className="text-lg font-semibold text-foreground">Criar novo usuario</h2>
+          <h2 className="text-lg font-semibold text-foreground">Criar novo usuário</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Defina o perfil, o e-mail e uma senha segura para acesso ao sistema.
           </p>
@@ -137,7 +137,7 @@ export function UserFormModal({
                   type="button"
                   onClick={() => setShowConfirmPassword((value) => !value)}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                  aria-label={showConfirmPassword ? 'Ocultar confirmacao de senha' : 'Mostrar confirmacao de senha'}
+                  aria-label={showConfirmPassword ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'}
                 >
                   {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
@@ -163,7 +163,7 @@ export function UserFormModal({
               Cancelar
             </Button>
             <Button type="submit" variant="primary" disabled={isPending}>
-              {isPending ? 'Salvando...' : 'Criar usuario'}
+              {isPending ? 'Salvando...' : 'Criar usuário'}
             </Button>
           </div>
         </form>

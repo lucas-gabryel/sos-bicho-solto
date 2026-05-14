@@ -20,11 +20,11 @@ const NAV_GROUPS = [
     ],
   },
   {
-    section: 'Gestao',
+    section: 'Gestão',
     items: [
       { href: '/tutores', label: 'Tutores', icon: Users },
-      { href: '/adocoes', label: 'Historico de Adocoes', icon: HeartHandshake },
-      { href: '/usuarios', label: 'Usuarios do Sistema', icon: UserCog, adminOnly: true },
+      { href: '/adocoes', label: 'Histórico de Adoções', icon: HeartHandshake },
+      { href: '/usuarios', label: 'Usuários do Sistema', icon: UserCog, adminOnly: true },
     ],
   },
 ] as const;
@@ -33,8 +33,8 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
   '/animals': 'Animais',
   '/tutores': 'Tutores',
-  '/adocoes': 'Historico de Adocoes',
-  '/usuarios': 'Usuarios do Sistema',
+  '/adocoes': 'Histórico de Adoções',
+  '/usuarios': 'Usuários do Sistema',
 };
 
 export function Sidebar() {
@@ -110,7 +110,7 @@ export function Sidebar() {
             </div>
             <div>
               <p className="text-sm font-semibold leading-tight text-foreground">SOS Bicho Solto</p>
-              <p className="text-[11px] text-muted-foreground">Modulo interno</p>
+              <p className="text-[11px] text-muted-foreground">Módulo interno</p>
             </div>
           </div>
           <Button variant="ghost" size="icon-sm" onClick={closeMobile} className="md:hidden" aria-label="Fechar menu">

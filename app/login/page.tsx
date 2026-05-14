@@ -38,7 +38,7 @@ export default function LoginPage() {
       await login(data);
       router.replace('/dashboard');
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Nao foi possivel entrar.');
+      setSubmitError(error instanceof Error ? error.message : 'Não foi possível entrar.');
     }
   };
 
