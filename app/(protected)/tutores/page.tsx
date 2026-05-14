@@ -23,7 +23,7 @@ const initialModalState: ModalState = {
   tutor: null,
 };
 
-export default function TutorsPage() {
+function TutorsPageContent() {
   const { data: tutors = [], isLoading } = useTutors();
   const createTutor = useCreateTutor();
   const updateTutor = useUpdateTutor();
@@ -154,4 +154,8 @@ export default function TutorsPage() {
       ) : null}
     </>
   );
+}
+
+export default function TutorsPage() {
+  return <TutorsPageContent />;
 }

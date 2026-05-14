@@ -1,20 +1,11 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import {
-  HeartHandshake,
-  LayoutDashboard,
-  LogOut,
-  Menu,
-  Moon,
-  PawPrint,
-  Sun,
-  UserCog,
-  Users,
-  X,
-} from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useLogout } from '@/hooks/use-logout';
+import { getRoleLabel } from '@/lib/user';
+import { cn } from '@/lib/utils';
+import { HeartHandshake, LayoutDashboard, LogOut, Menu, Moon, PawPrint, Sun, UserCog, Users, X } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -23,19 +14,17 @@ import { useEffect, useState } from 'react';
 const NAV_GROUPS = [
   {
     section: 'Principal',
-    adminOnly: false,
     items: [
       { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { href: '/animals', label: 'Animais', icon: PawPrint },
     ],
   },
   {
-    section: 'Gestão',
-    adminOnly: true,
+    section: 'Gestao',
     items: [
       { href: '/tutores', label: 'Tutores', icon: Users },
-      { href: '/adocoes', label: 'Histórico de Adoções', icon: HeartHandshake },
-      { href: '/usuarios', label: 'Usuários do Sistema', icon: UserCog },
+      { href: '/adocoes', label: 'Historico de Adocoes', icon: HeartHandshake },
+      { href: '/usuarios', label: 'Usuarios do Sistema', icon: UserCog, adminOnly: true },
     ],
   },
 ] as const;
@@ -44,8 +33,8 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
   '/animals': 'Animais',
   '/tutores': 'Tutores',
-  '/adocoes': 'Histórico de Adoções',
-  '/usuarios': 'Usuários do Sistema',
+  '/adocoes': 'Historico de Adocoes',
+  '/usuarios': 'Usuarios do Sistema',
 };
 
 export function Sidebar() {
@@ -53,6 +42,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   const { data: user } = useCurrentUser();
+  const logout = useLogout();
   const { resolvedTheme, setTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -63,17 +53,18 @@ export function Sidebar() {
     };
   }, [mobileOpen]);
 
-  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   const pageTitle =
-    Object.entries(PAGE_TITLES).find(([key]) => pathname === key || pathname.startsWith(key + '/'))?.[1] ?? '';
+    Object.entries(PAGE_TITLES).find(([key]) => pathname === key || pathname.startsWith(`${key}/`))?.[1] ?? '';
 
   const toggleTheme = () => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
   const closeMobile = () => setMobileOpen(false);
-  
-  const handleLogout = () => {
+
+  const handleLogout = async () => {
     closeMobile();
-    router.push('/login');
+    await logout.mutateAsync();
+    router.replace('/login');
   };
 
   const initials = user?.name
@@ -86,12 +77,7 @@ export function Sidebar() {
   return (
     <>
       <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border bg-card px-4 py-3 md:hidden">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setMobileOpen(true)}
-          aria-label="Abrir menu"
-        >
+        <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)} aria-label="Abrir menu">
           <Menu />
         </Button>
         <span className="flex-1 text-[15px] font-semibold text-foreground">{pageTitle || 'SOS Bicho Solto'}</span>
@@ -124,29 +110,28 @@ export function Sidebar() {
             </div>
             <div>
               <p className="text-sm font-semibold leading-tight text-foreground">SOS Bicho Solto</p>
-              <p className="text-[11px] text-muted-foreground">Módulo interno</p>
+              <p className="text-[11px] text-muted-foreground">Modulo interno</p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={closeMobile}
-            className="md:hidden"
-            aria-label="Fechar menu"
-          >
+          <Button variant="ghost" size="icon-sm" onClick={closeMobile} className="md:hidden" aria-label="Fechar menu">
             <X />
           </Button>
         </div>
 
         <nav className="flex-1 overflow-y-auto px-2 py-2.5">
           {NAV_GROUPS.map((group) => {
-            if (group.adminOnly && user?.role !== 'Administrador') return null;
+            const visibleItems = group.items.filter((item) => !('adminOnly' in item && item.adminOnly) || user?.role === 'admin');
+
+            if (visibleItems.length === 0) {
+              return null;
+            }
+
             return (
               <div key={group.section} className="mb-1">
                 <p className="mb-1 px-2.5 pt-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60">
                   {group.section}
                 </p>
-                {group.items.map(({ href, label, icon: Icon }) => {
+                {visibleItems.map(({ href, label, icon: Icon }) => {
                   const active = isActive(href);
                   return (
                     <Button
@@ -159,15 +144,13 @@ export function Sidebar() {
                       )}
                     >
                       <Link href={href} onClick={closeMobile}>
-                        {active && (
+                        {active ? (
                           <span className="absolute left-0 top-1/2 h-4.5 w-0.75 -translate-y-1/2 rounded-r bg-orange-600 dark:bg-orange-400" />
-                        )}
+                        ) : null}
                         <Icon
                           className={cn(
                             'size-3.75 shrink-0',
-                            active
-                              ? 'text-orange-600 dark:text-orange-400'
-                              : 'group-hover/button:text-foreground',
+                            active ? 'text-orange-600 dark:text-orange-400' : 'group-hover/button:text-foreground',
                           )}
                         />
                         <span>{label}</span>
@@ -183,11 +166,11 @@ export function Sidebar() {
         <div className="border-t border-border px-2 py-2.5">
           <div className="mb-0.5 flex items-center gap-2.5 rounded-[10px] px-2.5 py-2">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-orange-100 text-xs font-semibold text-orange-700 dark:bg-orange-950/40 dark:text-orange-400">
-              {initials ?? '—'}
+              {initials ?? '--'}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-medium text-foreground">{user?.name ?? '—'}</p>
-              <p className="text-[11px] text-muted-foreground">{user?.role ?? '—'}</p>
+              <p className="truncate text-[13px] font-medium text-foreground">{user?.name ?? '--'}</p>
+              <p className="text-[11px] text-muted-foreground">{user ? getRoleLabel(user.role) : '--'}</p>
             </div>
           </div>
 
@@ -201,10 +184,11 @@ export function Sidebar() {
           <Button
             variant="sidebar"
             onClick={handleLogout}
+            disabled={logout.isPending}
             className="text-destructive hover:bg-destructive/10 hover:text-destructive"
           >
             <LogOut className="size-3.75" />
-            <span>Sair do sistema</span>
+            <span>{logout.isPending ? 'Saindo...' : 'Sair do sistema'}</span>
           </Button>
         </div>
       </aside>
