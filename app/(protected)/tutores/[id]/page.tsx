@@ -21,6 +21,7 @@ import { useUpdateTutor } from '@/hooks/use-update-tutor';
 import { formatDateToPtBr, getAge, getTutorInitials } from '@/lib/tutor';
 import type { TutorFormValues } from '@/types/tutor';
 import { AdoptedAnimalCard } from '../_components/adopted-animal-card';
+import { DeleteConfirmationModal } from '../../animals/_components/delete-confirmation-modal';
 import { TutorFormModal } from '../_components/tutor-form-modal';
 
 function TutorDetailPageContent() {
@@ -34,6 +35,7 @@ function TutorDetailPageContent() {
   const deleteTutor = useDeleteTutor();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   if (isTutorLoading) {
     return (
@@ -76,15 +78,7 @@ function TutorDetailPageContent() {
     });
   };
 
-  const handleDeleteTutor = async () => {
-    const confirmed = window.confirm(
-      `Deseja excluir o tutor ${tutor.nome}? Essa ação remove apenas o cadastro mockado.`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
+  const handleConfirmDelete = async () => {
     await deleteTutor.mutateAsync(tutor.id);
     router.push('/tutores');
   };
@@ -113,7 +107,7 @@ function TutorDetailPageContent() {
               Editar tutor
             </Button>
 
-            <Button variant="destructive" onClick={handleDeleteTutor} disabled={deleteTutor.isPending}>
+            <Button variant="destructive" onClick={() => setIsDeleteModalOpen(true)} disabled={deleteTutor.isPending}>
               <Trash2 className="size-4" />
               {deleteTutor.isPending ? 'Excluindo...' : 'Excluir tutor'}
             </Button>
@@ -249,6 +243,15 @@ function TutorDetailPageContent() {
           onSubmit={handleUpdateTutor}
         />
       ) : null}
+
+      <DeleteConfirmationModal
+        open={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        onConfirm={handleConfirmDelete}
+        title="Excluir tutor"
+        description={`Deseja excluir o tutor ${tutor.nome}? Essa ação remove apenas o cadastro mockado.`}
+        isLoading={deleteTutor.isPending}
+      />
     </>
   );
 }
