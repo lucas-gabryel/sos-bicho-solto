@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAnimal } from '@/hooks/use-animal';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { cn } from '@/lib/utils';
+import { AnimalFormModal } from '../_components/animal-form-modal';
 import { DeleteConfirmationModal } from '../_components/delete-confirmation-modal';
 
 function speciesEmoji(esp: string) {
@@ -27,6 +28,7 @@ export default function AnimalDetailsPage() {
   const { data: currentUser, isLoading: isLoadingUser } = useCurrentUser();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const isProtector = currentUser?.role === 'protetor';
   const isLoading = isLoadingAnimal || isLoadingUser;
@@ -172,11 +174,9 @@ export default function AnimalDetailsPage() {
           <Card className="h-fit space-y-3 p-6">
             <h3 className="font-semibold text-foreground">Ações</h3>
 
-            <Button variant="outline" size="sm" className="w-full justify-start" asChild>
-              <Link href={`/animals/${animal.id}/edit`}>
-                <Edit2 className="mr-2 size-4" />
-                Editar
-              </Link>
+            <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => setIsEditOpen(true)}>
+              <Edit2 className="mr-2 size-4" />
+              Editar
             </Button>
 
             <Button
@@ -214,6 +214,8 @@ export default function AnimalDetailsPage() {
         description={`Tem certeza que deseja excluir ${animal.nome}? Esta ação não pode ser desfeita.`}
         isLoading={isDeleting}
       />
+
+      <AnimalFormModal open={isEditOpen} onOpenChange={setIsEditOpen} animal={animal} />
     </div>
   );
 }
@@ -222,7 +224,7 @@ function InfoField({ label, value }: { label: string; value: string | React.Reac
   return (
     <div className="space-y-1.5">
       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
-      <p className="text-sm font-medium text-foreground">{value}</p>
+      <div className="text-sm font-medium text-foreground">{value}</div>
     </div>
   );
 }
