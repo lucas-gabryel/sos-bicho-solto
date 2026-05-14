@@ -15,6 +15,7 @@ import { useUsers } from '@/hooks/use-users';
 import { formatDateToPtBr } from '@/lib/tutor';
 import { getRoleLabel } from '@/lib/user';
 import type { CreateUserFormValues } from '@/types/user';
+import { DeleteConfirmationModal } from '../animals/_components/delete-confirmation-modal';
 import { UserFormModal } from './_components/user-form-modal';
 
 export default function UsersPage() {
@@ -28,6 +29,11 @@ export default function UsersPage() {
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [deleteModal, setDeleteModal] = useState<{ open: boolean; userId: string; userName: string }>({
+    open: false,
+    userId: '',
+    userName: '',
+  });
 
   useEffect(() => {
     if (isCurrentUserLoading) {
@@ -63,16 +69,13 @@ export default function UsersPage() {
     });
   };
 
-  const handleDeleteUser = async (userId: string, userName: string) => {
-    const confirmed = window.confirm(
-      `Deseja excluir o usuário ${userName}? Essa ação remove apenas o cadastro mockado.`,
-    );
+  const openDeleteModal = (userId: string, userName: string) => {
+    setDeleteModal({ open: true, userId, userName });
+  };
 
-    if (!confirmed) {
-      return;
-    }
-
-    await deleteUser.mutateAsync(userId);
+  const handleConfirmDelete = async () => {
+    await deleteUser.mutateAsync(deleteModal.userId);
+    setDeleteModal({ open: false, userId: '', userName: '' });
   };
 
   if (isCurrentUserLoading || !currentUser || currentUser.role !== 'admin') {
@@ -173,7 +176,7 @@ export default function UsersPage() {
                             ? 'Não é permitido excluir o próprio usuário com a sessão aberta.'
                             : undefined
                         }
-                        onClick={() => handleDeleteUser(user.id, user.name)}
+                        onClick={() => openDeleteModal(user.id, user.name)}
                       >
                         <Trash2 className="size-4" />
                         {deleteUser.isPending && deleteUser.variables === user.id ? 'Excluindo...' : 'Excluir'}
@@ -202,6 +205,15 @@ export default function UsersPage() {
           Criando usuário...
         </div>
       ) : null}
+
+      <DeleteConfirmationModal
+        open={deleteModal.open}
+        onOpenChange={(open) => setDeleteModal((prev) => ({ ...prev, open }))}
+        onConfirm={handleConfirmDelete}
+        title={`Excluir usuário`}
+        description={`Deseja excluir o usuário ${deleteModal.userName}? Essa ação remove apenas o cadastro mockado.`}
+        isLoading={deleteUser.isPending}
+      />
 
       {deleteUser.isPending ? (
         <div className="pointer-events-none fixed bottom-4 right-4 z-60 flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground shadow-lg">
