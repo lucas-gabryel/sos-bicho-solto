@@ -93,3 +93,61 @@ export async function getAnimals(): Promise<Animal[]> {
     },
   ];
 }
+
+export interface CreateAnimalPayload {
+  nome: string;
+  esp: AnimalEsp;
+  raca: string;
+  sexo: AnimalSexo;
+  cor: string;
+  peso: number;
+  pesoAt?: number;
+  local: string;
+  obs?: string;
+  status: AnimalStatus;
+}
+
+export async function createAnimal(data: CreateAnimalPayload): Promise<Animal> {
+  // Simulate API delay
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  // Generate mock ID with today's date and sequence
+  const today = new Date();
+  const dateStr = `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.${today.getFullYear()}`;
+  const sequence = Math.floor(Math.random() * 1000);
+  const id = `${dateStr}.${sequence}`;
+
+  // Format date for display
+  const data_str = today.toLocaleDateString('pt-BR');
+
+  return {
+    id,
+    ...data,
+    pesoAt: data.pesoAt || data.peso,
+    data: data_str,
+  };
+}
+
+export interface UpdateAnimalPayload extends CreateAnimalPayload {
+  id: string;
+}
+
+export async function updateAnimal(data: UpdateAnimalPayload): Promise<Animal> {
+  // Simulate API delay
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  return {
+    id: data.id,
+    nome: data.nome,
+    esp: data.esp,
+    raca: data.raca,
+    sexo: data.sexo,
+    cor: data.cor,
+    peso: data.peso,
+    pesoAt: data.pesoAt || data.peso,
+    local: data.local,
+    obs: data.obs,
+    status: data.status,
+    data: new Date().toLocaleDateString('pt-BR'),
+  };
+}
