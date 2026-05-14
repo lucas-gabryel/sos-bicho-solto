@@ -1,14 +1,13 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff } from 'lucide-react';
+import { ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { createUserSchema, defaultCreateUserFormValues } from '@/lib/user-form';
 import type { CreateUserFormValues } from '@/types/user';
 
@@ -30,7 +29,6 @@ export function UserFormModal({
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
-    control,
     register,
     handleSubmit,
     formState: { errors },
@@ -86,21 +84,18 @@ export function UserFormModal({
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="role">Perfil</Label>
-              <Controller
-                control={control}
-                name="role"
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger id="role" aria-invalid={!!errors.role}>
-                      <SelectValue placeholder="Selecione um perfil" />
-                    </SelectTrigger>
-                    <SelectContent position="popper">
-                      <SelectItem value="admin">Administrador</SelectItem>
-                      <SelectItem value="protetor">Protetor</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
+              <div className="relative">
+                <select
+                  id="role"
+                  aria-invalid={!!errors.role}
+                  className="flex h-9 w-full appearance-none rounded-lg border border-input bg-card px-3 py-1 pr-9 text-sm text-foreground shadow-xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40"
+                  {...register('role')}
+                >
+                  <option value="admin">Administrador</option>
+                  <option value="protetor">Protetor</option>
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              </div>
               {errors.role ? <p className="text-xs text-destructive">{errors.role.message}</p> : null}
             </div>
 
