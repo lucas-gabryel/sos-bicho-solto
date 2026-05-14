@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 export const createAnimalSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório').min(3, 'Nome deve ter ao menos 3 caracteres'),
