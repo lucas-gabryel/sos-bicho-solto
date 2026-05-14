@@ -14,6 +14,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { cn } from '@/lib/utils';
 import { AnimalFormModal } from '../_components/animal-form-modal';
 import { DeleteConfirmationModal } from '../_components/delete-confirmation-modal';
+import { LinkTutorModal } from '../_components/link-tutor-modal';
 
 function speciesEmoji(esp: string) {
   return esp === 'Cão' ? '🐶' : '🐱';
@@ -29,6 +30,7 @@ export default function AnimalDetailsPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isLinkTutorOpen, setIsLinkTutorOpen] = useState(false);
 
   const isProtector = currentUser?.role === 'protetor';
   const isLoading = isLoadingAnimal || isLoadingUser;
@@ -189,19 +191,16 @@ export default function AnimalDetailsPage() {
               Excluir
             </Button>
 
-            {adopted ? (
-              <Button variant="outline" size="sm" className="w-full justify-start" disabled>
-                <Users className="mr-2 size-4" />
-                Vincular Tutor
-              </Button>
-            ) : (
-              <Button variant="outline" size="sm" className="w-full justify-start" asChild>
-                <Link href={`/animals/${animal.id}/link-tutor`}>
-                  <Users className="mr-2 size-4" />
-                  Vincular Tutor
-                </Link>
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start"
+              disabled={adopted}
+              onClick={() => !adopted && setIsLinkTutorOpen(true)}
+            >
+              <Users className="mr-2 size-4" />
+              Vincular Tutor
+            </Button>
           </Card>
         )}
       </div>
@@ -216,6 +215,13 @@ export default function AnimalDetailsPage() {
       />
 
       <AnimalFormModal open={isEditOpen} onOpenChange={setIsEditOpen} animal={animal} />
+
+      <LinkTutorModal
+        open={isLinkTutorOpen}
+        animalId={animal.id}
+        animalName={animal.nome}
+        onOpenChange={setIsLinkTutorOpen}
+      />
     </div>
   );
 }

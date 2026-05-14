@@ -100,6 +100,33 @@ export async function updateTutor(id: string, values: TutorFormValues): Promise<
   return cloneTutor(updatedTutor);
 }
 
+export async function linkAnimalToTutor(tutorId: string, animalId: string): Promise<Tutor> {
+  await wait();
+
+  let updatedTutor: Tutor | null = null;
+
+  tutorsDb = tutorsDb.map((tutor) => {
+    if (tutor.id !== tutorId) {
+      return tutor;
+    }
+
+    updatedTutor = {
+      ...tutor,
+      animaisAdotadosIds: tutor.animaisAdotadosIds.includes(animalId)
+        ? [...tutor.animaisAdotadosIds]
+        : [...tutor.animaisAdotadosIds, animalId],
+    };
+
+    return updatedTutor;
+  });
+
+  if (!updatedTutor) {
+    throw new Error('Tutor não encontrado.');
+  }
+
+  return cloneTutor(updatedTutor);
+}
+
 export async function deleteTutor(id: string): Promise<void> {
   await wait();
 
