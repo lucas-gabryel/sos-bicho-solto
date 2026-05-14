@@ -3,7 +3,7 @@
 import * as React from 'react';
 
 import { Slot } from '@radix-ui/react-slot';
-import { Controller, FieldPath, FieldValues, FormProvider, useFormContext } from 'react-hook-form';
+import { Controller, ControllerProps, FieldPath, FieldValues, FormProvider, useFormContext } from 'react-hook-form';
 
 import { cn } from '@/lib/utils';
 
@@ -23,13 +23,7 @@ const FormField = <
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   ...props
-}: FieldValues & {
-  name: TName;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control?: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  render: any;
-}) => (
+}: ControllerProps<TFieldValues, TName>) => (
   <FormFieldContext.Provider value={{ name: props.name }}>
     <Controller {...props} />
   </FormFieldContext.Provider>
@@ -97,13 +91,7 @@ const FormLabel = React.forwardRef<React.ElementRef<'label'>, React.LabelHTMLAtt
 );
 FormLabel.displayName = 'FormLabel';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const FormControl = React.forwardRef<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  any,
-  React.HTMLAttributes<HTMLDivElement>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
->(({ ...props }, ref: any) => {
+const FormControl = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(({ ...props }, ref) => {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
 
   return (
