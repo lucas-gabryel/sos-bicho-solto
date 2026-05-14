@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { AdminOnly } from '@/components/admin-only';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -255,9 +254,5 @@ function TutorDetailPageContent() {
 }
 
 export default function TutorDetailPage() {
-  return (
-    <AdminOnly>
-      <TutorDetailPageContent />
-    </AdminOnly>
-  );
+  return <TutorDetailPageContent />;
 }

@@ -14,7 +14,6 @@ import { useEffect, useState } from 'react';
 const NAV_GROUPS = [
   {
     section: 'Principal',
-    adminOnly: false,
     items: [
       { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { href: '/animals', label: 'Animais', icon: PawPrint },
@@ -22,11 +21,10 @@ const NAV_GROUPS = [
   },
   {
     section: 'Gestao',
-    adminOnly: true,
     items: [
       { href: '/tutores', label: 'Tutores', icon: Users },
       { href: '/adocoes', label: 'Historico de Adocoes', icon: HeartHandshake },
-      { href: '/usuarios', label: 'Usuarios do Sistema', icon: UserCog },
+      { href: '/usuarios', label: 'Usuarios do Sistema', icon: UserCog, adminOnly: true },
     ],
   },
 ] as const;
@@ -122,7 +120,9 @@ export function Sidebar() {
 
         <nav className="flex-1 overflow-y-auto px-2 py-2.5">
           {NAV_GROUPS.map((group) => {
-            if (group.adminOnly && user?.role !== 'admin') {
+            const visibleItems = group.items.filter((item) => !('adminOnly' in item && item.adminOnly) || user?.role === 'admin');
+
+            if (visibleItems.length === 0) {
               return null;
             }
 
@@ -131,7 +131,7 @@ export function Sidebar() {
                 <p className="mb-1 px-2.5 pt-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60">
                   {group.section}
                 </p>
-                {group.items.map(({ href, label, icon: Icon }) => {
+                {visibleItems.map(({ href, label, icon: Icon }) => {
                   const active = isActive(href);
                   return (
                     <Button

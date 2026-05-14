@@ -1,9 +1,9 @@
 'use client';
 
 import { LoaderCircle, Plus, Search, ShieldCheck, Trash2 } from 'lucide-react';
-import { useDeferredValue, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useDeferredValue, useEffect, useState } from 'react';
 
-import { AdminOnly } from '@/components/admin-only';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,15 +17,32 @@ import { getRoleLabel } from '@/lib/user';
 import type { CreateUserFormValues } from '@/types/user';
 import { UserFormModal } from './_components/user-form-modal';
 
-function UsersPageContent() {
-  const { data: currentUser } = useCurrentUser();
-  const { data: users = [], isLoading } = useUsers();
+export default function UsersPage() {
+  const router = useRouter();
+  const { data: currentUser, isLoading: isCurrentUserLoading } = useCurrentUser();
+  const canManageUsers = currentUser?.role === 'admin';
+  const { data: users = [], isLoading: isUsersLoading } = useUsers({ enabled: canManageUsers });
   const createUser = useCreateUser();
   const deleteUser = useDeleteUser();
 
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (isCurrentUserLoading) {
+      return;
+    }
+
+    if (!currentUser) {
+      router.replace('/login');
+      return;
+    }
+
+    if (currentUser.role !== 'admin') {
+      router.replace('/dashboard');
+    }
+  }, [currentUser, isCurrentUserLoading, router]);
 
   const filteredUsers = users.filter((user) => {
     const query = deferredSearch.trim().toLowerCase();
@@ -58,6 +75,16 @@ function UsersPageContent() {
     await deleteUser.mutateAsync(userId);
   };
 
+  if (isCurrentUserLoading || !currentUser || currentUser.role !== 'admin') {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center p-6">
+        <div className="rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground shadow-sm">
+          Carregando usuarios...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="p-4 md:p-7">
@@ -87,7 +114,7 @@ function UsersPageContent() {
           </div>
         </div>
 
-        {isLoading ? (
+        {isUsersLoading ? (
           <div className="rounded-[14px] border border-border bg-card px-4 py-10 text-center text-sm text-muted-foreground">
             Carregando usuarios...
           </div>
@@ -140,9 +167,9 @@ function UsersPageContent() {
                         type="button"
                         variant="destructive"
                         size="sm"
-                        disabled={deleteUser.isPending || user.id === currentUser?.id}
+                        disabled={deleteUser.isPending || user.id === currentUser.id}
                         title={
-                          user.id === currentUser?.id
+                          user.id === currentUser.id
                             ? 'Nao e permitido excluir o proprio usuario com a sessao aberta.'
                             : undefined
                         }
@@ -183,13 +210,5 @@ function UsersPageContent() {
         </div>
       ) : null}
     </>
-  );
-}
-
-export default function UsersPage() {
-  return (
-    <AdminOnly>
-      <UsersPageContent />
-    </AdminOnly>
   );
 }

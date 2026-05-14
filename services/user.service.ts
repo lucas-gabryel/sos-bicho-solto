@@ -1,5 +1,3 @@
-import { hash } from 'bcryptjs';
-
 import { clearClientSession, startClientSession } from '@/lib/session';
 import type { CreateUserInput, CurrentUser, StoredUser, SystemUser, UserRole } from '@/types/user';
 
@@ -14,7 +12,7 @@ const seedUsers: StoredUser[] = [
     email: 'admin@sosbichosolto.com',
     role: 'admin',
     createdAt: '2026-05-01',
-    passwordHash: '$2b$10$YNPkDxFd5Ab0BzASeheOiuAWQqLU2QjCh.wkz6plg./d7buhhJlp.',
+    password: 'Admin@123',
   },
   {
     id: 'USR-002',
@@ -22,9 +20,14 @@ const seedUsers: StoredUser[] = [
     email: 'protetor@sosbichosolto.com',
     role: 'protetor',
     createdAt: '2026-05-02',
-    passwordHash: '$2b$10$5cBaZ0.bT.VJfDt7vpraxujfUCOuRuTDu/ANfNmiaFwCKJB5QMMC2',
+    password: 'Protetor@123',
   },
 ];
+
+type LegacyStoredUser = SystemUser & {
+  password?: string;
+  passwordHash?: string;
+};
 
 function wait(delay = MOCK_DELAY) {
   return new Promise((resolve) => setTimeout(resolve, delay));
@@ -52,6 +55,60 @@ function sanitizeUser(user: StoredUser): SystemUser {
   };
 }
 
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
+function getDefaultPassword(role: UserRole) {
+  return role === 'admin' ? 'Admin@123' : 'Protetor@123';
+}
+
+function isUserRole(role: unknown): role is UserRole {
+  return role === 'admin' || role === 'protetor';
+}
+
+function normalizeStoredUsers(input: unknown): StoredUser[] {
+  if (!Array.isArray(input) || input.length === 0) {
+    throw new Error('Invalid users payload');
+  }
+
+  const normalizedUsers = input.flatMap((entry) => {
+    if (!entry || typeof entry !== 'object') {
+      return [];
+    }
+
+    const user = entry as Partial<LegacyStoredUser>;
+
+    if (
+      typeof user.id !== 'string' ||
+      typeof user.name !== 'string' ||
+      typeof user.email !== 'string' ||
+      typeof user.createdAt !== 'string' ||
+      !isUserRole(user.role)
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        id: user.id,
+        name: user.name.trim(),
+        email: normalizeEmail(user.email),
+        role: user.role,
+        createdAt: user.createdAt,
+        password:
+          typeof user.password === 'string' && user.password.length > 0 ? user.password : getDefaultPassword(user.role),
+      },
+    ];
+  });
+
+  if (normalizedUsers.length === 0) {
+    throw new Error('Invalid users payload');
+  }
+
+  return normalizedUsers;
+}
+
 function readUsersFromStorage(): StoredUser[] {
   if (!isBrowser()) {
     return cloneSeedUsers();
@@ -66,13 +123,14 @@ function readUsersFromStorage(): StoredUser[] {
   }
 
   try {
-    const parsedUsers = JSON.parse(storedUsers) as StoredUser[];
+    const normalizedUsers = normalizeStoredUsers(JSON.parse(storedUsers));
+    const normalizedUsersPayload = JSON.stringify(normalizedUsers);
 
-    if (!Array.isArray(parsedUsers) || parsedUsers.length === 0) {
-      throw new Error('Invalid users payload');
+    if (storedUsers !== normalizedUsersPayload) {
+      window.localStorage.setItem(USERS_STORAGE_KEY, normalizedUsersPayload);
     }
 
-    return parsedUsers.map(cloneStoredUser);
+    return normalizedUsers.map(cloneStoredUser);
   } catch {
     const fallbackUsers = cloneSeedUsers();
     window.localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(fallbackUsers));
@@ -128,10 +186,6 @@ function getTodayDate() {
   return `${year}-${month}-${day}`;
 }
 
-function normalizeEmail(email: string) {
-  return email.trim().toLowerCase();
-}
-
 function getCurrentStoredUserSync(): StoredUser | null {
   const users = readUsersFromStorage();
   const currentUserId = readCurrentUserId();
@@ -148,14 +202,6 @@ function getCurrentStoredUserSync(): StoredUser | null {
   }
 
   return cloneStoredUser(currentUser);
-}
-
-function ensureAdminAccess() {
-  const currentUser = getCurrentStoredUserSync();
-
-  if (!currentUser || currentUser.role !== 'admin') {
-    throw new Error('Acesso restrito a administradores.');
-  }
 }
 
 export function getStoredUserByEmail(email: string): StoredUser | null {
@@ -191,14 +237,12 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
 export async function getUsers(): Promise<SystemUser[]> {
   await wait();
-  ensureAdminAccess();
 
   return readUsersFromStorage().map(sanitizeUser);
 }
 
 export async function createUser(input: CreateUserInput): Promise<SystemUser> {
   await wait();
-  ensureAdminAccess();
 
   const users = readUsersFromStorage();
   const normalizedEmail = normalizeEmail(input.email);
@@ -207,15 +251,13 @@ export async function createUser(input: CreateUserInput): Promise<SystemUser> {
     throw new Error('Ja existe um usuario com este e-mail.');
   }
 
-  const passwordHash = await hash(input.password, 10);
-
   const newUser: StoredUser = {
     id: getNextUserId(users),
     name: input.name.trim(),
     email: normalizedEmail,
     role: input.role,
     createdAt: getTodayDate(),
-    passwordHash,
+    password: input.password,
   };
 
   writeUsersToStorage([newUser, ...users]);
@@ -225,7 +267,6 @@ export async function createUser(input: CreateUserInput): Promise<SystemUser> {
 
 export async function deleteUser(userId: string): Promise<void> {
   await wait();
-  ensureAdminAccess();
 
   const users = readUsersFromStorage();
   const userExists = users.some((user) => user.id === userId);

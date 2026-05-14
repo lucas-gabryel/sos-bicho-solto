@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-import { ProtectedShell } from '@/components/protected-shell';
+import { Sidebar } from '@/components/sidebar';
 import { SESSION_COOKIE_NAME } from '@/lib/session';
 
 export default async function ProtectedLayout({
@@ -15,5 +15,10 @@ export default async function ProtectedLayout({
     redirect('/login');
   }
 
-  return <ProtectedShell>{children}</ProtectedShell>;
+  return (
+    <div className="min-h-screen bg-background">
+      <Sidebar />
+      <main className="md:ml-60">{children}</main>
+    </div>
+  );
 }

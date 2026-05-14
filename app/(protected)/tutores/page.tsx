@@ -3,7 +3,6 @@
 import { LoaderCircle, Plus, Search, Users } from 'lucide-react';
 import { useDeferredValue, useState } from 'react';
 
-import { AdminOnly } from '@/components/admin-only';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCreateTutor } from '@/hooks/use-create-tutor';
@@ -158,9 +157,5 @@ function TutorsPageContent() {
 }
 
 export default function TutorsPage() {
-  return (
-    <AdminOnly>
-      <TutorsPageContent />
-    </AdminOnly>
-  );
+  return <TutorsPageContent />;
 }

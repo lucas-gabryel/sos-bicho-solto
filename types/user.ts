@@ -9,7 +9,7 @@ export interface SystemUser {
 }
 
 export interface StoredUser extends SystemUser {
-  passwordHash: string;
+  password: string;
 }
 
 export type CurrentUser = SystemUser;

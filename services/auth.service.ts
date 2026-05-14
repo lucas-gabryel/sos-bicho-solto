@@ -1,5 +1,3 @@
-import { compare } from 'bcryptjs';
-
 import type { CurrentUser } from '@/types/user';
 import { getStoredUserByEmail, logout as clearCurrentSession, setCurrentUserSession } from '@/services/user.service';
 
@@ -21,9 +19,7 @@ export async function login(credentials: LoginCredentials): Promise<CurrentUser>
     throw new Error('E-mail ou senha invalidos.');
   }
 
-  const isValidPassword = await compare(credentials.password, user.passwordHash);
-
-  if (!isValidPassword) {
+  if (credentials.password !== user.password) {
     throw new Error('E-mail ou senha invalidos.');
   }
 
