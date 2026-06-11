@@ -29,8 +29,10 @@ yarn-error.log*
 pnpm-debug.log*
 
 # env files
-.env*.local
 .env
+.env.*
+!.env.example
+!backend/.env.example
 backend/.env
 
 # typescript

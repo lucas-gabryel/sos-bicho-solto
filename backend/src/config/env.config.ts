@@ -11,13 +11,11 @@ class EnvironmentVariables {
   @IsString()
   DATABASE_URL!: string;
 
-  @IsOptional()
   @IsString()
-  JWT_SECRET?: string;
+  JWT_SECRET!: string;
 
-  @IsOptional()
   @IsString()
-  JWT_EXPIRES_IN?: string;
+  JWT_EXPIRES_IN!: string;
 
   @IsOptional()
   @IsNumber()
