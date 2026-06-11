@@ -7,6 +7,14 @@ import { PrismaService } from 'src/database/prisma.service';
 export class UsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  findAll(): Promise<User[]> {
+    return this.prisma.user.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
   findByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { email },
@@ -19,7 +27,22 @@ export class UsersRepository {
     });
   }
 
-  upsert(data: Prisma.UserUpsertArgs): Promise<User> {
-    return this.prisma.user.upsert(data);
+  create(data: Prisma.UserCreateInput): Promise<User> {
+    return this.prisma.user.create({
+      data,
+    });
+  }
+
+  update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
+    return this.prisma.user.update({
+      where: { id },
+      data,
+    });
+  }
+
+  delete(id: string): Promise<User> {
+    return this.prisma.user.delete({
+      where: { id },
+    });
   }
 }
