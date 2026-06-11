@@ -1,0 +1,20 @@
+packages:
+  - .
+  - backend
+
+onlyBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - '@swc/core'
+  - msw
+  - prisma
+  - sharp
+  - unrs-resolver
+allowBuilds:
+  '@prisma/client': true
+  '@prisma/engines': true
+  '@swc/core': true
+  msw: true
+  prisma: true
+  sharp: true
+  unrs-resolver: true

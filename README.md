@@ -1,4 +1,19 @@
-# SOS Bicho Solto | Frontend
+# SOS Bicho Solto
+
+## Estrutura do projeto
+
+```text
+.
+├── app/        # Frontend Next.js
+├── backend/    # Backend NestJS
+├── components/
+├── hooks/
+├── lib/
+├── services/
+└── types/
+```
+
+## Frontend
 
 Aplicação WEB SPA para gestão de animais resgatados, desenvolvida com Next.js. 
 
@@ -56,3 +71,23 @@ Mantenha a abstração em 3 camadas para facilitar a futura integração com o b
 - Integração via **Pull Request (PR)**.
 
 ---
+
+## Backend
+
+A pasta `backend/` contém a base inicial da API em NestJS com:
+
+- `ConfigModule` global com validação de ambiente
+- Prisma preparado para conexão com PostgreSQL
+- CORS configurado por `FRONTEND_URL`
+- `ValidationPipe` global
+- endpoint `GET /api/health`
+
+### Setup local do backend
+
+```bash
+cd backend
+pnpm install
+copy .env.example .env
+pnpm prisma generate
+pnpm start:dev
+```
