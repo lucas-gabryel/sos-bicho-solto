@@ -94,7 +94,34 @@ export async function updateTutor(id: string, values: TutorFormValues): Promise<
   });
 
   if (!updatedTutor) {
-    throw new Error('Tutor nao encontrado.');
+    throw new Error('Tutor não encontrado.');
+  }
+
+  return cloneTutor(updatedTutor);
+}
+
+export async function linkAnimalToTutor(tutorId: string, animalId: string): Promise<Tutor> {
+  await wait();
+
+  let updatedTutor: Tutor | null = null;
+
+  tutorsDb = tutorsDb.map((tutor) => {
+    if (tutor.id !== tutorId) {
+      return tutor;
+    }
+
+    updatedTutor = {
+      ...tutor,
+      animaisAdotadosIds: tutor.animaisAdotadosIds.includes(animalId)
+        ? [...tutor.animaisAdotadosIds]
+        : [...tutor.animaisAdotadosIds, animalId],
+    };
+
+    return updatedTutor;
+  });
+
+  if (!updatedTutor) {
+    throw new Error('Tutor não encontrado.');
   }
 
   return cloneTutor(updatedTutor);
@@ -106,7 +133,7 @@ export async function deleteTutor(id: string): Promise<void> {
   const exists = tutorsDb.some((tutor) => tutor.id === id);
 
   if (!exists) {
-    throw new Error('Tutor nao encontrado.');
+    throw new Error('Tutor não encontrado.');
   }
 
   tutorsDb = tutorsDb.filter((tutor) => tutor.id !== id);

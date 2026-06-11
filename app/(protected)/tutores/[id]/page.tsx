@@ -21,9 +21,10 @@ import { useUpdateTutor } from '@/hooks/use-update-tutor';
 import { formatDateToPtBr, getAge, getTutorInitials } from '@/lib/tutor';
 import type { TutorFormValues } from '@/types/tutor';
 import { AdoptedAnimalCard } from '../_components/adopted-animal-card';
+import { DeleteConfirmationModal } from '../../animals/_components/delete-confirmation-modal';
 import { TutorFormModal } from '../_components/tutor-form-modal';
 
-export default function TutorDetailPage() {
+function TutorDetailPageContent() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const tutorId = typeof params.id === 'string' ? params.id : '';
@@ -34,6 +35,7 @@ export default function TutorDetailPage() {
   const deleteTutor = useDeleteTutor();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   if (isTutorLoading) {
     return (
@@ -51,9 +53,9 @@ export default function TutorDetailPage() {
       <div className="p-4 md:p-7">
         <Card className="rounded-[16px] border border-border py-0 ring-0">
           <CardHeader className="border-b border-border px-5 py-5">
-            <CardTitle>Tutor nao encontrado</CardTitle>
+            <CardTitle>Tutor não encontrado</CardTitle>
             <CardDescription>
-              O registro solicitado nao existe mais ou nao foi encontrado na base mockada.
+              O registro solicitado não existe mais ou não foi encontrado na base mockada.
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5 py-5">
@@ -76,15 +78,7 @@ export default function TutorDetailPage() {
     });
   };
 
-  const handleDeleteTutor = async () => {
-    const confirmed = window.confirm(
-      `Deseja excluir o tutor ${tutor.nome}? Essa acao remove apenas o cadastro mockado.`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
+  const handleConfirmDelete = async () => {
     await deleteTutor.mutateAsync(tutor.id);
     router.push('/tutores');
   };
@@ -113,7 +107,7 @@ export default function TutorDetailPage() {
               Editar tutor
             </Button>
 
-            <Button variant="destructive" onClick={handleDeleteTutor} disabled={deleteTutor.isPending}>
+            <Button variant="destructive" onClick={() => setIsDeleteModalOpen(true)} disabled={deleteTutor.isPending}>
               <Trash2 className="size-4" />
               {deleteTutor.isPending ? 'Excluindo...' : 'Excluir tutor'}
             </Button>
@@ -153,7 +147,7 @@ export default function TutorDetailPage() {
 
               <div className="rounded-[14px] border border-border bg-muted/30 p-4">
                 <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-                  Identificacao
+                  Identificação
                 </p>
                 <div className="space-y-3 text-sm text-foreground">
                   <p>CPF {tutor.cpf}</p>
@@ -169,7 +163,7 @@ export default function TutorDetailPage() {
 
               <div className="rounded-[14px] border border-border bg-muted/30 p-4 md:col-span-2">
                 <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-                  Endereco
+                  Endereço
                 </p>
                 <div className="flex items-start gap-2 text-sm text-foreground">
                   <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
@@ -182,7 +176,7 @@ export default function TutorDetailPage() {
           <Card className="rounded-[16px] border border-border py-0 ring-0">
             <CardHeader className="border-b border-border px-5 py-5">
               <CardTitle>Resumo</CardTitle>
-              <CardDescription>Visao rapida do historico de adocoes ligado a este tutor</CardDescription>
+              <CardDescription>Visão rápida do histórico de adoções ligado a este tutor</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 px-5 py-5">
               <div className="rounded-[14px] border border-border bg-card p-4">
@@ -211,7 +205,7 @@ export default function TutorDetailPage() {
           <div>
             <h2 className="text-lg font-semibold text-foreground">Animais adotados</h2>
             <p className="mt-0.5 text-[13px] text-muted-foreground">
-              Relacao de animais vinculados ao tutor neste mock
+              Relação de animais vinculados ao tutor neste mock
             </p>
           </div>
 
@@ -249,6 +243,19 @@ export default function TutorDetailPage() {
           onSubmit={handleUpdateTutor}
         />
       ) : null}
+
+      <DeleteConfirmationModal
+        open={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        onConfirm={handleConfirmDelete}
+        title="Excluir tutor"
+        description={`Deseja excluir o tutor ${tutor.nome}? Essa ação remove apenas o cadastro mockado.`}
+        isLoading={deleteTutor.isPending}
+      />
     </>
   );
+}
+
+export default function TutorDetailPage() {
+  return <TutorDetailPageContent />;
 }

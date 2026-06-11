@@ -5,21 +5,18 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAnimals } from '@/hooks/use-animals';
 import { AnimalCard } from './_components/animal-card';
+import { AnimalFormModal } from './_components/animal-form-modal';
 
 export default function AnimalsPage() {
   const { data: animals = [] } = useAnimals();
   const [search, setSearch] = useState('');
   const [species, setSpecies] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingAnimal, setEditingAnimal] = useState<(typeof animals)[0] | undefined>(undefined);
 
   const filtered = animals
     .filter((a) => species === 'all' || a.esp === species)
@@ -42,7 +39,14 @@ export default function AnimalsPage() {
           <h1 className="text-[22px] font-semibold text-foreground">Animais</h1>
           <p className="mt-0.5 text-[13px] text-muted-foreground">Gerenciamento de animais resgatados</p>
         </div>
-        <Button variant="primary" size="default">
+        <Button
+          variant="primary"
+          size="default"
+          onClick={() => {
+            setEditingAnimal(undefined);
+            setIsModalOpen(true);
+          }}
+        >
           <Plus className="size-4" />
           Registrar animal
         </Button>
@@ -94,6 +98,17 @@ export default function AnimalsPage() {
           ))}
         </div>
       )}
+
+      <AnimalFormModal
+        open={isModalOpen}
+        onOpenChange={(open) => {
+          setIsModalOpen(open);
+          if (!open) {
+            setEditingAnimal(undefined);
+          }
+        }}
+        animal={editingAnimal}
+      />
     </div>
   );
 }
