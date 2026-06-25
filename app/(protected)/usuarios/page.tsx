@@ -73,8 +73,8 @@ export default function UsersPage() {
     setDeleteModal({ open: true, userId, userName });
   };
 
-  const handleConfirmDelete = async () => {
-    await deleteUser.mutateAsync(deleteModal.userId);
+  const handleConfirmDelete = async (password: string) => {
+    await deleteUser.mutateAsync({ id: deleteModal.userId, senhaAdmin: password });
     setDeleteModal({ open: false, userId: '', userName: '' });
   };
 
@@ -179,7 +179,7 @@ export default function UsersPage() {
                         onClick={() => openDeleteModal(user.id, user.name)}
                       >
                         <Trash2 className="size-4" />
-                        {deleteUser.isPending && deleteUser.variables === user.id ? 'Excluindo...' : 'Excluir'}
+                        {deleteUser.isPending && deleteUser.variables?.id === user.id ? 'Excluindo...' : 'Excluir'}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -211,7 +211,7 @@ export default function UsersPage() {
         onOpenChange={(open) => setDeleteModal((prev) => ({ ...prev, open }))}
         onConfirm={handleConfirmDelete}
         title={`Excluir usuário`}
-        description={`Deseja excluir o usuário ${deleteModal.userName}? Essa ação remove apenas o cadastro mockado.`}
+        description={`Deseja excluir o usuário ${deleteModal.userName}? Essa ação desativa o cadastro no sistema.`}
         isLoading={deleteUser.isPending}
       />
 

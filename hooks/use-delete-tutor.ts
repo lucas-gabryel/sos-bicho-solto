@@ -9,7 +9,7 @@ export function useDeleteTutor() {
 
   return useMutation({
     mutationFn: deleteTutor,
-    onSuccess: (_, id) => {
+    onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: tutorKeys.all });
       queryClient.invalidateQueries({ queryKey: dashboardStatsKeys.all });
       queryClient.removeQueries({ queryKey: tutorKeys.detail(id) });

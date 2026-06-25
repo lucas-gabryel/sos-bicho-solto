@@ -16,6 +16,7 @@ import { StatusBadge } from './status-badge';
 
 export interface RecentAnimal {
   id: string;
+  numeroRegistro: string;
   nome: string;
   esp: string;
   local: string;
@@ -51,7 +52,7 @@ export function RecentTable({ animals }: { animals: RecentAnimal[] }) {
             className="cursor-pointer border-b border-border hover:bg-orange-50/60 dark:hover:bg-orange-950/10"
           >
             <TableCell className="px-5 py-3">
-              <span className="font-mono text-[11px] text-muted-foreground">{animal.id}</span>
+              <span className="font-mono text-[11px] text-muted-foreground">{animal.numeroRegistro}</span>
             </TableCell>
             <TableCell className="px-5 py-3 text-[13px] font-medium text-foreground">
               {animal.nome}

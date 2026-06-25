@@ -1,39 +1,43 @@
+import { apiRequest } from '@/lib/api';
+import { setAuthToken } from '@/lib/auth-token';
+import { clearClientSession, startClientSession } from '@/lib/session';
+import { mapUsuarioToCurrentUser, type UsuarioApi } from '@/services/user.service';
 import type { CurrentUser } from '@/types/user';
-import { getStoredUserByEmail, logout as clearCurrentSession, setCurrentUserSession } from '@/services/user.service';
 
 export interface LoginCredentials {
   email: string;
   password: string;
 }
 
-function wait(delay = 300) {
-  return new Promise((resolve) => setTimeout(resolve, delay));
+interface LoginResponse {
+  access_token: string;
+  usuario: UsuarioApi;
 }
 
 export async function login(credentials: LoginCredentials): Promise<CurrentUser> {
-  await wait(500);
+  const { access_token, usuario } = await apiRequest<LoginResponse>('/auth/login', {
+    method: 'POST',
+    auth: false,
+    body: {
+      email: credentials.email.trim().toLowerCase(),
+      senha: credentials.password,
+    },
+  });
 
-  const user = getStoredUserByEmail(credentials.email);
+  setAuthToken(access_token);
+  startClientSession();
 
-  if (!user) {
-    throw new Error('E-mail ou senha inválidos.');
-  }
-
-  if (credentials.password !== user.password) {
-    throw new Error('E-mail ou senha inválidos.');
-  }
-
-  setCurrentUserSession(user.id);
-
-  return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    createdAt: user.createdAt,
-  };
+  return mapUsuarioToCurrentUser(usuario);
 }
 
 export async function logout(): Promise<void> {
-  await clearCurrentSession();
+  // JWT é stateless: o logout do back apenas confirma; o front descarta o token.
+  try {
+    await apiRequest<{ ok: true }>('/auth/logout', { method: 'POST' });
+  } catch {
+    // Ignora falhas de rede no logout — a sessão local é limpa de qualquer forma.
+  }
+
+  setAuthToken(null);
+  clearClientSession();
 }

@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAnimal } from '@/hooks/use-animal';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useDeleteAnimal } from '@/hooks/use-delete-animal';
 import { cn } from '@/lib/utils';
 import { DeleteConfirmationModal } from '../_components/delete-confirmation-modal';
 
@@ -25,21 +26,19 @@ export default function AnimalDetailsPage() {
 
   const { data: animal, isLoading: isLoadingAnimal } = useAnimal(animalId);
   const { data: currentUser, isLoading: isLoadingUser } = useCurrentUser();
+  const deleteAnimal = useDeleteAnimal();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const isProtector = currentUser?.role === 'protetor';
   const isLoading = isLoadingAnimal || isLoadingUser;
 
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    try {
-      // Simular exclusão
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.push('/animals');
-    } finally {
-      setIsDeleting(false);
+  const handleDelete = async (password: string) => {
+    if (!animal) {
+      return;
     }
+
+    await deleteAnimal.mutateAsync({ id: animal.id, senhaAdmin: password });
+    router.push('/animals');
   };
 
   if (isLoading) {
@@ -99,7 +98,7 @@ export default function AnimalDetailsPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-semibold text-foreground">{animal.nome}</h1>
-          <p className="text-sm text-muted-foreground">{animal.id}</p>
+          <p className="text-sm text-muted-foreground">{animal.numeroRegistro}</p>
         </div>
       </div>
 
@@ -212,7 +211,7 @@ export default function AnimalDetailsPage() {
         onConfirm={handleDelete}
         title="Excluir animal"
         description={`Tem certeza que deseja excluir ${animal.nome}? Esta ação não pode ser desfeita.`}
-        isLoading={isDeleting}
+        isLoading={deleteAnimal.isPending}
       />
     </div>
   );
