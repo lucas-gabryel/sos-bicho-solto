@@ -1,4 +1,4 @@
-import { getTutors } from '@/services/tutor.service';
+import { apiRequest } from '@/lib/api';
 
 export interface DashboardStats {
   totalAnimais: number;
@@ -8,12 +8,5 @@ export interface DashboardStats {
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const tutors = await getTutors();
-
-  return {
-    totalAnimais: 5,
-    emAcolhimento: 3,
-    adotados: 2,
-    tutores: tutors.length,
-  };
+  return apiRequest<DashboardStats>('/dashboard/resumo');
 }
