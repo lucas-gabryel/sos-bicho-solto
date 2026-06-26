@@ -1,12 +1,13 @@
 'use client';
 
-import { ArrowLeft, Info, LoaderCircle, PencilLine, Trash2 } from 'lucide-react';
+import { ArrowLeft, Info, PencilLine, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDeleteTutor } from '@/hooks/use-delete-tutor';
 import { useTutor } from '@/hooks/use-tutor';
@@ -15,7 +16,7 @@ import { useUpdateTutor } from '@/hooks/use-update-tutor';
 import { formatDateToPtBr, getAge } from '@/lib/tutor';
 import { cn } from '@/lib/utils';
 import type { TutorFormValues } from '@/types/tutor';
-import { AnimalCard } from '../../animals/_components/animal-card';
+import { AnimalCard, AnimalCardSkeleton } from '../../animals/_components/animal-card';
 import { DeleteConfirmationModal } from '../../animals/_components/delete-confirmation-modal';
 import { TutorFormModal } from '../_components/tutor-form-modal';
 
@@ -37,11 +38,36 @@ function TutorDetailPageContent() {
 
   if (isTutorLoading) {
     return (
-      <div className="flex min-h-[70vh] items-center justify-center p-6">
-        <div className="flex items-center gap-3 rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground shadow-sm">
-          <LoaderCircle className="size-4 animate-spin" />
-          Carregando tutor...
+      <div className="p-4 md:p-7">
+        <div className="mb-6 flex items-center gap-3">
+          <Skeleton className="size-9 rounded-md" />
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-44" />
+            <Skeleton className="h-4 w-56" />
+          </div>
         </div>
+
+        <Card className="rounded-2xl p-6">
+          <div className="flex items-center gap-5">
+            <Skeleton className="size-18 shrink-0 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </div>
+
+          <div className="my-5 h-px bg-border" />
+
+          <Skeleton className="mb-3 h-3 w-32" />
+          <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="space-y-1.5">
+                <Skeleton className="h-2.5 w-20" />
+                <Skeleton className="h-4 w-28" />
+              </div>
+            ))}
+          </div>
+        </Card>
       </div>
     );
   }
@@ -149,9 +175,10 @@ function TutorDetailPageContent() {
 
           <SectionTitle className="mt-6">Animais adotados ({adoptedAnimals.length})</SectionTitle>
           {isAnimalsLoading ? (
-            <div className="flex items-center gap-3 rounded-lg bg-muted/60 px-4 py-3.5 text-sm text-muted-foreground">
-              <LoaderCircle className="size-4 animate-spin" />
-              Carregando animais adotados...
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3.5">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <AnimalCardSkeleton key={i} />
+              ))}
             </div>
           ) : adoptedAnimals.length === 0 ? (
             <div className="flex items-center gap-3 rounded-lg bg-muted/60 px-4 py-3.5 text-sm text-muted-foreground">

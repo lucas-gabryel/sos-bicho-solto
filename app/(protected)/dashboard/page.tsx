@@ -23,8 +23,8 @@ function getTodayLabel() {
 }
 
 export default function DashboardPage() {
-  const { data: animals = [] } = useRecentAnimals(5);
-  const { data: stats } = useDashboardStats();
+  const { data: animals = [], isLoading: isAnimalsLoading } = useRecentAnimals(5);
+  const { data: stats, isLoading: isStatsLoading } = useDashboardStats();
 
   const todayFormatted = useSyncExternalStore(emptySubscribe, getTodayLabel, () => '');
 
@@ -43,6 +43,7 @@ export default function DashboardPage() {
           icon={PawPrint}
           color="orange"
           href="/animals"
+          loading={isStatsLoading}
         />
         <MetricCard
           label="Em Acolhimento"
@@ -51,6 +52,7 @@ export default function DashboardPage() {
           icon={Home}
           color="blue"
           href="/animals"
+          loading={isStatsLoading}
         />
         <MetricCard
           label="Adotados"
@@ -59,6 +61,7 @@ export default function DashboardPage() {
           icon={Heart}
           color="green"
           href="/animals"
+          loading={isStatsLoading}
         />
         <MetricCard
           label="Tutores"
@@ -67,6 +70,7 @@ export default function DashboardPage() {
           icon={Users}
           color="purple"
           href="/tutores"
+          loading={isStatsLoading}
         />
       </div>
 
@@ -83,7 +87,7 @@ export default function DashboardPage() {
             </Link>
           </Button>
         </div>
-        <RecentTable animals={animals} />
+        <RecentTable animals={animals} isLoading={isAnimalsLoading} />
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import type { Animal } from '@/services/animal.service';
 
@@ -65,5 +66,19 @@ export function AnimalCard({ animal }: { animal: Animal }) {
         </div>
       </Card>
     </Link>
+  );
+}
+
+export function AnimalCardSkeleton() {
+  return (
+    <Card className="gap-0 rounded-[14px] border border-border py-0 ring-0">
+      <Skeleton className="h-30 rounded-none" />
+      <div className="p-3.25">
+        <Skeleton className="mb-1.5 h-2.5 w-14" />
+        <Skeleton className="mb-2.5 h-3.5 w-32" />
+        <Skeleton className="mb-2.5 h-3 w-40" />
+        <Skeleton className="h-5 w-24 rounded-full" />
+      </div>
+    </Card>
   );
 }

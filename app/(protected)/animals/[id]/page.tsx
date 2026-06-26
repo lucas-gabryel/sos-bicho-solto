@@ -249,9 +249,12 @@ export default function AnimalDetailsPage() {
             </span>
           </Link>
         ) : adopted ? (
-          <div className="flex items-center gap-3 rounded-lg bg-muted/60 px-4 py-3.5 text-sm text-muted-foreground">
-            <Info className="size-4 shrink-0 text-blue-600 dark:text-blue-400" />
-            <span>Carregando dados do tutor...</span>
+          <div className="flex items-center gap-3 rounded-lg bg-muted/60 px-4 py-3.5">
+            <Skeleton className="size-10 shrink-0 rounded-full" />
+            <div className="flex-1 space-y-1.5">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-3 w-56" />
+            </div>
           </div>
         ) : (
           <div className="flex items-center gap-3 rounded-lg bg-muted/60 px-4 py-3.5 text-sm text-muted-foreground">

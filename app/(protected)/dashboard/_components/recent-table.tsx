@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { StatusBadge } from './status-badge';
 
@@ -16,7 +17,7 @@ export interface RecentAnimal {
   status: 'Adotado' | 'Acolhimento';
 }
 
-export function RecentTable({ animals }: { animals: RecentAnimal[] }) {
+export function RecentTable({ animals, isLoading = false }: { animals: RecentAnimal[]; isLoading?: boolean }) {
   const router = useRouter();
 
   return (
@@ -34,7 +35,30 @@ export function RecentTable({ animals }: { animals: RecentAnimal[] }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {animals.map((animal) => (
+        {isLoading
+          ? Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i} className="border-b border-border">
+                <TableCell className="px-5 py-3">
+                  <Skeleton className="h-3 w-20" />
+                </TableCell>
+                <TableCell className="px-5 py-3">
+                  <Skeleton className="h-3.5 w-28" />
+                </TableCell>
+                <TableCell className="px-5 py-3">
+                  <Skeleton className="h-3.5 w-16" />
+                </TableCell>
+                <TableCell className="px-5 py-3">
+                  <Skeleton className="h-3 w-32" />
+                </TableCell>
+                <TableCell className="px-5 py-3">
+                  <Skeleton className="h-5 w-24 rounded-full" />
+                </TableCell>
+                <TableCell className="px-5 py-3">
+                  <Skeleton className="size-7 rounded-md" />
+                </TableCell>
+              </TableRow>
+            ))
+          : animals.map((animal) => (
           <TableRow
             key={animal.id}
             onClick={() => router.push(`/animals/${animal.id}`)}

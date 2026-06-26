@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCreateUser } from '@/hooks/use-create-user';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -83,10 +84,13 @@ export default function UsersPage() {
 
   if (isCurrentUserLoading || !currentUser || currentUser.role !== 'admin') {
     return (
-      <div className="flex min-h-[70vh] items-center justify-center p-6">
-        <div className="rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground shadow-sm">
-          Carregando usuários...
+      <div className="p-4 md:p-7">
+        <div className="mb-6 space-y-2">
+          <Skeleton className="h-6 w-52" />
+          <Skeleton className="h-4 w-72" />
         </div>
+        <Skeleton className="mb-4 h-9 w-full max-w-md rounded-lg" />
+        <UsersTableSkeleton />
       </div>
     );
   }
@@ -124,9 +128,7 @@ export default function UsersPage() {
         </div>
 
         {isUsersLoading ? (
-          <div className="rounded-[14px] border border-border bg-card px-4 py-10 text-center text-sm text-muted-foreground">
-            Carregando usuários...
-          </div>
+          <UsersTableSkeleton />
         ) : users.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-[14px] border border-dashed border-border py-16 text-muted-foreground">
             <ShieldCheck className="size-10 opacity-30" />
@@ -231,5 +233,47 @@ export default function UsersPage() {
         </div>
       ) : null}
     </>
+  );
+}
+
+function UsersTableSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-[14px] border border-border bg-card">
+      <Table className="border-collapse">
+        <TableHeader>
+          <TableRow className="border-b border-border bg-muted/40 hover:bg-muted/40">
+            {['Nome', 'E-mail', 'Perfil', 'Criado em', 'Ações'].map((header) => (
+              <TableHead
+                key={header}
+                className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground"
+              >
+                {header}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <TableRow key={i} className="border-b border-border">
+              <TableCell className="px-5 py-3">
+                <Skeleton className="h-3.5 w-40" />
+              </TableCell>
+              <TableCell className="px-5 py-3">
+                <Skeleton className="h-3.5 w-48" />
+              </TableCell>
+              <TableCell className="px-5 py-3">
+                <Skeleton className="h-5 w-24 rounded-full" />
+              </TableCell>
+              <TableCell className="px-5 py-3">
+                <Skeleton className="h-3.5 w-24" />
+              </TableCell>
+              <TableCell className="px-5 py-3">
+                <Skeleton className="h-8 w-20 rounded-md" />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

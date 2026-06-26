@@ -4,6 +4,7 @@ import { ChevronRight, Mail, PawPrint, Phone } from 'lucide-react';
 import Link from 'next/link';
 
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { Tutor } from '@/types/tutor';
 
 interface TutorCardProps {
@@ -51,5 +52,30 @@ export function TutorCard({ tutor }: TutorCardProps) {
         </div>
       </Card>
     </Link>
+  );
+}
+
+export function TutorCardSkeleton() {
+  return (
+    <Card className="gap-0 rounded-[14px] border border-border p-0 ring-0">
+      <div className="p-4.5">
+        <div className="mb-2.75 flex items-center gap-2.75">
+          <Skeleton className="size-10.5 shrink-0 rounded-full" />
+          <div className="flex-1 space-y-1.5">
+            <Skeleton className="h-3.5 w-32" />
+            <Skeleton className="h-2.5 w-24" />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-3 w-40" />
+          <Skeleton className="h-3 w-28" />
+        </div>
+      </div>
+
+      <div className="border-t border-border bg-muted/40 px-4.5 py-3">
+        <Skeleton className="h-3.5 w-36" />
+      </div>
+    </Card>
   );
 }
