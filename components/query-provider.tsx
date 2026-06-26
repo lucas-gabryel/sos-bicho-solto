@@ -14,7 +14,6 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
   const [client] = useState(
     () =>
       new QueryClient({
-        // Toast global de erro: qualquer query/mutação que falhar avisa o usuário.
         queryCache: new QueryCache({
           onError: (error) => toast.error(getErrorMessage(error)),
         }),
@@ -23,9 +22,6 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
         }),
         defaultOptions: {
           queries: {
-            // Dados ficam "frescos" por 5 min: navegar entre telas reaproveita o cache
-            // e não refaz a requisição. Refetch só após esse tempo, ao invalidar (mutações)
-            // ou quando o usuário recarrega a página manualmente.
             staleTime: FIVE_MINUTES,
             gcTime: 2 * FIVE_MINUTES,
             refetchOnWindowFocus: false,

@@ -115,9 +115,6 @@ export async function deleteTutor({ id, senhaAdmin }: DeleteTutorInput): Promise
   });
 }
 
-// Vincula um animal a um tutor registrando uma adoção (POST /adocoes):
-// o back marca o animal como ADOTADO e seta tutorId. Retorna o tutor atualizado
-// (com animaisAdotadosIds recarregado) para o cache do React Query.
 export async function linkAnimalToTutor(tutorId: string, animalId: string): Promise<Tutor> {
   await apiRequest('/adocoes', {
     method: 'POST',

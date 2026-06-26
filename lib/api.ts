@@ -22,8 +22,6 @@ export interface RespostaPaginada<T> {
   };
 }
 
-// As páginas do front carregam a lista inteira e filtram no cliente.
-// Enquanto não há UI de paginação, pedimos o teto suportado pela API (limit máx = 100).
 export const LIST_LIMIT = 100;
 
 interface ApiRequestOptions {

@@ -55,9 +55,6 @@ export interface AnimalApi {
   fotos?: { id: string; url: string; principal: boolean }[];
 }
 
-// A API exige ao menos 1 foto (URL válida) no cadastro de animal. Enquanto não há
-// upload de arquivo, o front envia a URL informada ou esta imagem padrão.
-// Ver lacunas.md (upload de fotos).
 const PLACEHOLDER_PHOTO_URL = 'https://placedog.net/640/480';
 
 function especieToEsp(especie: EspecieApi): AnimalEsp {
@@ -196,8 +193,6 @@ export interface CreateAnimalPayload {
 }
 
 export async function createAnimal(data: CreateAnimalPayload): Promise<Animal> {
-  // `status` não é enviado: a API sempre cria como ACOLHIMENTO (muda via adoção).
-  // `pesoAt` não é aceito no cadastro (só registrado na edição).
   const animal = await apiRequest<AnimalApi>('/animais', {
     method: 'POST',
     body: {
@@ -225,7 +220,6 @@ export interface UpdateAnimalPayload extends CreateAnimalPayload {
 }
 
 export async function updateAnimal(data: UpdateAnimalPayload): Promise<Animal> {
-  // A API não permite alterar `status` na edição (muda via adoção/devolução).
   const animal = await apiRequest<AnimalApi>(`/animais/${data.id}`, {
     method: 'PATCH',
     body: {
