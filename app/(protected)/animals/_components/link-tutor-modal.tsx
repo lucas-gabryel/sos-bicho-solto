@@ -74,7 +74,6 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
     control,
     register,
     handleSubmit,
-    reset,
     setValue,
     formState: { errors },
   } = useForm<TutorFormValues>({
@@ -104,16 +103,6 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
       window.removeEventListener('keydown', onKeyDown);
     };
   }, [open, isPending, onOpenChange]);
-
-  useEffect(() => {
-    if (!open) {
-      setActiveTab('select');
-      setSearch('');
-      setSelectedTutorId(null);
-      setSubmitError(null);
-      reset(defaultValues);
-    }
-  }, [open, reset]);
 
   const filteredTutors = tutors.filter(
     (tutor) =>
