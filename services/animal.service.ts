@@ -22,7 +22,9 @@ export interface Animal {
   local: string;
   obs?: string;
   status: AnimalStatus;
+  tutorId?: string;
   data: string;
+  foto?: string;
 }
 
 type EspecieApi = 'CAO' | 'GATO';
@@ -53,9 +55,6 @@ export interface AnimalApi {
   fotos?: { id: string; url: string; principal: boolean }[];
 }
 
-// A API exige ao menos 1 foto (URL válida) no cadastro de animal. Enquanto não há
-// upload de arquivo, o front envia a URL informada ou esta imagem padrão.
-// Ver lacunas.md (upload de fotos).
 const PLACEHOLDER_PHOTO_URL = 'https://placedog.net/640/480';
 
 function especieToEsp(especie: EspecieApi): AnimalEsp {
@@ -107,6 +106,8 @@ function formatRegistrationDate(value: string): string {
 }
 
 function mapAnimal(animal: AnimalApi): Animal {
+  const fotoPrincipal = animal.fotos?.find((foto) => foto.principal) ?? animal.fotos?.[0];
+
   return {
     id: animal.id,
     numeroRegistro: animal.numeroRegistro,
@@ -124,7 +125,9 @@ function mapAnimal(animal: AnimalApi): Animal {
     local: animal.localResgate,
     obs: animal.observacoes ?? undefined,
     status: statusToFront(animal.status),
+    tutorId: animal.tutorId ?? undefined,
     data: formatRegistrationDate(animal.criadoEm),
+    foto: fotoPrincipal?.url,
   };
 }
 
@@ -190,8 +193,6 @@ export interface CreateAnimalPayload {
 }
 
 export async function createAnimal(data: CreateAnimalPayload): Promise<Animal> {
-  // `status` não é enviado: a API sempre cria como ACOLHIMENTO (muda via adoção).
-  // `pesoAt` não é aceito no cadastro (só registrado na edição).
   const animal = await apiRequest<AnimalApi>('/animais', {
     method: 'POST',
     body: {
@@ -219,7 +220,6 @@ export interface UpdateAnimalPayload extends CreateAnimalPayload {
 }
 
 export async function updateAnimal(data: UpdateAnimalPayload): Promise<Animal> {
-  // A API não permite alterar `status` na edição (muda via adoção/devolução).
   const animal = await apiRequest<AnimalApi>(`/animais/${data.id}`, {
     method: 'PATCH',
     body: {

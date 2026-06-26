@@ -31,7 +31,6 @@ export async function login(credentials: LoginCredentials): Promise<CurrentUser>
 }
 
 export async function logout(): Promise<void> {
-  // JWT é stateless: o logout do back apenas confirma; o front descarta o token.
   try {
     await apiRequest<{ ok: true }>('/auth/logout', { method: 'POST' });
   } catch {

@@ -2,6 +2,8 @@ import { cn } from '@/lib/utils';
 import { type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 
+import { Skeleton } from '@/components/ui/skeleton';
+
 interface MetricCardProps {
   label: string;
   value: number;
@@ -9,6 +11,7 @@ interface MetricCardProps {
   icon: LucideIcon;
   color: 'orange' | 'blue' | 'green' | 'purple';
   href: string;
+  loading?: boolean;
 }
 
 const colorMap = {
@@ -30,7 +33,7 @@ const colorMap = {
   },
 };
 
-export function MetricCard({ label, value, sub, icon: Icon, color, href }: MetricCardProps) {
+export function MetricCard({ label, value, sub, icon: Icon, color, href, loading = false }: MetricCardProps) {
   const colors = colorMap[color];
 
   return (
@@ -48,7 +51,11 @@ export function MetricCard({ label, value, sub, icon: Icon, color, href }: Metri
         <Icon className="size-4.5" />
       </div>
       <p className="mb-1 text-xs text-muted-foreground">{label}</p>
-      <p className="text-[28px] font-semibold leading-none text-foreground">{value}</p>
+      {loading ? (
+        <Skeleton className="h-7 w-12" />
+      ) : (
+        <p className="text-[28px] font-semibold leading-none text-foreground">{value}</p>
+      )}
       <p className="mt-1 text-[11px] text-muted-foreground/70">{sub}</p>
     </Link>
   );

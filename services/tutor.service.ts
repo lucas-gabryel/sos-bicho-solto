@@ -14,6 +14,7 @@ interface TutorApi {
   dataNascimento: string;
   criadoEm: string;
   modificadoEm: string;
+  totalAnimaisAdotados: number;
 }
 
 function toDateOnly(value: string): string {
@@ -27,6 +28,7 @@ function toDateOnly(value: string): string {
 function mapTutor(tutor: TutorApi, animaisAdotadosIds: string[] = []): Tutor {
   return {
     id: tutor.id,
+    codigo: tutor.codigo,
     nome: tutor.nome,
     cpf: formatCpf(tutor.cpf),
     telefone: tutor.telefone,
@@ -34,6 +36,7 @@ function mapTutor(tutor: TutorApi, animaisAdotadosIds: string[] = []): Tutor {
     endereco: tutor.endereco,
     dataNascimento: toDateOnly(tutor.dataNascimento),
     animaisAdotadosIds,
+    totalAnimaisAdotados: tutor.totalAnimaisAdotados ?? animaisAdotadosIds.length,
   };
 }
 
@@ -112,9 +115,6 @@ export async function deleteTutor({ id, senhaAdmin }: DeleteTutorInput): Promise
   });
 }
 
-// Vincula um animal a um tutor registrando uma adoção (POST /adocoes):
-// o back marca o animal como ADOTADO e seta tutorId. Retorna o tutor atualizado
-// (com animaisAdotadosIds recarregado) para o cache do React Query.
 export async function linkAnimalToTutor(tutorId: string, animalId: string): Promise<Tutor> {
   await apiRequest('/adocoes', {
     method: 'POST',

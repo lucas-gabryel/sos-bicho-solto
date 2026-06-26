@@ -21,7 +21,6 @@ export const createAnimalSchema = z.object({
     }, 'Data de nascimento inválida'),
   local: z.string().min(1, 'Localização é obrigatória').min(3, 'Localização deve ter ao menos 3 caracteres'),
   obs: z.string().optional(),
-  // Foto por URL (upload de arquivo virá depois). Vazio = imagem padrão é usada no service.
   fotoUrl: z.string().url('URL inválida').optional().or(z.literal('')),
 });
 

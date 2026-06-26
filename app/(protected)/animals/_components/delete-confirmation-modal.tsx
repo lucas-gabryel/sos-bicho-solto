@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle } from 'lucide-react';
+import { AlertTriangle, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -26,24 +26,20 @@ export function DeleteConfirmationModal({
   isLoading = false,
 }: DeleteConfirmationModalProps) {
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleConfirm = async () => {
     if (!password) {
-      setError('Informe a senha do administrador');
       return;
     }
 
     setIsDeleting(true);
-    setError('');
     try {
-      // A senha é revalidada no backend (RN03); o erro retornado é exibido aqui.
       await onConfirm(password);
       onOpenChange(false);
       setPassword('');
-    } catch (confirmError) {
-      setError(confirmError instanceof Error ? confirmError.message : 'Não foi possível concluir a exclusão.');
+    } catch {
+      // Erro exibido pelo toast global.
     } finally {
       setIsDeleting(false);
     }
@@ -52,63 +48,56 @@ export function DeleteConfirmationModal({
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       setPassword('');
-      setError('');
     }
     onOpenChange(newOpen);
   };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="rounded-2xl sm:max-w-100">
         <DialogHeader>
           <div className="flex items-start gap-3">
-            <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-destructive/10">
-              <AlertCircle className="size-5 text-destructive" />
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-destructive/10 text-destructive">
+              <AlertTriangle className="size-4.5" />
             </div>
-            <div>
+            <div className="text-left">
               <DialogTitle>{title}</DialogTitle>
               <DialogDescription className="mt-1">{description}</DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-[13px]">
-              Digite a senha de administrador
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Digite a senha"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (error) setError('');
-              }}
-              disabled={isDeleting || isLoading}
-              className="h-9 text-sm"
-            />
-            {error && <p className="text-xs text-destructive">{error}</p>}
-          </div>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Revalide sua senha de administrador para prosseguir.{' '}
+          <strong className="font-semibold text-foreground">Esta ação não pode ser desfeita.</strong>
+        </p>
+
+        <div className="space-y-2">
+          <Label htmlFor="password" className="text-[13px]">
+            Senha do administrador <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="password"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={isDeleting || isLoading}
+            className="h-9 text-sm"
+          />
         </div>
 
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-            disabled={isDeleting || isLoading}
-            className="flex-1"
-          >
+        <div className="mt-1 flex justify-end gap-2 border-t border-border pt-4">
+          <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isDeleting || isLoading}>
             Cancelar
           </Button>
           <Button
             variant="destructive"
             onClick={handleConfirm}
             disabled={!password || isDeleting || isLoading}
-            className="flex-1"
           >
-            {isDeleting || isLoading ? 'Excluindo...' : 'Excluir'}
+            <Trash2 className="size-4" />
+            {isDeleting || isLoading ? 'Excluindo...' : 'Excluir definitivamente'}
           </Button>
         </div>
       </DialogContent>

@@ -10,7 +10,7 @@ import { useCreateTutor } from '@/hooks/use-create-tutor';
 import { useTutors } from '@/hooks/use-tutors';
 import { useUpdateTutor } from '@/hooks/use-update-tutor';
 import type { Tutor, TutorFormValues } from '@/types/tutor';
-import { TutorCard } from './_components/tutor-card';
+import { TutorCard, TutorCardSkeleton } from './_components/tutor-card';
 import { TutorFormModal } from './_components/tutor-form-modal';
 
 const PAGE_SIZE = 9;
@@ -46,10 +46,6 @@ function TutorsPageContent() {
 
   const openCreateModal = () => {
     setModalState({ open: true, mode: 'create', tutor: null });
-  };
-
-  const openEditModal = (tutor: Tutor) => {
-    setModalState({ open: true, mode: 'edit', tutor });
   };
 
   const closeModal = () => {
@@ -100,9 +96,9 @@ function TutorsPageContent() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3.5">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="h-64 animate-pulse rounded-[14px] border border-border bg-card/60" />
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-3.5">
+            {Array.from({ length: PAGE_SIZE }).map((_, index) => (
+              <TutorCardSkeleton key={index} />
             ))}
           </div>
         ) : tutors.length === 0 ? (
@@ -118,7 +114,7 @@ function TutorsPageContent() {
               }`}
             >
               {tutors.map((tutor) => (
-                <TutorCard key={tutor.id} tutor={tutor} onEdit={openEditModal} />
+                <TutorCard key={tutor.id} tutor={tutor} />
               ))}
             </div>
 

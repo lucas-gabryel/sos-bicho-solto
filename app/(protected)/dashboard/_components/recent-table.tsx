@@ -4,14 +4,8 @@ import { ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { StatusBadge } from './status-badge';
 
 export interface RecentAnimal {
@@ -23,11 +17,7 @@ export interface RecentAnimal {
   status: 'Adotado' | 'Acolhimento';
 }
 
-function speciesEmoji(esp: string) {
-  return esp === 'Cão' ? '🐶' : '🐱';
-}
-
-export function RecentTable({ animals }: { animals: RecentAnimal[] }) {
+export function RecentTable({ animals, isLoading = false }: { animals: RecentAnimal[]; isLoading?: boolean }) {
   const router = useRouter();
 
   return (
@@ -45,7 +35,30 @@ export function RecentTable({ animals }: { animals: RecentAnimal[] }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {animals.map((animal) => (
+        {isLoading
+          ? Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i} className="border-b border-border">
+                <TableCell className="px-5 py-3">
+                  <Skeleton className="h-3 w-20" />
+                </TableCell>
+                <TableCell className="px-5 py-3">
+                  <Skeleton className="h-3.5 w-28" />
+                </TableCell>
+                <TableCell className="px-5 py-3">
+                  <Skeleton className="h-3.5 w-16" />
+                </TableCell>
+                <TableCell className="px-5 py-3">
+                  <Skeleton className="h-3 w-32" />
+                </TableCell>
+                <TableCell className="px-5 py-3">
+                  <Skeleton className="h-5 w-24 rounded-full" />
+                </TableCell>
+                <TableCell className="px-5 py-3">
+                  <Skeleton className="size-7 rounded-md" />
+                </TableCell>
+              </TableRow>
+            ))
+          : animals.map((animal) => (
           <TableRow
             key={animal.id}
             onClick={() => router.push(`/animals/${animal.id}`)}
@@ -54,15 +67,9 @@ export function RecentTable({ animals }: { animals: RecentAnimal[] }) {
             <TableCell className="px-5 py-3">
               <span className="font-mono text-[11px] text-muted-foreground">{animal.numeroRegistro}</span>
             </TableCell>
-            <TableCell className="px-5 py-3 text-[13px] font-medium text-foreground">
-              {animal.nome}
-            </TableCell>
-            <TableCell className="px-5 py-3 text-[13px] text-foreground">
-              {speciesEmoji(animal.esp)} {animal.esp}
-            </TableCell>
-            <TableCell className="px-5 py-3 text-[12px] text-muted-foreground">
-              {animal.local}
-            </TableCell>
+            <TableCell className="px-5 py-3 text-[13px] font-medium text-foreground">{animal.nome}</TableCell>
+            <TableCell className="px-5 py-3 text-[13px] text-foreground">{animal.esp}</TableCell>
+            <TableCell className="px-5 py-3 text-[12px] text-muted-foreground">{animal.local}</TableCell>
             <TableCell className="px-5 py-3">
               <StatusBadge status={animal.status} />
             </TableCell>

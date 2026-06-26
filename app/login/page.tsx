@@ -22,9 +22,8 @@ type FormData = yup.InferType<typeof schema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { mutateAsync: login, isPending } = useLogin();
+  const { mutate: login, isPending } = useLogin();
   const [showPassword, setShowPassword] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
@@ -32,14 +31,8 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<FormData>({ resolver: yupResolver(schema) });
 
-  const onSubmit = async (data: FormData) => {
-    try {
-      setSubmitError(null);
-      await login(data);
-      router.replace('/dashboard');
-    } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Não foi possível entrar.');
-    }
+  const onSubmit = (data: FormData) => {
+    login(data, { onSuccess: () => router.replace('/dashboard') });
   };
 
   return (
@@ -102,12 +95,6 @@ export default function LoginPage() {
               </div>
               {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
             </div>
-
-            {submitError ? (
-              <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {submitError}
-              </div>
-            ) : null}
 
             <Button
               type="submit"

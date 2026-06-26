@@ -15,7 +15,6 @@ export function useCreateAnimal() {
       return createAnimal(data);
     },
     onSuccess: () => {
-      // Invalidate and refetch animals list
       queryClient.invalidateQueries({ queryKey: ['animals'] });
     },
   });
@@ -29,7 +28,6 @@ export function useUpdateAnimal() {
       return updateAnimal(data);
     },
     onSuccess: () => {
-      // Invalidate and refetch animals list
       queryClient.invalidateQueries({ queryKey: ['animals'] });
     },
   });

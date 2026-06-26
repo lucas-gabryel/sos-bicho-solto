@@ -26,7 +26,6 @@ export function UserFormModal({
 }: UserFormModalProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
@@ -39,11 +38,10 @@ export function UserFormModal({
 
   const submit = handleSubmit(async (values) => {
     try {
-      setSubmitError(null);
       await onSubmit(values);
       onOpenChange(false);
-    } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Não foi possível criar o usuário.');
+    } catch {
+      // Erro exibido pelo toast global.
     }
   });
 
@@ -151,12 +149,6 @@ export function UserFormModal({
           <div className="rounded-[14px] border border-border bg-muted/30 px-3.5 py-3 text-[12px] text-muted-foreground">
             A senha deve ter entre 8 e 15 caracteres, com ao menos uma letra maiuscula e um caractere especial.
           </div>
-
-          {submitError ? (
-            <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {submitError}
-            </div>
-          ) : null}
 
           <div className="flex flex-col-reverse gap-2 border-t border-border pt-4 sm:flex-row sm:justify-end">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>

@@ -1,6 +1,6 @@
 'use client';
 
-import { LoaderCircle, Plus, Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Pagination } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAnimals } from '@/hooks/use-animals';
 import type { AnimalEsp, AnimalStatus } from '@/services/animal.service';
-import { AnimalCard } from './_components/animal-card';
+import { AnimalCard, AnimalCardSkeleton } from './_components/animal-card';
 import { AnimalFormModal } from './_components/animal-form-modal';
 
 const PAGE_SIZE = 12;
@@ -85,9 +85,10 @@ export default function AnimalsPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center gap-2 py-16 text-sm text-muted-foreground">
-          <LoaderCircle className="size-4 animate-spin" />
-          Carregando animais...
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3.5">
+          {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+            <AnimalCardSkeleton key={i} />
+          ))}
         </div>
       ) : animals.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-16 text-muted-foreground">
