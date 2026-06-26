@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAnimal } from '@/hooks/use-animal';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDeleteAnimal } from '@/hooks/use-delete-animal';
+import { formatDateToPtBr } from '@/lib/tutor';
 import { cn } from '@/lib/utils';
 import { AnimalFormModal } from '../_components/animal-form-modal';
 import { DeleteConfirmationModal } from '../_components/delete-confirmation-modal';
@@ -107,14 +108,11 @@ export default function AnimalDetailsPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        {/* Main Content */}
         <Card className="md:col-span-2 space-y-6 p-6">
-          {/* Species Emoji Section */}
           <div className="flex h-40 items-center justify-center rounded-lg bg-muted/50 text-6xl">
             {speciesEmoji(animal.esp)}
           </div>
 
-          {/* Status and Basic Info */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-foreground">Informações Básicas</h2>
@@ -153,16 +151,21 @@ export default function AnimalDetailsPage() {
                 }
               />
               <InfoField label="Cor" value={animal.cor} />
+              {animal.porte && <InfoField label="Porte" value={animal.porte} />}
               <InfoField label="Peso Inicial" value={`${animal.peso.toFixed(1)} kg`} />
               {animal.pesoAt && <InfoField label="Peso Atual" value={`${animal.pesoAt.toFixed(1)} kg`} />}
             </div>
           </div>
 
-          {/* Location and Observations */}
           <div className="space-y-4 border-t pt-6">
             <h2 className="text-lg font-semibold text-foreground">Detalhes Adicionais</h2>
 
-            <div className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <InfoField label="Castrado" value={animal.castrado ? 'Sim' : 'Não'} />
+              <InfoField label="Vacinado" value={animal.vacinado ? 'Sim' : 'Não'} />
+              {animal.dataNascimento && (
+                <InfoField label="Data de Nascimento" value={formatDateToPtBr(animal.dataNascimento)} />
+              )}
               <InfoField label="Localização" value={animal.local} />
               <InfoField label="Data de Registro" value={animal.data} />
               {animal.obs && <InfoField label="Observações" value={animal.obs} />}
@@ -170,7 +173,6 @@ export default function AnimalDetailsPage() {
           </div>
         </Card>
 
-        {/* Sidebar with Actions */}
         {!isProtector && (
           <Card className="h-fit space-y-3 p-6">
             <h3 className="font-semibold text-foreground">Ações</h3>

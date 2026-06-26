@@ -1,7 +1,6 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,6 @@ interface AnimalFormModalProps {
 }
 
 export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalProps) {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const createMutation = useCreateAnimal();
   const updateMutation = useUpdateAnimal();
 
@@ -43,61 +41,61 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
           esp: animal.esp,
           raca: animal.raca,
           sexo: animal.sexo,
+          porte: animal.porte,
           cor: animal.cor,
           peso: animal.peso,
           pesoAt: animal.pesoAt,
+          castrado: animal.castrado,
+          vacinado: animal.vacinado,
+          dataNascimento: animal.dataNascimento ?? '',
           local: animal.local,
           obs: animal.obs || '',
-          status: animal.status,
+          fotoUrl: '',
         }
       : {
           nome: '',
           esp: undefined,
           raca: '',
           sexo: undefined,
+          porte: undefined,
           cor: '',
           peso: undefined,
           pesoAt: undefined,
+          castrado: false,
+          vacinado: false,
+          dataNascimento: '',
           local: '',
           obs: '',
-          status: undefined,
+          fotoUrl: '',
         },
   });
 
   async function onSubmit(data: CreateAnimalFormData) {
+    const payload = {
+      nome: data.nome,
+      esp: data.esp,
+      raca: data.raca,
+      sexo: data.sexo,
+      porte: data.porte,
+      cor: data.cor,
+      peso: data.peso,
+      pesoAt: data.pesoAt ? Number(data.pesoAt) : undefined,
+      castrado: data.castrado,
+      vacinado: data.vacinado,
+      dataNascimento: data.dataNascimento || undefined,
+      local: data.local,
+      obs: data.obs,
+      fotoUrl: data.fotoUrl || undefined,
+    };
+
     try {
       if (isEditing && animal) {
-        await updateMutation.mutateAsync({
-          id: animal.id,
-          nome: data.nome,
-          esp: data.esp,
-          raca: data.raca,
-          sexo: data.sexo,
-          cor: data.cor,
-          peso: data.peso,
-          pesoAt: data.pesoAt ? Number(data.pesoAt) : undefined,
-          local: data.local,
-          obs: data.obs,
-          status: data.status,
-        });
+        await updateMutation.mutateAsync({ id: animal.id, ...payload });
       } else {
-        await createMutation.mutateAsync({
-          nome: data.nome,
-          esp: data.esp,
-          raca: data.raca,
-          sexo: data.sexo,
-          cor: data.cor,
-          peso: data.peso,
-          pesoAt: data.pesoAt ? Number(data.pesoAt) : undefined,
-          local: data.local,
-          obs: data.obs,
-          status: data.status,
-        });
+        await createMutation.mutateAsync(payload);
       }
 
-      // Reset form and close modal
       form.reset();
-      setSelectedFile(null);
       onOpenChange(false);
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -107,7 +105,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       form.reset();
-      setSelectedFile(null);
     }
     onOpenChange(newOpen);
   };
@@ -124,7 +121,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Nome */}
             <FormField
               control={form.control}
               name="nome"
@@ -139,7 +135,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Espécie */}
             <FormField
               control={form.control}
               name="esp"
@@ -162,7 +157,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Raça */}
             <FormField
               control={form.control}
               name="raca"
@@ -177,7 +171,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Sexo */}
             <FormField
               control={form.control}
               name="sexo"
@@ -200,7 +193,29 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Cor */}
+            <FormField
+              control={form.control}
+              name="porte"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Porte</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o porte" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Pequeno">Pequeno</SelectItem>
+                      <SelectItem value="Médio">Médio</SelectItem>
+                      <SelectItem value="Grande">Grande</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="cor"
@@ -215,7 +230,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Peso */}
             <FormField
               control={form.control}
               name="peso"
@@ -230,7 +244,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Peso Atual */}
             <FormField
               control={form.control}
               name="pesoAt"
@@ -245,7 +258,58 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Localização */}
+            <FormField
+              control={form.control}
+              name="dataNascimento"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Data de nascimento</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} value={field.value ?? ''} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex flex-wrap gap-6">
+              <FormField
+                control={form.control}
+                name="castrado"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center gap-2 space-y-0">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        className="size-4 rounded border-input accent-orange-600"
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">Castrado</FormLabel>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="vacinado"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center gap-2 space-y-0">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        className="size-4 rounded border-input accent-orange-600"
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">Vacinado</FormLabel>
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
               name="local"
@@ -260,7 +324,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Observações */}
             <FormField
               control={form.control}
               name="obs"
@@ -279,46 +342,27 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Status */}
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status *</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
+            {!isEditing && (
+              <FormField
+                control={form.control}
+                name="fotoUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>URL da foto</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o status" />
-                      </SelectTrigger>
+                      <Input
+                        type="url"
+                        placeholder="https://exemplo.com/foto.jpg"
+                        {...field}
+                        value={field.value ?? ''}
+                      />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Acolhimento">Em Acolhimento</SelectItem>
-                      <SelectItem value="Adotado">Adotado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Foto */}
-            <FormItem>
-              <FormLabel>Foto</FormLabel>
-              <FormControl>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setSelectedFile(file);
-                    }
-                  }}
-                />
-              </FormControl>
-              {selectedFile && <p className="text-xs text-neutral-500">Arquivo selecionado: {selectedFile.name}</p>}
-            </FormItem>
+                    <p className="text-xs text-muted-foreground">Se vazio, uma imagem padrão é usada.</p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <DialogFooter>
               <Button

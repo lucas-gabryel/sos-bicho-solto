@@ -64,7 +64,10 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
   const [selectedTutorId, setSelectedTutorId] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const { data: tutors = [], isLoading: isLoadingTutors } = useTutors();
+  const { data: tutorsPage, isLoading: isLoadingTutors } = useTutors({
+    limit: 20,
+    busca: search.trim() || undefined,
+  });
   const linkMutation = useLinkAnimalToTutor();
   const createTutor = useCreateTutor();
 
@@ -104,12 +107,7 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
     };
   }, [open, isPending, onOpenChange]);
 
-  const filteredTutors = tutors.filter(
-    (tutor) =>
-      tutor.nome.toLowerCase().includes(search.toLowerCase()) ||
-      tutor.cpf.includes(search) ||
-      tutor.email.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filteredTutors = tutorsPage?.data ?? [];
 
   const handleConfirmLink = async () => {
     if (!selectedTutorId) return;

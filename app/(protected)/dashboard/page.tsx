@@ -4,13 +4,13 @@ import { ArrowRight, Heart, Home, PawPrint, Users } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
-import { useAnimals } from '@/hooks/use-animals';
+import { useRecentAnimals } from '@/hooks/use-animals';
 import { useDashboardStats } from '@/hooks/use-dashboard-stats';
 import { MetricCard } from './_components/metric-card';
 import { RecentTable } from './_components/recent-table';
 
 export default function DashboardPage() {
-  const { data: animals = [] } = useAnimals();
+  const { data: animals = [] } = useRecentAnimals(5);
   const { data: stats } = useDashboardStats();
 
   const today = new Date().toLocaleDateString('pt-BR', {

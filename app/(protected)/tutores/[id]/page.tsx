@@ -14,9 +14,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { useAnimals } from '@/hooks/use-animals';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDeleteTutor } from '@/hooks/use-delete-tutor';
 import { useTutor } from '@/hooks/use-tutor';
+import { useTutorAnimals } from '@/hooks/use-tutor-animals';
 import { useUpdateTutor } from '@/hooks/use-update-tutor';
 import { formatDateToPtBr, getAge, getTutorInitials } from '@/lib/tutor';
 import type { TutorFormValues } from '@/types/tutor';
@@ -29,10 +30,13 @@ function TutorDetailPageContent() {
   const router = useRouter();
   const tutorId = typeof params.id === 'string' ? params.id : '';
 
+  const { data: currentUser } = useCurrentUser();
   const { data: tutor, isLoading: isTutorLoading } = useTutor(tutorId);
-  const { data: animals = [], isLoading: isAnimalsLoading } = useAnimals();
+  const { data: adoptedAnimals = [], isLoading: isAnimalsLoading } = useTutorAnimals(tutorId);
   const updateTutor = useUpdateTutor();
   const deleteTutor = useDeleteTutor();
+
+  const isAdmin = currentUser?.role === 'admin';
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -55,7 +59,7 @@ function TutorDetailPageContent() {
           <CardHeader className="border-b border-border px-5 py-5">
             <CardTitle>Tutor não encontrado</CardTitle>
             <CardDescription>
-              O registro solicitado não existe mais ou não foi encontrado na base mockada.
+              O registro solicitado não existe mais ou não foi encontrado.
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5 py-5">
@@ -69,7 +73,6 @@ function TutorDetailPageContent() {
   }
 
   const age = getAge(tutor.dataNascimento);
-  const adoptedAnimals = animals.filter((animal) => tutor.animaisAdotadosIds.includes(animal.id));
 
   const handleUpdateTutor = async (values: TutorFormValues) => {
     await updateTutor.mutateAsync({
@@ -107,10 +110,12 @@ function TutorDetailPageContent() {
               Editar tutor
             </Button>
 
-            <Button variant="destructive" onClick={() => setIsDeleteModalOpen(true)} disabled={deleteTutor.isPending}>
-              <Trash2 className="size-4" />
-              {deleteTutor.isPending ? 'Excluindo...' : 'Excluir tutor'}
-            </Button>
+            {isAdmin && (
+              <Button variant="destructive" onClick={() => setIsDeleteModalOpen(true)} disabled={deleteTutor.isPending}>
+                <Trash2 className="size-4" />
+                {deleteTutor.isPending ? 'Excluindo...' : 'Excluir tutor'}
+              </Button>
+            )}
           </div>
         </div>
 
@@ -194,7 +199,7 @@ function TutorDetailPageContent() {
               <div className="rounded-[14px] border border-border bg-card p-4">
                 <p className="text-[12px] text-muted-foreground">Status do cadastro</p>
                 <Badge className="mt-2 gap-1.5 rounded-full border-transparent bg-green-100 px-2.5 py-0.5 text-[11px] font-semibold text-green-700 dark:bg-green-950/40 dark:text-green-400">
-                  Ativo na base mockada
+                  Ativo
                 </Badge>
               </div>
             </CardContent>
@@ -205,7 +210,7 @@ function TutorDetailPageContent() {
           <div>
             <h2 className="text-lg font-semibold text-foreground">Animais adotados</h2>
             <p className="mt-0.5 text-[13px] text-muted-foreground">
-              Relação de animais vinculados ao tutor neste mock
+              Relação de animais vinculados ao tutor
             </p>
           </div>
 

@@ -1,4 +1,4 @@
-import { apiRequest, ApiError, LIST_LIMIT, type RespostaPaginada } from '@/lib/api';
+import { apiRequest, ApiError, type RespostaPaginada } from '@/lib/api';
 import { setAuthToken } from '@/lib/auth-token';
 import { clearClientSession } from '@/lib/session';
 import type { CreateUserInput, CurrentUser, SystemUser, UserRole } from '@/types/user';
@@ -62,12 +62,18 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   }
 }
 
-export async function getUsers(): Promise<SystemUser[]> {
-  const { data } = await apiRequest<RespostaPaginada<UsuarioApi>>('/usuarios', {
-    query: { limit: LIST_LIMIT },
+export interface ListUsersParams {
+  page?: number;
+  limit?: number;
+  busca?: string;
+}
+
+export async function getUsers(params: ListUsersParams = {}): Promise<RespostaPaginada<SystemUser>> {
+  const { data, meta } = await apiRequest<RespostaPaginada<UsuarioApi>>('/usuarios', {
+    query: { page: params.page, limit: params.limit, busca: params.busca },
   });
 
-  return data.map(mapUsuarioToSystemUser);
+  return { data: data.map(mapUsuarioToSystemUser), meta };
 }
 
 export async function createUser(input: CreateUserInput): Promise<SystemUser> {
