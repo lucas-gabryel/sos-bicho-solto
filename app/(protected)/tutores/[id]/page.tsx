@@ -78,8 +78,8 @@ function TutorDetailPageContent() {
     });
   };
 
-  const handleConfirmDelete = async () => {
-    await deleteTutor.mutateAsync(tutor.id);
+  const handleConfirmDelete = async (password: string) => {
+    await deleteTutor.mutateAsync({ id: tutor.id, senhaAdmin: password });
     router.push('/tutores');
   };
 
@@ -249,7 +249,7 @@ function TutorDetailPageContent() {
         onOpenChange={setIsDeleteModalOpen}
         onConfirm={handleConfirmDelete}
         title="Excluir tutor"
-        description={`Deseja excluir o tutor ${tutor.nome}? Essa ação remove apenas o cadastro mockado.`}
+        description={`Deseja excluir o tutor ${tutor.nome}? Essa ação desativa o cadastro no sistema.`}
         isLoading={deleteTutor.isPending}
       />
     </>
