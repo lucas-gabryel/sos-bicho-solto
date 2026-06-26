@@ -7,6 +7,7 @@ import { useDeferredValue, useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Pagination } from '@/components/ui/pagination';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCreateUser } from '@/hooks/use-create-user';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -18,16 +19,28 @@ import type { CreateUserFormValues } from '@/types/user';
 import { DeleteConfirmationModal } from '../animals/_components/delete-confirmation-modal';
 import { UserFormModal } from './_components/user-form-modal';
 
+const PAGE_SIZE = 10;
+
 export default function UsersPage() {
   const router = useRouter();
   const { data: currentUser, isLoading: isCurrentUserLoading } = useCurrentUser();
   const canManageUsers = currentUser?.role === 'admin';
-  const { data: users = [], isLoading: isUsersLoading } = useUsers({ enabled: canManageUsers });
+  const [search, setSearch] = useState('');
+  const deferredSearch = useDeferredValue(search);
+  const [page, setPage] = useState(1);
+
+  const { data, isLoading: isUsersLoading } = useUsers({
+    page,
+    limit: PAGE_SIZE,
+    busca: deferredSearch.trim() || undefined,
+    enabled: canManageUsers,
+  });
   const createUser = useCreateUser();
   const deleteUser = useDeleteUser();
 
-  const [search, setSearch] = useState('');
-  const deferredSearch = useDeferredValue(search);
+  const users = data?.data ?? [];
+  const totalPages = data?.meta.totalPages ?? 0;
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState<{ open: boolean; userId: string; userName: string }>({
     open: false,
@@ -49,16 +62,6 @@ export default function UsersPage() {
       router.replace('/dashboard');
     }
   }, [currentUser, isCurrentUserLoading, router]);
-
-  const filteredUsers = users.filter((user) => {
-    const query = deferredSearch.trim().toLowerCase();
-
-    if (!query) {
-      return true;
-    }
-
-    return [user.name, user.email, getRoleLabel(user.role)].join(' ').toLowerCase().includes(query);
-  });
 
   const handleCreateUser = async (values: CreateUserFormValues) => {
     await createUser.mutateAsync({
@@ -112,7 +115,10 @@ export default function UsersPage() {
               placeholder="Buscar por nome, e-mail ou perfil..."
               className="pl-9 text-[13px]"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setPage(1);
+              }}
             />
           </div>
         </div>
@@ -121,7 +127,7 @@ export default function UsersPage() {
           <div className="rounded-[14px] border border-border bg-card px-4 py-10 text-center text-sm text-muted-foreground">
             Carregando usuários...
           </div>
-        ) : filteredUsers.length === 0 ? (
+        ) : users.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-[14px] border border-dashed border-border py-16 text-muted-foreground">
             <ShieldCheck className="size-10 opacity-30" />
             <p className="text-sm">Nenhum usuário encontrado</p>
@@ -142,7 +148,7 @@ export default function UsersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
+                {users.map((user) => (
                   <TableRow key={user.id} className="border-b border-border">
                     <TableCell className="px-5 py-3">
                       <div>
@@ -186,6 +192,12 @@ export default function UsersPage() {
                 ))}
               </TableBody>
             </Table>
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className="mt-6">
+            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
         )}
       </div>

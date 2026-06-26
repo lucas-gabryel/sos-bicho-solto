@@ -5,12 +5,15 @@ import { useDeferredValue, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Pagination } from '@/components/ui/pagination';
 import { useCreateTutor } from '@/hooks/use-create-tutor';
 import { useTutors } from '@/hooks/use-tutors';
 import { useUpdateTutor } from '@/hooks/use-update-tutor';
 import type { Tutor, TutorFormValues } from '@/types/tutor';
 import { TutorCard } from './_components/tutor-card';
 import { TutorFormModal } from './_components/tutor-form-modal';
+
+const PAGE_SIZE = 9;
 
 type ModalState =
   | { open: false; mode: 'create'; tutor: null }
@@ -24,38 +27,29 @@ const initialModalState: ModalState = {
 };
 
 function TutorsPageContent() {
-  const { data: tutors = [], isLoading } = useTutors();
+  const [search, setSearch] = useState('');
+  const deferredSearch = useDeferredValue(search);
+  const [page, setPage] = useState(1);
+  const [modalState, setModalState] = useState<ModalState>(initialModalState);
+
+  const { data, isLoading, isFetching } = useTutors({
+    page,
+    limit: PAGE_SIZE,
+    busca: deferredSearch.trim() || undefined,
+  });
+
   const createTutor = useCreateTutor();
   const updateTutor = useUpdateTutor();
 
-  const [search, setSearch] = useState('');
-  const deferredSearch = useDeferredValue(search);
-  const [modalState, setModalState] = useState<ModalState>(initialModalState);
-
-  const filteredTutors = tutors.filter((tutor) => {
-    const query = deferredSearch.trim().toLowerCase();
-
-    if (!query) {
-      return true;
-    }
-
-    return [tutor.nome, tutor.cpf, tutor.telefone, tutor.email, tutor.endereco].join(' ').toLowerCase().includes(query);
-  });
+  const tutors = data?.data ?? [];
+  const totalPages = data?.meta.totalPages ?? 0;
 
   const openCreateModal = () => {
-    setModalState({
-      open: true,
-      mode: 'create',
-      tutor: null,
-    });
+    setModalState({ open: true, mode: 'create', tutor: null });
   };
 
   const openEditModal = (tutor: Tutor) => {
-    setModalState({
-      open: true,
-      mode: 'edit',
-      tutor,
-    });
+    setModalState({ open: true, mode: 'edit', tutor });
   };
 
   const closeModal = () => {
@@ -68,10 +62,7 @@ function TutorsPageContent() {
       return;
     }
 
-    await updateTutor.mutateAsync({
-      id: modalState.tutor.id,
-      values,
-    });
+    await updateTutor.mutateAsync({ id: modalState.tutor.id, values });
   };
 
   const isPending = createTutor.isPending || updateTutor.isPending;
@@ -97,10 +88,13 @@ function TutorsPageContent() {
           <div className="relative min-w-45 flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nome, CPF, telefone, e-mail ou endereço..."
+              placeholder="Buscar por nome ou CPF..."
               className="pl-9 text-[13px]"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setPage(1);
+              }}
             />
           </div>
         </div>
@@ -111,17 +105,29 @@ function TutorsPageContent() {
               <div key={index} className="h-64 animate-pulse rounded-[14px] border border-border bg-card/60" />
             ))}
           </div>
-        ) : filteredTutors.length === 0 ? (
+        ) : tutors.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-[14px] border border-dashed border-border py-16 text-muted-foreground">
             <Users className="size-10 opacity-30" />
             <p className="text-sm">Nenhum tutor encontrado</p>
           </div>
         ) : (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-3.5">
-            {filteredTutors.map((tutor) => (
-              <TutorCard key={tutor.id} tutor={tutor} onEdit={openEditModal} />
-            ))}
-          </div>
+          <>
+            <div
+              className={`grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-3.5 ${
+                isFetching ? 'opacity-60 transition-opacity' : 'transition-opacity'
+              }`}
+            >
+              {tutors.map((tutor) => (
+                <TutorCard key={tutor.id} tutor={tutor} onEdit={openEditModal} />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="mt-6">
+                <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+              </div>
+            )}
+          </>
         )}
       </div>
 

@@ -37,12 +37,18 @@ function mapTutor(tutor: TutorApi, animaisAdotadosIds: string[] = []): Tutor {
   };
 }
 
-export async function getTutors(): Promise<Tutor[]> {
-  const { data } = await apiRequest<RespostaPaginada<TutorApi>>('/tutores', {
-    query: { limit: LIST_LIMIT },
+export interface ListTutorsParams {
+  page?: number;
+  limit?: number;
+  busca?: string;
+}
+
+export async function getTutors(params: ListTutorsParams = {}): Promise<RespostaPaginada<Tutor>> {
+  const { data, meta } = await apiRequest<RespostaPaginada<TutorApi>>('/tutores', {
+    query: { page: params.page, limit: params.limit, busca: params.busca },
   });
 
-  return data.map((tutor) => mapTutor(tutor));
+  return { data: data.map((tutor) => mapTutor(tutor)), meta };
 }
 
 export async function getTutorById(id: string): Promise<Tutor | null> {
