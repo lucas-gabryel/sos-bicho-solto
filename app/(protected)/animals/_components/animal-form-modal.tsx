@@ -121,7 +121,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Nome */}
             <FormField
               control={form.control}
               name="nome"
@@ -136,7 +135,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Espécie */}
             <FormField
               control={form.control}
               name="esp"
@@ -159,7 +157,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Raça */}
             <FormField
               control={form.control}
               name="raca"
@@ -174,7 +171,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Sexo */}
             <FormField
               control={form.control}
               name="sexo"
@@ -197,7 +193,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Porte */}
             <FormField
               control={form.control}
               name="porte"
@@ -221,7 +216,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Cor */}
             <FormField
               control={form.control}
               name="cor"
@@ -236,7 +230,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Peso */}
             <FormField
               control={form.control}
               name="peso"
@@ -251,7 +244,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Peso Atual */}
             <FormField
               control={form.control}
               name="pesoAt"
@@ -266,7 +258,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Data de nascimento */}
             <FormField
               control={form.control}
               name="dataNascimento"
@@ -281,7 +272,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Castrado / Vacinado */}
             <div className="flex flex-wrap gap-6">
               <FormField
                 control={form.control}
@@ -320,7 +310,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               />
             </div>
 
-            {/* Localização */}
             <FormField
               control={form.control}
               name="local"
@@ -335,7 +324,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Observações */}
             <FormField
               control={form.control}
               name="obs"
@@ -354,7 +342,6 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            {/* Foto (por URL — upload de arquivo será adicionado depois) */}
             {!isEditing && (
               <FormField
                 control={form.control}
