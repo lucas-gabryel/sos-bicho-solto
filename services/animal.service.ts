@@ -22,7 +22,9 @@ export interface Animal {
   local: string;
   obs?: string;
   status: AnimalStatus;
+  tutorId?: string;
   data: string;
+  foto?: string;
 }
 
 type EspecieApi = 'CAO' | 'GATO';
@@ -107,6 +109,8 @@ function formatRegistrationDate(value: string): string {
 }
 
 function mapAnimal(animal: AnimalApi): Animal {
+  const fotoPrincipal = animal.fotos?.find((foto) => foto.principal) ?? animal.fotos?.[0];
+
   return {
     id: animal.id,
     numeroRegistro: animal.numeroRegistro,
@@ -124,7 +128,9 @@ function mapAnimal(animal: AnimalApi): Animal {
     local: animal.localResgate,
     obs: animal.observacoes ?? undefined,
     status: statusToFront(animal.status),
+    tutorId: animal.tutorId ?? undefined,
     data: formatRegistrationDate(animal.criadoEm),
+    foto: fotoPrincipal?.url,
   };
 }
 
