@@ -4,14 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { StatusBadge } from './status-badge';
 
 export interface RecentAnimal {
@@ -21,10 +14,6 @@ export interface RecentAnimal {
   esp: string;
   local: string;
   status: 'Adotado' | 'Acolhimento';
-}
-
-function speciesEmoji(esp: string) {
-  return esp === 'Cão' ? '🐶' : '🐱';
 }
 
 export function RecentTable({ animals }: { animals: RecentAnimal[] }) {
@@ -54,15 +43,9 @@ export function RecentTable({ animals }: { animals: RecentAnimal[] }) {
             <TableCell className="px-5 py-3">
               <span className="font-mono text-[11px] text-muted-foreground">{animal.numeroRegistro}</span>
             </TableCell>
-            <TableCell className="px-5 py-3 text-[13px] font-medium text-foreground">
-              {animal.nome}
-            </TableCell>
-            <TableCell className="px-5 py-3 text-[13px] text-foreground">
-              {speciesEmoji(animal.esp)} {animal.esp}
-            </TableCell>
-            <TableCell className="px-5 py-3 text-[12px] text-muted-foreground">
-              {animal.local}
-            </TableCell>
+            <TableCell className="px-5 py-3 text-[13px] font-medium text-foreground">{animal.nome}</TableCell>
+            <TableCell className="px-5 py-3 text-[13px] text-foreground">{animal.esp}</TableCell>
+            <TableCell className="px-5 py-3 text-[12px] text-muted-foreground">{animal.local}</TableCell>
             <TableCell className="px-5 py-3">
               <StatusBadge status={animal.status} />
             </TableCell>

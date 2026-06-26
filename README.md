@@ -28,6 +28,7 @@ pnpm dev
 
 - `NEXT_PUBLIC_API_URL` — URL base da API.
 - `PORT` — porta do front no `pnpm dev`.
+- `NEXT_PUBLIC_FALLBACK_CAT_IMAGE_URL` / `NEXT_PUBLIC_FALLBACK_DOG_IMAGE_URL` — imagens de fallback dos cards de animal.
 
 ## 📐 Arquitetura e Padrões
 
