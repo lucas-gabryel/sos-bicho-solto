@@ -151,10 +151,7 @@ export default function UsersPage() {
                 {users.map((user) => (
                   <TableRow key={user.id} className="border-b border-border">
                     <TableCell className="px-5 py-3">
-                      <div>
-                        <p className="text-[13px] font-medium text-foreground">{user.name}</p>
-                        <p className="text-[11px] text-muted-foreground">{user.id}</p>
-                      </div>
+                      <p className="text-[13px] font-medium text-foreground">{user.name}</p>
                     </TableCell>
                     <TableCell className="px-5 py-3 text-[13px] text-foreground">{user.email}</TableCell>
                     <TableCell className="px-5 py-3">
