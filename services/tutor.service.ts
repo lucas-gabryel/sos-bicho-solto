@@ -14,6 +14,7 @@ interface TutorApi {
   dataNascimento: string;
   criadoEm: string;
   modificadoEm: string;
+  totalAnimaisAdotados: number;
 }
 
 function toDateOnly(value: string): string {
@@ -34,6 +35,7 @@ function mapTutor(tutor: TutorApi, animaisAdotadosIds: string[] = []): Tutor {
     endereco: tutor.endereco,
     dataNascimento: toDateOnly(tutor.dataNascimento),
     animaisAdotadosIds,
+    totalAnimaisAdotados: tutor.totalAnimaisAdotados ?? animaisAdotadosIds.length,
   };
 }
 
