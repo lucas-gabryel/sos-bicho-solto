@@ -1,6 +1,8 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Check, PawPrint } from 'lucide-react';
+import { type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
@@ -23,6 +25,14 @@ interface AnimalFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   animal?: Animal;
+}
+
+function FormSection({ children }: { children: ReactNode }) {
+  return (
+    <p className="col-span-full mt-1 border-b border-border pb-1.5 text-[11px] font-semibold tracking-[0.06em] text-muted-foreground uppercase">
+      {children}
+    </p>
+  );
 }
 
 export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalProps) {
@@ -70,7 +80,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
         },
   });
 
-  async function onSubmit(data: CreateAnimalFormData) {
+  function onSubmit(data: CreateAnimalFormData) {
     const payload = {
       nome: data.nome,
       esp: data.esp,
@@ -88,17 +98,15 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
       fotoUrl: data.fotoUrl || undefined,
     };
 
-    try {
-      if (isEditing && animal) {
-        await updateMutation.mutateAsync({ id: animal.id, ...payload });
-      } else {
-        await createMutation.mutateAsync(payload);
-      }
-
+    const onSuccess = () => {
       form.reset();
       onOpenChange(false);
-    } catch (error) {
-      console.error('Error submitting form:', error);
+    };
+
+    if (isEditing && animal) {
+      updateMutation.mutate({ id: animal.id, ...payload }, { onSuccess });
+    } else {
+      createMutation.mutate(payload, { onSuccess });
     }
   }
 
@@ -111,24 +119,33 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
+      <DialogContent className="max-h-[92vh] overflow-y-auto rounded-2xl sm:max-w-155">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Editar Animal' : 'Registrar Novo Animal'}</DialogTitle>
-          <DialogDescription>
-            {isEditing ? 'Atualize as informações do animal resgatado.' : 'Preencha os dados do animal resgatado.'}
-          </DialogDescription>
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-orange-100 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
+              <PawPrint className="size-4.5" />
+            </div>
+            <div className="text-left">
+              <DialogTitle>{isEditing ? 'Editar animal' : 'Registrar animal'}</DialogTitle>
+              <DialogDescription>
+                {isEditing ? 'Altere os dados e salve as alterações.' : 'Preencha todos os campos obrigatórios.'}
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <FormSection>Dados do animal</FormSection>
+
             <FormField
               control={form.control}
               name="nome"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome *</FormLabel>
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Nome do animal *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex: Rex" {...field} />
+                    <Input placeholder="Ex: Rex, Mimi, Bolinha" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -143,8 +160,8 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
                   <FormLabel>Espécie *</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione a espécie" />
+                      <SelectTrigger className="h-9 w-full">
+                        <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -179,8 +196,8 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
                   <FormLabel>Sexo *</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o sexo" />
+                      <SelectTrigger className="h-9 w-full">
+                        <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -195,14 +212,28 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
 
             <FormField
               control={form.control}
+              name="cor"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cor *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ex: Caramelo, Preto e branco" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="porte"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Porte</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o porte" />
+                      <SelectTrigger className="h-9 w-full">
+                        <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -218,26 +249,12 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
 
             <FormField
               control={form.control}
-              name="cor"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cor *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: Caramelo, Preto" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="peso"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Peso (kg) *</FormLabel>
+                  <FormLabel>Peso inicial (kg) *</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Ex: 7.5" step="0.1" {...field} />
+                    <Input type="number" placeholder="0.0" step="0.1" min="0" {...field} value={field.value ?? ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -249,9 +266,16 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               name="pesoAt"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Peso Atual (kg)</FormLabel>
+                  <FormLabel>Peso atual (kg)</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Ex: 8.1" step="0.1" {...field} value={field.value ?? ''} />
+                    <Input
+                      type="number"
+                      placeholder="Opcional"
+                      step="0.1"
+                      min="0"
+                      {...field}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -272,7 +296,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               )}
             />
 
-            <div className="flex flex-wrap gap-6">
+            <div className="flex flex-wrap items-center gap-6 md:col-span-2">
               <FormField
                 control={form.control}
                 name="castrado"
@@ -314,8 +338,8 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               control={form.control}
               name="local"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Localização *</FormLabel>
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Localidade de resgate *</FormLabel>
                   <FormControl>
                     <Input placeholder="Ex: Centro, Arapiraca/AL" {...field} />
                   </FormControl>
@@ -328,11 +352,11 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               control={form.control}
               name="obs"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Observações</FormLabel>
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Observações de saúde</FormLabel>
                   <FormControl>
                     <textarea
-                      placeholder="Descreva o estado de saúde, traumas, vacinas, etc."
+                      placeholder="Estado de saúde, vacinas, tratamentos..."
                       className="flex min-h-24 w-full rounded-lg border border-input bg-card px-3 py-1 text-sm shadow-xs transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
                       {...field}
                     />
@@ -347,7 +371,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
                 control={form.control}
                 name="fotoUrl"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="md:col-span-2">
                     <FormLabel>URL da foto</FormLabel>
                     <FormControl>
                       <Input
@@ -364,7 +388,7 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               />
             )}
 
-            <DialogFooter>
+            <DialogFooter className="mt-1 border-t border-border pt-4 md:col-span-2">
               <Button
                 type="button"
                 variant="outline"
@@ -373,8 +397,9 @@ export function AnimalFormModal({ open, onOpenChange, animal }: AnimalFormModalP
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={mutation.isPending}>
-                {mutation.isPending ? 'Salvando...' : isEditing ? 'Atualizar' : 'Registrar'}
+              <Button type="submit" variant="primary" disabled={mutation.isPending}>
+                <Check className="size-4" />
+                {mutation.isPending ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar registro'}
               </Button>
             </DialogFooter>
           </form>
