@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAnimal } from '@/hooks/use-animal';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDeleteAnimal } from '@/hooks/use-delete-animal';
+import { formatDateToPtBr } from '@/lib/tutor';
 import { cn } from '@/lib/utils';
 import { AnimalFormModal } from '../_components/animal-form-modal';
 import { DeleteConfirmationModal } from '../_components/delete-confirmation-modal';
@@ -153,6 +154,7 @@ export default function AnimalDetailsPage() {
                 }
               />
               <InfoField label="Cor" value={animal.cor} />
+              {animal.porte && <InfoField label="Porte" value={animal.porte} />}
               <InfoField label="Peso Inicial" value={`${animal.peso.toFixed(1)} kg`} />
               {animal.pesoAt && <InfoField label="Peso Atual" value={`${animal.pesoAt.toFixed(1)} kg`} />}
             </div>
@@ -162,7 +164,12 @@ export default function AnimalDetailsPage() {
           <div className="space-y-4 border-t pt-6">
             <h2 className="text-lg font-semibold text-foreground">Detalhes Adicionais</h2>
 
-            <div className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <InfoField label="Castrado" value={animal.castrado ? 'Sim' : 'Não'} />
+              <InfoField label="Vacinado" value={animal.vacinado ? 'Sim' : 'Não'} />
+              {animal.dataNascimento && (
+                <InfoField label="Data de Nascimento" value={formatDateToPtBr(animal.dataNascimento)} />
+              )}
               <InfoField label="Localização" value={animal.local} />
               <InfoField label="Data de Registro" value={animal.data} />
               {animal.obs && <InfoField label="Observações" value={animal.obs} />}

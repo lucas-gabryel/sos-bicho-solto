@@ -14,9 +14,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { useAnimals } from '@/hooks/use-animals';
 import { useDeleteTutor } from '@/hooks/use-delete-tutor';
 import { useTutor } from '@/hooks/use-tutor';
+import { useTutorAnimals } from '@/hooks/use-tutor-animals';
 import { useUpdateTutor } from '@/hooks/use-update-tutor';
 import { formatDateToPtBr, getAge, getTutorInitials } from '@/lib/tutor';
 import type { TutorFormValues } from '@/types/tutor';
@@ -30,7 +30,7 @@ function TutorDetailPageContent() {
   const tutorId = typeof params.id === 'string' ? params.id : '';
 
   const { data: tutor, isLoading: isTutorLoading } = useTutor(tutorId);
-  const { data: animals = [], isLoading: isAnimalsLoading } = useAnimals();
+  const { data: adoptedAnimals = [], isLoading: isAnimalsLoading } = useTutorAnimals(tutorId);
   const updateTutor = useUpdateTutor();
   const deleteTutor = useDeleteTutor();
 
@@ -69,7 +69,6 @@ function TutorDetailPageContent() {
   }
 
   const age = getAge(tutor.dataNascimento);
-  const adoptedAnimals = animals.filter((animal) => tutor.animaisAdotadosIds.includes(animal.id));
 
   const handleUpdateTutor = async (values: TutorFormValues) => {
     await updateTutor.mutateAsync({

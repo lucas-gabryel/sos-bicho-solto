@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { Mars, Venus } from 'lucide-react';
+import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -15,19 +15,15 @@ export function AnimalCard({ animal }: { animal: Animal }) {
 
   return (
     <Link href={`/animals/${animal.id}`} className="block">
-      <Card className="cursor-pointer gap-0 rounded-[14px] border border-border py-0 ring-0 transition-all duration-150 hover:-translate-y-[3px] hover:border-foreground/20 hover:shadow-md">
-        <div className="flex h-30 items-center justify-center bg-muted/50 text-[52px]">
-          {speciesEmoji(animal.esp)}
-        </div>
+      <Card className="cursor-pointer gap-0 rounded-[14px] border border-border py-0 ring-0 transition-all duration-150 hover:-translate-y-0.75 hover:border-foreground/20 hover:shadow-md">
+        <div className="flex h-30 items-center justify-center bg-muted/50 text-[52px]">{speciesEmoji(animal.esp)}</div>
         <div className="p-3.25">
           <p className="mb-0.5 font-mono text-[10px] text-muted-foreground/60">{animal.numeroRegistro}</p>
           <p className="mb-1.5 truncate text-sm font-semibold text-foreground">
             {animal.nome} · {animal.raca}
           </p>
           <div className="mb-2 flex flex-wrap items-center gap-1.5 text-[12px] text-muted-foreground">
-            {animal.sexo === 'Macho'
-              ? <Mars className="size-3 shrink-0" />
-              : <Venus className="size-3 shrink-0" />}
+            {animal.sexo === 'Macho' ? <Mars className="size-3 shrink-0" /> : <Venus className="size-3 shrink-0" />}
             <span>{animal.sexo}</span>
             <span className="text-muted-foreground/30">·</span>
             <span>{animal.cor}</span>

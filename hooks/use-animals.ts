@@ -1,10 +1,24 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
-import { getAnimals } from '@/services/animal.service';
+import { getAnimals, getRecentAnimals, type ListAnimalsParams } from '@/services/animal.service';
 
-export function useAnimals() {
+export const animalKeys = {
+  all: ['animals'] as const,
+  list: (params: ListAnimalsParams) => ['animals', 'list', params] as const,
+  recent: (limit: number) => ['animals', 'recent', limit] as const,
+};
+
+export function useAnimals(params: ListAnimalsParams = {}) {
   return useQuery({
-    queryKey: ['animals'],
-    queryFn: getAnimals,
+    queryKey: animalKeys.list(params),
+    queryFn: () => getAnimals(params),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useRecentAnimals(limit = 5) {
+  return useQuery({
+    queryKey: animalKeys.recent(limit),
+    queryFn: () => getRecentAnimals(limit),
   });
 }
