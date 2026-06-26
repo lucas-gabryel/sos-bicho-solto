@@ -1,18 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { dashboardStatsKeys } from '@/hooks/use-dashboard-stats';
-import { deleteTutor } from '@/services/tutor.service';
-import { tutorKeys } from '@/hooks/use-tutors';
+import { deleteAnimal } from '@/services/animal.service';
 
-export function useDeleteTutor() {
+export function useDeleteAnimal() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deleteTutor,
+    mutationFn: deleteAnimal,
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: tutorKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['animals'] });
       queryClient.invalidateQueries({ queryKey: dashboardStatsKeys.all });
-      queryClient.removeQueries({ queryKey: tutorKeys.detail(id) });
+      queryClient.removeQueries({ queryKey: ['animal', id] });
     },
   });
 }

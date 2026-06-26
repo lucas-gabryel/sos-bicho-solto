@@ -1,140 +1,125 @@
-import { normalizeTutorValues } from '@/lib/tutor';
+import { apiRequest, LIST_LIMIT, type RespostaPaginada } from '@/lib/api';
+import { formatCpf, normalizeTutorValues } from '@/lib/tutor';
+import type { AnimalApi } from '@/services/animal.service';
 import type { Tutor, TutorFormValues } from '@/types/tutor';
 
-const MOCK_DELAY = 500;
-
-let tutorsDb: Tutor[] = [
-  {
-    id: 'TUT-001',
-    nome: 'Ana Clara Santos',
-    cpf: '390.533.447-05',
-    telefone: '(82) 99912-3456',
-    email: 'ana.clara@email.com',
-    endereco: 'Rua Pedro Oliveira, 145 - Centro, Arapiraca/AL',
-    dataNascimento: '1992-03-15',
-    animaisAdotadosIds: ['06.05.2026.2'],
-  },
-  {
-    id: 'TUT-002',
-    nome: 'Carlos Henrique Lima',
-    cpf: '168.995.350-09',
-    telefone: '(82) 98877-1020',
-    email: 'carlos.lima@email.com',
-    endereco: 'Av. Fernandes Lima, 820 - Farol, Maceio/AL',
-    dataNascimento: '1988-11-02',
-    animaisAdotadosIds: ['20.04.2026.1'],
-  },
-];
-
-function wait(delay = MOCK_DELAY) {
-  return new Promise((resolve) => setTimeout(resolve, delay));
+interface TutorApi {
+  id: string;
+  codigo: number;
+  nome: string;
+  cpf: string;
+  telefone: string;
+  email: string;
+  endereco: string;
+  dataNascimento: string;
+  criadoEm: string;
+  modificadoEm: string;
 }
 
-function cloneTutor(tutor: Tutor): Tutor {
+function toDateOnly(value: string): string {
+  if (!value) {
+    return '';
+  }
+
+  return new Date(value).toISOString().slice(0, 10);
+}
+
+function mapTutor(tutor: TutorApi, animaisAdotadosIds: string[] = []): Tutor {
   return {
-    ...tutor,
-    animaisAdotadosIds: [...tutor.animaisAdotadosIds],
+    id: tutor.id,
+    nome: tutor.nome,
+    cpf: formatCpf(tutor.cpf),
+    telefone: tutor.telefone,
+    email: tutor.email,
+    endereco: tutor.endereco,
+    dataNascimento: toDateOnly(tutor.dataNascimento),
+    animaisAdotadosIds,
   };
-}
-
-function getNextTutorId() {
-  const lastId = tutorsDb.reduce((max, tutor) => {
-    const currentId = Number(tutor.id.replace('TUT-', ''));
-
-    return Number.isNaN(currentId) ? max : Math.max(max, currentId);
-  }, 0);
-
-  return `TUT-${String(lastId + 1).padStart(3, '0')}`;
 }
 
 export async function getTutors(): Promise<Tutor[]> {
-  await wait();
+  const { data } = await apiRequest<RespostaPaginada<TutorApi>>('/tutores', {
+    query: { limit: LIST_LIMIT },
+  });
 
-  return tutorsDb.map(cloneTutor);
+  return data.map((tutor) => mapTutor(tutor));
 }
 
 export async function getTutorById(id: string): Promise<Tutor | null> {
-  await wait();
+  const tutor = await apiRequest<TutorApi>(`/tutores/${id}`);
 
-  const tutor = tutorsDb.find((item) => item.id === id);
+  const { data: animais } = await apiRequest<RespostaPaginada<AnimalApi>>(`/tutores/${id}/animais`, {
+    query: { limit: LIST_LIMIT },
+  });
 
-  return tutor ? cloneTutor(tutor) : null;
+  return mapTutor(
+    tutor,
+    animais.map((animal) => animal.id),
+  );
 }
 
 export async function createTutor(values: TutorFormValues): Promise<Tutor> {
-  await wait();
+  const normalized = normalizeTutorValues(values);
 
-  const newTutor: Tutor = {
-    id: getNextTutorId(),
-    ...normalizeTutorValues(values),
-    animaisAdotadosIds: [],
-  };
+  const tutor = await apiRequest<TutorApi>('/tutores', {
+    method: 'POST',
+    body: {
+      nome: normalized.nome,
+      cpf: normalized.cpf,
+      telefone: normalized.telefone,
+      email: normalized.email,
+      endereco: normalized.endereco,
+      dataNascimento: normalized.dataNascimento,
+    },
+  });
 
-  tutorsDb = [newTutor, ...tutorsDb];
-
-  return cloneTutor(newTutor);
+  return mapTutor(tutor);
 }
 
 export async function updateTutor(id: string, values: TutorFormValues): Promise<Tutor> {
-  await wait();
+  const normalized = normalizeTutorValues(values);
 
-  let updatedTutor: Tutor | null = null;
-
-  tutorsDb = tutorsDb.map((tutor) => {
-    if (tutor.id !== id) {
-      return tutor;
-    }
-
-    updatedTutor = {
-      ...tutor,
-      ...normalizeTutorValues(values),
-    };
-
-    return updatedTutor;
+  const tutor = await apiRequest<TutorApi>(`/tutores/${id}`, {
+    method: 'PATCH',
+    body: {
+      nome: normalized.nome,
+      cpf: normalized.cpf,
+      telefone: normalized.telefone,
+      email: normalized.email,
+      endereco: normalized.endereco,
+      dataNascimento: normalized.dataNascimento,
+    },
   });
 
-  if (!updatedTutor) {
-    throw new Error('Tutor não encontrado.');
-  }
-
-  return cloneTutor(updatedTutor);
+  return mapTutor(tutor);
 }
 
+export interface DeleteTutorInput {
+  id: string;
+  senhaAdmin: string;
+}
+
+export async function deleteTutor({ id, senhaAdmin }: DeleteTutorInput): Promise<void> {
+  await apiRequest<{ ok: true }>(`/tutores/${id}`, {
+    method: 'DELETE',
+    body: { senhaAdmin },
+  });
+}
+
+// Vincula um animal a um tutor registrando uma adoção (POST /adocoes):
+// o back marca o animal como ADOTADO e seta tutorId. Retorna o tutor atualizado
+// (com animaisAdotadosIds recarregado) para o cache do React Query.
 export async function linkAnimalToTutor(tutorId: string, animalId: string): Promise<Tutor> {
-  await wait();
-
-  let updatedTutor: Tutor | null = null;
-
-  tutorsDb = tutorsDb.map((tutor) => {
-    if (tutor.id !== tutorId) {
-      return tutor;
-    }
-
-    updatedTutor = {
-      ...tutor,
-      animaisAdotadosIds: tutor.animaisAdotadosIds.includes(animalId)
-        ? [...tutor.animaisAdotadosIds]
-        : [...tutor.animaisAdotadosIds, animalId],
-    };
-
-    return updatedTutor;
+  await apiRequest('/adocoes', {
+    method: 'POST',
+    body: { tutorId, animalId },
   });
 
-  if (!updatedTutor) {
+  const tutor = await getTutorById(tutorId);
+
+  if (!tutor) {
     throw new Error('Tutor não encontrado.');
   }
 
-  return cloneTutor(updatedTutor);
-}
-
-export async function deleteTutor(id: string): Promise<void> {
-  await wait();
-
-  const exists = tutorsDb.some((tutor) => tutor.id === id);
-
-  if (!exists) {
-    throw new Error('Tutor não encontrado.');
-  }
-
-  tutorsDb = tutorsDb.filter((tutor) => tutor.id !== id);
+  return tutor;
 }

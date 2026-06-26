@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 interface DeleteConfirmationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: () => Promise<void> | void;
+  onConfirm: (password: string) => Promise<void> | void;
   title: string;
   description: string;
   isLoading?: boolean;
@@ -30,19 +30,20 @@ export function DeleteConfirmationModal({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleConfirm = async () => {
-    const correctPassword = 'Admin@123';
-
-    if (password !== correctPassword) {
-      setError('Senha incorreta');
+    if (!password) {
+      setError('Informe a senha do administrador');
       return;
     }
 
     setIsDeleting(true);
+    setError('');
     try {
-      await onConfirm();
+      // A senha é revalidada no backend (RN03); o erro retornado é exibido aqui.
+      await onConfirm(password);
       onOpenChange(false);
       setPassword('');
-      setError('');
+    } catch (confirmError) {
+      setError(confirmError instanceof Error ? confirmError.message : 'Não foi possível concluir a exclusão.');
     } finally {
       setIsDeleting(false);
     }
