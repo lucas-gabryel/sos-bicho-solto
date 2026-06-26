@@ -48,10 +48,6 @@ function TutorsPageContent() {
     setModalState({ open: true, mode: 'create', tutor: null });
   };
 
-  const openEditModal = (tutor: Tutor) => {
-    setModalState({ open: true, mode: 'edit', tutor });
-  };
-
   const closeModal = () => {
     setModalState(initialModalState);
   };
@@ -118,7 +114,7 @@ function TutorsPageContent() {
               }`}
             >
               {tutors.map((tutor) => (
-                <TutorCard key={tutor.id} tutor={tutor} onEdit={openEditModal} />
+                <TutorCard key={tutor.id} tutor={tutor} />
               ))}
             </div>
 
