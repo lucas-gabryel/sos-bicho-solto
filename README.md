@@ -1,8 +1,9 @@
 # SOS Bicho Solto | Frontend
 
-Aplicação WEB SPA para gestão de animais resgatados, desenvolvida com Next.js. 
+Aplicação WEB SPA para gestão de animais resgatados, desenvolvida com Next.js.
 
 ## 💻 Tech Stack
+
 - **Framework:** Next.js (App Router)
 - **Linguagem:** TypeScript (Strict Mode)
 - **Estilização:** Tailwind CSS + Shadcn/UI
@@ -17,9 +18,16 @@ Aplicação WEB SPA para gestão de animais resgatados, desenvolvida com Next.js
 git clone <repo-url>
 cd sos-bicho-solto
 pnpm install
+cp .env.example .env
 pnpm dev
 ```
+
 > **Nota:** Instale as extensões do VS Code recomendadas no .vscode/extensions.json. O Prettier formatará o código no Ctrl + S.
+
+### Variáveis de ambiente (`.env`)
+
+- `NEXT_PUBLIC_API_URL` — URL base da API.
+- `PORT` — porta do front no `pnpm dev`.
 
 ## 📐 Arquitetura e Padrões
 
@@ -28,6 +36,7 @@ pnpm dev
 3. **CI/CD:** O deploy na Vercel falhará se houver erros de Lint ou TypeScript.
 
 ### Estrutura de Pastas
+
 ```text
 src/
 ├── app/
@@ -43,7 +52,9 @@ src/
 ```
 
 ### Padrão Mock -> API
+
 Mantenha a abstração em 3 camadas para facilitar a futura integração com o backend:
+
 1. repositories/animais.ts: Retorna a Promise com o Mock.
 2. hooks/use-animais.ts: Faz o wrap do repositório no useQuery / useMutation.
 3. app/.../page.tsx: Consome apenas o hook.
