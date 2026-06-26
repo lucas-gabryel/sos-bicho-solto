@@ -18,7 +18,7 @@ export function AdoptedAnimalCard({ animal }: { animal: Animal }) {
       <CardContent className="p-4">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <p className="font-mono text-[10px] text-muted-foreground/70">{animal.id}</p>
+            <p className="font-mono text-[10px] text-muted-foreground/70">{animal.numeroRegistro}</p>
             <p className="mt-1 text-sm font-semibold text-foreground">
               {animal.nome} · {animal.raca}
             </p>

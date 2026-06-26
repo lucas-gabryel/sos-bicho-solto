@@ -25,7 +25,7 @@ export default function AnimalsPage() {
       if (!search) return true;
       const q = search.toLowerCase();
       return (
-        a.id.toLowerCase().includes(q) ||
+        a.numeroRegistro.toLowerCase().includes(q) ||
         a.nome.toLowerCase().includes(q) ||
         a.raca.toLowerCase().includes(q) ||
         a.local.toLowerCase().includes(q)

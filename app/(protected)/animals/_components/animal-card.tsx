@@ -20,7 +20,7 @@ export function AnimalCard({ animal }: { animal: Animal }) {
           {speciesEmoji(animal.esp)}
         </div>
         <div className="p-3.25">
-          <p className="mb-0.5 font-mono text-[10px] text-muted-foreground/60">{animal.id}</p>
+          <p className="mb-0.5 font-mono text-[10px] text-muted-foreground/60">{animal.numeroRegistro}</p>
           <p className="mb-1.5 truncate text-sm font-semibold text-foreground">
             {animal.nome} · {animal.raca}
           </p>
