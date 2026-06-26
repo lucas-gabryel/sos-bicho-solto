@@ -2,6 +2,7 @@
 
 import { ArrowRight, Heart, Home, PawPrint, Users } from 'lucide-react';
 import Link from 'next/link';
+import { useSyncExternalStore } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useRecentAnimals } from '@/hooks/use-animals';
@@ -9,17 +10,23 @@ import { useDashboardStats } from '@/hooks/use-dashboard-stats';
 import { MetricCard } from './_components/metric-card';
 import { RecentTable } from './_components/recent-table';
 
-export default function DashboardPage() {
-  const { data: animals = [] } = useRecentAnimals(5);
-  const { data: stats } = useDashboardStats();
+const emptySubscribe = () => () => {};
 
+function getTodayLabel() {
   const today = new Date().toLocaleDateString('pt-BR', {
     weekday: 'long',
     day: '2-digit',
     month: 'long',
     year: 'numeric',
   });
-  const todayFormatted = today.charAt(0).toUpperCase() + today.slice(1);
+  return today.charAt(0).toUpperCase() + today.slice(1);
+}
+
+export default function DashboardPage() {
+  const { data: animals = [] } = useRecentAnimals(5);
+  const { data: stats } = useDashboardStats();
+
+  const todayFormatted = useSyncExternalStore(emptySubscribe, getTodayLabel, () => '');
 
   return (
     <div className="p-4 md:p-7">
@@ -51,7 +58,7 @@ export default function DashboardPage() {
           sub="com tutor vinculado"
           icon={Heart}
           color="green"
-          href="/adocoes"
+          href="/animals"
         />
         <MetricCard
           label="Tutores"
