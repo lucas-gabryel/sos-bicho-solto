@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod/v3';
 
@@ -64,7 +64,6 @@ export function TutorFormModal({
   onOpenChange,
   onSubmit,
 }: TutorFormModalProps) {
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     control,
@@ -124,11 +123,10 @@ export function TutorFormModal({
 
   const submit = handleSubmit(async (values) => {
     try {
-      setSubmitError(null);
       await onSubmit(values);
       onOpenChange(false);
-    } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Não foi possível salvar o tutor.');
+    } catch {
+      // Erro exibido pelo toast global.
     }
   });
 
@@ -254,12 +252,6 @@ export function TutorFormModal({
               {errors.endereco ? <p className="text-xs text-destructive">{errors.endereco.message}</p> : null}
             </div>
           </div>
-
-          {submitError ? (
-            <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {submitError}
-            </div>
-          ) : null}
 
           <div className="flex flex-col-reverse gap-2 border-t border-border pt-4 sm:flex-row sm:justify-end">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>

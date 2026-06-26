@@ -62,7 +62,6 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
   const [activeTab, setActiveTab] = useState<Tab>('select');
   const [search, setSearch] = useState('');
   const [selectedTutorId, setSelectedTutorId] = useState<string | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { data: tutorsPage, isLoading: isLoadingTutors } = useTutors({
     limit: 20,
@@ -111,25 +110,23 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
 
   const handleConfirmLink = async () => {
     if (!selectedTutorId) return;
-    setSubmitError(null);
     try {
       await linkMutation.mutateAsync({ tutorId: selectedTutorId, animalId });
       onOpenChange(false);
       onSuccess?.();
-    } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Não foi possível vincular o tutor.');
+    } catch {
+      // Erro exibido pelo toast global.
     }
   };
 
   const handleCreateAndLink = handleSubmit(async (values) => {
-    setSubmitError(null);
     try {
       const newTutor = await createTutor.mutateAsync(values);
       await linkMutation.mutateAsync({ tutorId: newTutor.id, animalId });
       onOpenChange(false);
       onSuccess?.();
-    } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Não foi possível cadastrar e vincular o tutor.');
+    } catch {
+      // Erro exibido pelo toast global.
     }
   });
 
@@ -245,12 +242,6 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
               )}
             </div>
 
-            {submitError && (
-              <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {submitError}
-              </div>
-            )}
-
             <div className="flex flex-col-reverse gap-2 border-t border-border pt-4 sm:flex-row sm:justify-end">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
                 Cancelar
@@ -354,12 +345,6 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
                 </div>
               </div>
             </div>
-
-            {submitError && (
-              <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {submitError}
-              </div>
-            )}
 
             <div className="flex flex-col-reverse gap-2 border-t border-border pt-4 sm:flex-row sm:justify-end">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
