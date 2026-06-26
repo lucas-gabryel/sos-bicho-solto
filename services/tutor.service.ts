@@ -28,6 +28,7 @@ function toDateOnly(value: string): string {
 function mapTutor(tutor: TutorApi, animaisAdotadosIds: string[] = []): Tutor {
   return {
     id: tutor.id,
+    codigo: tutor.codigo,
     nome: tutor.nome,
     cpf: formatCpf(tutor.cpf),
     telefone: tutor.telefone,

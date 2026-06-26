@@ -1,5 +1,6 @@
 export interface Tutor {
   id: string;
+  codigo: number;
   nome: string;
   cpf: string;
   telefone: string;
