@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, ArrowRight, Edit2, Info, Link2, Mars, Trash2, Venus } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Edit2, Info, Link2, Mars, Printer, Trash2, Venus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { AnimalFormModal } from '../_components/animal-form-modal';
 import { DeleteConfirmationModal } from '../_components/delete-confirmation-modal';
 import { LinkTutorModal } from '../_components/link-tutor-modal';
+import { PrintAnimalModal } from '../_components/print-animal-modal';
 
 const CAT_FALLBACK_IMAGE = process.env.NEXT_PUBLIC_FALLBACK_CAT_IMAGE_URL || 'https://cataas.com/cat?width=500&height=500';
 const DOG_FALLBACK_IMAGE = process.env.NEXT_PUBLIC_FALLBACK_DOG_IMAGE_URL || 'https://placedog.net/500/500';
@@ -35,6 +36,7 @@ export default function AnimalDetailsPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLinkTutorOpen, setIsLinkTutorOpen] = useState(false);
+  const [isPrintOpen, setIsPrintOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   const isProtector = currentUser?.role === 'protetor';
@@ -117,35 +119,47 @@ export default function AnimalDetailsPage() {
           </div>
         </div>
 
-        {!isProtector && (
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-transparent bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-950/60"
-              onClick={() => setIsEditOpen(true)}
-            >
-              <Edit2 className="size-3.5" />
-              Editar
-            </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-transparent bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-950/40 dark:text-orange-400 dark:hover:bg-orange-950/60"
+            onClick={() => setIsPrintOpen(true)}
+          >
+            <Printer className="size-3.5" />
+            Imprimir
+          </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-transparent bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50 dark:bg-green-950/40 dark:text-green-400 dark:hover:bg-green-950/60"
-              disabled={adopted}
-              onClick={() => !adopted && setIsLinkTutorOpen(true)}
-            >
-              <Link2 className="size-3.5" />
-              Vincular tutor
-            </Button>
+          {!isProtector && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-transparent bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-950/60"
+                onClick={() => setIsEditOpen(true)}
+              >
+                <Edit2 className="size-3.5" />
+                Editar
+              </Button>
 
-            <Button variant="destructive" size="sm" onClick={() => setIsDeleteOpen(true)}>
-              <Trash2 className="size-3.5" />
-              Excluir
-            </Button>
-          </div>
-        )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-transparent bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50 dark:bg-green-950/40 dark:text-green-400 dark:hover:bg-green-950/60"
+                disabled={adopted}
+                onClick={() => !adopted && setIsLinkTutorOpen(true)}
+              >
+                <Link2 className="size-3.5" />
+                Vincular tutor
+              </Button>
+
+              <Button variant="destructive" size="sm" onClick={() => setIsDeleteOpen(true)}>
+                <Trash2 className="size-3.5" />
+                Excluir
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       <Card className="rounded-2xl p-6">
@@ -274,6 +288,13 @@ export default function AnimalDetailsPage() {
       />
 
       <AnimalFormModal open={isEditOpen} onOpenChange={setIsEditOpen} animal={animal} />
+
+      <PrintAnimalModal
+        open={isPrintOpen}
+        onOpenChange={setIsPrintOpen}
+        animal={animal}
+        tutor={tutor}
+      />
 
       {isLinkTutorOpen && (
         <LinkTutorModal
