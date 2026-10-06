@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAnimals } from '@/hooks/use-animals';
-import type { AnimalEsp, AnimalStatus } from '@/services/animal.service';
+import type { Animal, AnimalEsp, AnimalStatus } from '@/services/animal.service';
 import { AnimalCard, AnimalCardSkeleton } from './_components/animal-card';
 import { AnimalFormModal } from './_components/animal-form-modal';
+import { PrintAnimalModal } from './_components/print-animal-modal';
 
 const PAGE_SIZE = 12;
 
@@ -20,6 +21,7 @@ export default function AnimalsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [animalToPrint, setAnimalToPrint] = useState<Animal | null>(null);
 
   const { data, isLoading, isFetching } = useAnimals({
     page,
@@ -99,7 +101,7 @@ export default function AnimalsPage() {
         <div className={isFetching ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3.5">
             {animals.map((animal) => (
-              <AnimalCard key={animal.id} animal={animal} />
+              <AnimalCard key={animal.id} animal={animal} onPrint={setAnimalToPrint} />
             ))}
           </div>
         </div>
@@ -112,6 +114,14 @@ export default function AnimalsPage() {
       )}
 
       <AnimalFormModal open={isModalOpen} onOpenChange={setIsModalOpen} />
+
+      <PrintAnimalModal
+        open={Boolean(animalToPrint)}
+        onOpenChange={(open) => {
+          if (!open) setAnimalToPrint(null);
+        }}
+        animal={animalToPrint}
+      />
     </div>
   );
 }
