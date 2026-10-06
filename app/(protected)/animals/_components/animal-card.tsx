@@ -15,7 +15,13 @@ import { PrintAnimalModal } from './print-animal-modal';
 const CAT_FALLBACK_IMAGE = process.env.NEXT_PUBLIC_FALLBACK_CAT_IMAGE_URL || 'https://cataas.com/cat?width=500&height=500';
 const DOG_FALLBACK_IMAGE = process.env.NEXT_PUBLIC_FALLBACK_DOG_IMAGE_URL || 'https://placedog.net/500/500';
 
-export function AnimalCard({ animal }: { animal: Animal }) {
+export function AnimalCard({
+  animal,
+  onPrint,
+}: {
+  animal: Animal;
+  onPrint?: (animal: Animal) => void;
+}) {
   const adopted = animal.status === 'Adotado';
   const fallbackSrc = animal.esp === 'Gato' ? CAT_FALLBACK_IMAGE : DOG_FALLBACK_IMAGE;
   const [imageError, setImageError] = useState(false);
@@ -23,10 +29,13 @@ export function AnimalCard({ animal }: { animal: Animal }) {
   const imageSrc = !imageError && animal.foto ? animal.foto : fallbackSrc;
 
   return (
-    <>
-      <Link href={`/animals/${animal.id}`} className="block">
+    <div className="group relative">
+      <Link
+        href={`/animals/${animal.id}`}
+        className="block rounded-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
         <Card className="cursor-pointer gap-0 rounded-[14px] border border-border py-0 ring-0 transition-all duration-150 hover:-translate-y-0.75 hover:border-foreground/20 hover:shadow-md">
-          <div className="relative flex h-30 items-center justify-center overflow-hidden bg-muted/50">
+          <div className="relative flex h-30 items-center justify-center overflow-hidden rounded-t-[13px] bg-muted/50">
             <Image
               src={imageSrc}
               alt={animal.nome}
@@ -36,18 +45,6 @@ export function AnimalCard({ animal }: { animal: Animal }) {
               unoptimized
               onError={() => setImageError(true)}
             />
-            <button
-              type="button"
-              title="Imprimir dados do animal"
-              className="absolute right-2 top-2 z-10 flex size-7 items-center justify-center rounded-full bg-background/85 text-foreground/80 shadow-xs backdrop-blur-xs transition hover:bg-background hover:text-orange-600 dark:bg-background/90"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsPrintOpen(true);
-              }}
-            >
-              <Printer className="size-3.5" />
-            </button>
           </div>
           <div className="p-3.25">
             <p className="mb-0.5 font-mono text-[10px] text-muted-foreground/60">{animal.numeroRegistro}</p>
@@ -84,12 +81,32 @@ export function AnimalCard({ animal }: { animal: Animal }) {
         </Card>
       </Link>
 
-      <PrintAnimalModal
-        open={isPrintOpen}
-        onOpenChange={setIsPrintOpen}
-        animal={animal}
-      />
-    </>
+      <button
+        type="button"
+        aria-label={`Imprimir ficha de ${animal.nome}`}
+        title={`Imprimir ficha de ${animal.nome}`}
+        className="absolute right-2 top-2 z-10 flex size-7 items-center justify-center rounded-full bg-background/85 text-foreground/80 shadow-xs backdrop-blur-xs transition hover:bg-background hover:text-orange-600 dark:bg-background/90"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (onPrint) {
+            onPrint(animal);
+          } else {
+            setIsPrintOpen(true);
+          }
+        }}
+      >
+        <Printer className="size-3.5" />
+      </button>
+
+      {!onPrint && isPrintOpen && (
+        <PrintAnimalModal
+          open={isPrintOpen}
+          onOpenChange={setIsPrintOpen}
+          animal={animal}
+        />
+      )}
+    </div>
   );
 }
 

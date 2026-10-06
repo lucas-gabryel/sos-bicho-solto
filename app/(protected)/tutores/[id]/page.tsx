@@ -15,9 +15,11 @@ import { useTutorAnimals } from '@/hooks/use-tutor-animals';
 import { useUpdateTutor } from '@/hooks/use-update-tutor';
 import { formatDateToPtBr, getAge } from '@/lib/tutor';
 import { cn } from '@/lib/utils';
+import type { Animal } from '@/services/animal.service';
 import type { TutorFormValues } from '@/types/tutor';
 import { AnimalCard, AnimalCardSkeleton } from '../../animals/_components/animal-card';
 import { DeleteConfirmationModal } from '../../animals/_components/delete-confirmation-modal';
+import { PrintAnimalModal } from '../../animals/_components/print-animal-modal';
 import { TutorFormModal } from '../_components/tutor-form-modal';
 
 function TutorDetailPageContent() {
@@ -35,6 +37,7 @@ function TutorDetailPageContent() {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [animalToPrint, setAnimalToPrint] = useState<Animal | null>(null);
 
   if (isTutorLoading) {
     return (
@@ -188,7 +191,7 @@ function TutorDetailPageContent() {
           ) : (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3.5">
               {adoptedAnimals.map((animal) => (
-                <AnimalCard key={animal.id} animal={animal} />
+                <AnimalCard key={animal.id} animal={animal} onPrint={setAnimalToPrint} />
               ))}
             </div>
           )}
@@ -213,6 +216,15 @@ function TutorDetailPageContent() {
         title="Excluir tutor"
         description={`Deseja excluir o tutor ${tutor.nome}? Essa ação desativa o cadastro no sistema.`}
         isLoading={deleteTutor.isPending}
+      />
+
+      <PrintAnimalModal
+        open={Boolean(animalToPrint)}
+        onOpenChange={(open) => {
+          if (!open) setAnimalToPrint(null);
+        }}
+        animal={animalToPrint}
+        tutor={tutor}
       />
     </>
   );

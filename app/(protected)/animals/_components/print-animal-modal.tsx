@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckSquare, FileText, Printer, Square } from 'lucide-react';
+import { FileText, Printer, Square } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 
@@ -13,11 +13,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  ANIMAL_PRINT_FIELDS,
-  CATEGORY_LABELS,
-  DEFAULT_SELECTED_FIELDS,
-} from '@/lib/print-animal';
+import { useTutor } from '@/hooks/use-tutor';
+import { ANIMAL_PRINT_FIELDS, CATEGORY_LABELS, DEFAULT_SELECTED_FIELDS } from '@/lib/print-animal';
+import { cn } from '@/lib/utils';
 import type { Animal } from '@/services/animal.service';
 import type { Tutor } from '@/types/tutor';
 import { AnimalPrintDocument } from './animal-print-document';
@@ -25,7 +23,7 @@ import { AnimalPrintDocument } from './animal-print-document';
 interface PrintAnimalModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  animal: Animal;
+  animal: Animal | null;
   tutor?: Tutor | null;
 }
 
@@ -33,9 +31,12 @@ export function PrintAnimalModal({ open, onOpenChange, animal, tutor }: PrintAni
   const [selectedFields, setSelectedFields] = useState<string[]>(DEFAULT_SELECTED_FIELDS);
   const printContentRef = useRef<HTMLDivElement>(null);
 
+  const { data: fetchedTutor } = useTutor(animal?.tutorId ?? '');
+  const activeTutor = tutor !== undefined ? tutor : fetchedTutor;
+
   const handlePrint = useReactToPrint({
     contentRef: printContentRef,
-    documentTitle: `Prontuario_${animal.numeroRegistro || animal.nome || 'Animal'}`,
+    documentTitle: `Prontuario_${animal?.numeroRegistro || animal?.nome || 'Animal'}`,
     onAfterPrint: () => {
       onOpenChange(false);
     },
@@ -61,9 +62,7 @@ export function PrintAnimalModal({ open, onOpenChange, animal, tutor }: PrintAni
   const isNoneSelected = selectedCount === 0;
 
   const toggleField = (id: string) => {
-    setSelectedFields((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
-    );
+    setSelectedFields((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
   };
 
   const handleSelectAll = () => {
@@ -75,9 +74,13 @@ export function PrintAnimalModal({ open, onOpenChange, animal, tutor }: PrintAni
   };
 
   const onConfirmPrint = () => {
-    if (selectedFields.length === 0) return;
+    if (selectedFields.length === 0 || !animal) return;
     handlePrint();
   };
+
+  if (!animal) {
+    return null;
+  }
 
   return (
     <>
@@ -91,7 +94,8 @@ export function PrintAnimalModal({ open, onOpenChange, animal, tutor }: PrintAni
               <div>
                 <DialogTitle className="text-lg font-bold">Imprimir Registro do Animal</DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground">
-                  Selecione as informações de <strong className="text-foreground">{animal.nome}</strong> que deseja incluir na impressão.
+                  Selecione as informações de <strong className="text-foreground">{animal.nome}</strong> que deseja
+                  incluir na impressão.
                 </DialogDescription>
               </div>
             </div>
@@ -102,7 +106,7 @@ export function PrintAnimalModal({ open, onOpenChange, animal, tutor }: PrintAni
               <div className="flex items-center gap-1.5 font-medium text-foreground">
                 <FileText className="size-4 text-muted-foreground" />
                 <span>
-                  {selectedCount} de {totalFields} campo{totalFields > 1 ? 's' : ''} selecionado{selectedCount !== 1 ? 's' : ''}
+                  {selectedCount} de {totalFields} {selectedCount === 1 ? 'campo selecionado' : 'campos selecionados'}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -110,22 +114,45 @@ export function PrintAnimalModal({ open, onOpenChange, animal, tutor }: PrintAni
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-7 px-2 text-xs"
+                  aria-pressed={isAllSelected}
+                  className={cn(
+                    'h-7 px-2.5 text-xs transition-colors',
+                    isAllSelected
+                      ? 'font-semibold text-orange-600 hover:bg-orange-500/10 disabled:opacity-100 dark:text-orange-400 dark:hover:bg-orange-400/10 dark:disabled:opacity-100'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  )}
                   onClick={handleSelectAll}
                   disabled={isAllSelected}
                 >
-                  <CheckSquare className="size-3.5" />
+                  <Square
+                    className={cn(
+                      'size-3.5',
+                      isAllSelected && 'fill-orange-500 text-orange-500 dark:fill-orange-400 dark:text-orange-400',
+                    )}
+                  />
                   Marcar todos
                 </Button>
+
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-7 px-2 text-xs"
+                  aria-pressed={isNoneSelected}
+                  className={cn(
+                    'h-7 px-2.5 text-xs transition-colors',
+                    isNoneSelected
+                      ? 'font-semibold text-orange-600 hover:bg-orange-500/10 disabled:opacity-100 dark:text-orange-400 dark:hover:bg-orange-400/10 dark:disabled:opacity-100'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  )}
                   onClick={handleDeselectAll}
                   disabled={isNoneSelected}
                 >
-                  <Square className="size-3.5" />
+                  <Square
+                    className={cn(
+                      'size-3.5',
+                      isNoneSelected && 'fill-orange-500 text-orange-500 dark:fill-orange-400 dark:text-orange-400',
+                    )}
+                  />
                   Desmarcar todos
                 </Button>
               </div>
@@ -165,12 +192,7 @@ export function PrintAnimalModal({ open, onOpenChange, animal, tutor }: PrintAni
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button
-              type="button"
-              variant="primary"
-              onClick={onConfirmPrint}
-              disabled={selectedCount === 0}
-            >
+            <Button type="button" variant="primary" onClick={onConfirmPrint} disabled={selectedCount === 0}>
               <Printer className="size-4" />
               Imprimir ({selectedCount})
             </Button>
@@ -179,23 +201,25 @@ export function PrintAnimalModal({ open, onOpenChange, animal, tutor }: PrintAni
       </Dialog>
 
       {/* Offscreen print document container for react-to-print */}
-      <div
-        style={{
-          position: 'absolute',
-          left: '-9999px',
-          top: 0,
-          width: '210mm',
-          overflow: 'hidden',
-        }}
-        aria-hidden="true"
-      >
-        <AnimalPrintDocument
-          ref={printContentRef}
-          animal={animal}
-          tutor={tutor}
-          selectedFieldIds={selectedFields}
-        />
-      </div>
+      {open && (
+        <div
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            top: 0,
+            width: '210mm',
+            overflow: 'hidden',
+          }}
+          aria-hidden="true"
+        >
+          <AnimalPrintDocument
+            ref={printContentRef}
+            animal={animal}
+            tutor={activeTutor}
+            selectedFieldIds={selectedFields}
+          />
+        </div>
+      )}
     </>
   );
 }

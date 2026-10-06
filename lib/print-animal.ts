@@ -2,73 +2,12 @@ import { formatDateToPtBr } from '@/lib/tutor';
 import type { Animal } from '@/services/animal.service';
 import type { Tutor } from '@/types/tutor';
 
-export interface AnimalPrintFieldOption {
-  id: string;
-  label: string;
-  category: 'identificacao' | 'caracteristicas' | 'saude' | 'localizacao' | 'adocao';
-}
-
-export const ANIMAL_PRINT_FIELDS: AnimalPrintFieldOption[] = [
-  // Identificação
-  { id: 'numeroRegistro', label: 'Número de Registro', category: 'identificacao' },
-  { id: 'nome', label: 'Nome do Animal', category: 'identificacao' },
-  { id: 'esp', label: 'Espécie', category: 'identificacao' },
-  { id: 'raca', label: 'Raça', category: 'identificacao' },
-  { id: 'sexo', label: 'Sexo', category: 'identificacao' },
-  { id: 'cor', label: 'Cor / Pelagem', category: 'identificacao' },
-  { id: 'data', label: 'Data de Resgate / Cadastro', category: 'identificacao' },
-
-  // Características
-  { id: 'porte', label: 'Porte', category: 'caracteristicas' },
-  { id: 'dataNascimento', label: 'Data de Nascimento / Idade', category: 'caracteristicas' },
-  { id: 'peso', label: 'Peso Inicial', category: 'caracteristicas' },
-  { id: 'pesoAt', label: 'Peso Atual', category: 'caracteristicas' },
-
-  // Saúde & Cuidados
-  { id: 'castrado', label: 'Castrado', category: 'saude' },
-  { id: 'vacinado', label: 'Vacinado', category: 'saude' },
-  { id: 'obs', label: 'Observações de Saúde', category: 'saude' },
-
-  // Localização
-  { id: 'local', label: 'Localidade de Resgate', category: 'localizacao' },
-
-  // Status & Adoção
-  { id: 'status', label: 'Status (Acolhimento / Adotado)', category: 'adocao' },
-  { id: 'tutor', label: 'Dados do Tutor Responsável', category: 'adocao' },
-];
-
-export const CATEGORY_LABELS: Record<AnimalPrintFieldOption['category'], string> = {
-  identificacao: 'Identificação Básica',
-  caracteristicas: 'Características Físicas',
-  saude: 'Saúde & Cuidados',
-  localizacao: 'Origem & Resgate',
-  adocao: 'Status & Vinculação',
-};
-
-export const DEFAULT_SELECTED_FIELDS: string[] = ANIMAL_PRINT_FIELDS.map((f) => f.id);
-
-export function calculateAge(birthDateStr?: string): string | undefined {
-  if (!birthDateStr) return undefined;
-  const birth = new Date(birthDateStr);
-  if (isNaN(birth.getTime())) return undefined;
-
-  const now = new Date();
-  let years = now.getFullYear() - birth.getFullYear();
-  let months = now.getMonth() - birth.getMonth();
-
-  if (months < 0 || (months === 0 && now.getDate() < birth.getDate())) {
-    years--;
-    months += 12;
-  }
-
-  if (years > 0) {
-    return `${years} ano${years > 1 ? 's' : ''}${months > 0 ? ` e ${months} m${months > 1 ? 'eses' : 'ês'}` : ''}`;
-  }
-  if (months > 0) {
-    return `${months} m${months > 1 ? 'eses' : 'ês'}`;
-  }
-  return 'Menos de 1 mês';
-}
+export type AnimalPrintCategory =
+  | 'identificacao'
+  | 'caracteristicas'
+  | 'saude'
+  | 'localizacao'
+  | 'adocao';
 
 export interface PrintSectionItem {
   label: string;
@@ -81,6 +20,234 @@ export interface PrintSection {
   items: PrintSectionItem[];
 }
 
+export interface AnimalPrintFieldOption {
+  id: string;
+  label: string;
+  category: AnimalPrintCategory;
+  render: (animal: Animal, tutor?: Tutor | null) => PrintSectionItem | PrintSectionItem[];
+}
+
+export const CATEGORY_LABELS: Record<AnimalPrintCategory, string> = {
+  identificacao: 'Identificação Básica',
+  caracteristicas: 'Características Físicas',
+  saude: 'Saúde & Cuidados',
+  localizacao: 'Origem & Resgate',
+  adocao: 'Status & Vinculação',
+};
+
+export function calculateAge(birthDateStr?: string): string | undefined {
+  if (!birthDateStr) return undefined;
+
+  let birth: Date;
+  const match = birthDateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) {
+    const year = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10) - 1;
+    const day = parseInt(match[3], 10);
+    birth = new Date(year, month, day, 0, 0, 0, 0);
+    if (birth.getFullYear() !== year || birth.getMonth() !== month || birth.getDate() !== day) {
+      return undefined;
+    }
+  } else {
+    const parsed = new Date(birthDateStr.includes('T') ? birthDateStr : `${birthDateStr}T00:00:00`);
+    if (Number.isNaN(parsed.getTime())) return undefined;
+    birth = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate(), 0, 0, 0, 0);
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (birth.getTime() > today.getTime()) {
+    return undefined;
+  }
+
+  let years = today.getFullYear() - birth.getFullYear();
+  let months = today.getMonth() - birth.getMonth();
+  const days = today.getDate() - birth.getDate();
+
+  if (days < 0) {
+    months -= 1;
+  }
+
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+
+  if (years > 0) {
+    const yearStr = `${years} ano${years > 1 ? 's' : ''}`;
+    if (months > 0) {
+      const monthStr = `${months} m${months > 1 ? 'eses' : 'ês'}`;
+      return `${yearStr} e ${monthStr}`;
+    }
+    return yearStr;
+  }
+
+  if (months > 0) {
+    return `${months} m${months > 1 ? 'eses' : 'ês'}`;
+  }
+
+  return 'Menos de 1 mês';
+}
+
+export const ANIMAL_PRINT_FIELDS: AnimalPrintFieldOption[] = [
+  // Identificação
+  {
+    id: 'numeroRegistro',
+    label: 'Número de Registro',
+    category: 'identificacao',
+    render: (animal) => ({ label: 'Nº de Registro', value: animal.numeroRegistro || 'Não informado' }),
+  },
+  {
+    id: 'nome',
+    label: 'Nome do Animal',
+    category: 'identificacao',
+    render: (animal) => ({ label: 'Nome', value: animal.nome || 'Sem nome' }),
+  },
+  {
+    id: 'esp',
+    label: 'Espécie',
+    category: 'identificacao',
+    render: (animal) => ({ label: 'Espécie', value: animal.esp || 'Não informada' }),
+  },
+  {
+    id: 'raca',
+    label: 'Raça',
+    category: 'identificacao',
+    render: (animal) => ({ label: 'Raça', value: animal.raca || 'Não informada' }),
+  },
+  {
+    id: 'sexo',
+    label: 'Sexo',
+    category: 'identificacao',
+    render: (animal) => ({ label: 'Sexo', value: animal.sexo || 'Não informado' }),
+  },
+  {
+    id: 'cor',
+    label: 'Cor / Pelagem',
+    category: 'identificacao',
+    render: (animal) => ({ label: 'Cor / Pelagem', value: animal.cor || 'Não informada' }),
+  },
+  {
+    id: 'data',
+    label: 'Data de Resgate / Cadastro',
+    category: 'identificacao',
+    render: (animal) => ({ label: 'Data de Resgate/Cadastro', value: animal.data || 'Não informada' }),
+  },
+
+  // Características
+  {
+    id: 'porte',
+    label: 'Porte',
+    category: 'caracteristicas',
+    render: (animal) => ({ label: 'Porte', value: animal.porte || 'Não informado' }),
+  },
+  {
+    id: 'dataNascimento',
+    label: 'Data de Nascimento / Idade',
+    category: 'caracteristicas',
+    render: (animal) => {
+      if (!animal.dataNascimento) {
+        return { label: 'Data de Nascimento / Idade', value: '-' };
+      }
+      const formattedDate = formatDateToPtBr(animal.dataNascimento);
+      if (formattedDate === '-') {
+        return { label: 'Data de Nascimento / Idade', value: '-' };
+      }
+      const age = calculateAge(animal.dataNascimento);
+      return {
+        label: 'Data de Nascimento / Idade',
+        value: age ? `${formattedDate} (${age})` : formattedDate,
+      };
+    },
+  },
+  {
+    id: 'peso',
+    label: 'Peso Inicial',
+    category: 'caracteristicas',
+    render: (animal) => ({
+      label: 'Peso Inicial',
+      value: animal.peso != null ? `${animal.peso.toFixed(1)} kg` : '-',
+    }),
+  },
+  {
+    id: 'pesoAt',
+    label: 'Peso Atual',
+    category: 'caracteristicas',
+    render: (animal) => ({
+      label: 'Peso Atual',
+      value: animal.pesoAt != null ? `${animal.pesoAt.toFixed(1)} kg` : 'Não registrado',
+    }),
+  },
+
+  // Saúde & Cuidados
+  {
+    id: 'castrado',
+    label: 'Castrado',
+    category: 'saude',
+    render: (animal) => ({ label: 'Castrado', value: animal.castrado ? 'Sim' : 'Não' }),
+  },
+  {
+    id: 'vacinado',
+    label: 'Vacinado',
+    category: 'saude',
+    render: (animal) => ({ label: 'Vacinado', value: animal.vacinado ? 'Sim' : 'Não' }),
+  },
+  {
+    id: 'obs',
+    label: 'Observações de Saúde',
+    category: 'saude',
+    render: (animal) => ({
+      label: 'Observações de Saúde',
+      value: animal.obs?.trim() || 'Nenhuma observação registrada',
+      fullWidth: true,
+    }),
+  },
+
+  // Localização
+  {
+    id: 'local',
+    label: 'Localidade de Resgate',
+    category: 'localizacao',
+    render: (animal) => ({
+      label: 'Localidade de Resgate',
+      value: animal.local?.trim() || 'Não informada',
+      fullWidth: true,
+    }),
+  },
+
+  // Status & Adoção
+  {
+    id: 'status',
+    label: 'Status (Acolhimento / Adotado)',
+    category: 'adocao',
+    render: (animal) => ({ label: 'Status Atual', value: animal.status || 'Acolhimento' }),
+  },
+  {
+    id: 'tutor',
+    label: 'Dados do Tutor Responsável',
+    category: 'adocao',
+    render: (_animal, tutor) => {
+      if (tutor) {
+        return [
+          { label: 'Tutor Responsável', value: tutor.nome || '-' },
+          { label: 'CPF do Tutor', value: tutor.cpf || '-' },
+          { label: 'Telefone', value: tutor.telefone || '-' },
+          { label: 'E-mail', value: tutor.email || '-' },
+          { label: 'Endereço', value: tutor.endereco || '-', fullWidth: true },
+        ];
+      }
+      return {
+        label: 'Tutor Responsável',
+        value: 'Nenhum tutor vinculado (Disponível para adoção)',
+        fullWidth: true,
+      };
+    },
+  },
+];
+
+export const DEFAULT_SELECTED_FIELDS: string[] = ANIMAL_PRINT_FIELDS.map((f) => f.id);
+
 export function getAnimalPrintSections(
   animal: Animal,
   tutor: Tutor | null | undefined,
@@ -89,113 +256,37 @@ export function getAnimalPrintSections(
   const selectedSet = new Set(selectedFieldIds);
   const sections: PrintSection[] = [];
 
-  // Identificação
-  const identItems: PrintSectionItem[] = [];
-  if (selectedSet.has('numeroRegistro')) {
-    identItems.push({ label: 'Nº de Registro', value: animal.numeroRegistro || 'Não informado' });
-  }
-  if (selectedSet.has('nome')) {
-    identItems.push({ label: 'Nome', value: animal.nome || 'Sem nome' });
-  }
-  if (selectedSet.has('esp')) {
-    identItems.push({ label: 'Espécie', value: animal.esp || 'Não informada' });
-  }
-  if (selectedSet.has('raca')) {
-    identItems.push({ label: 'Raça', value: animal.raca || 'Não informada' });
-  }
-  if (selectedSet.has('sexo')) {
-    identItems.push({ label: 'Sexo', value: animal.sexo || 'Não informado' });
-  }
-  if (selectedSet.has('cor')) {
-    identItems.push({ label: 'Cor / Pelagem', value: animal.cor || 'Não informada' });
-  }
-  if (selectedSet.has('data')) {
-    identItems.push({ label: 'Data de Resgate/Cadastro', value: animal.data || 'Não informada' });
-  }
-  if (identItems.length > 0) {
-    sections.push({ title: 'Identificação Básica', items: identItems });
-  }
+  const categories: AnimalPrintCategory[] = [
+    'identificacao',
+    'caracteristicas',
+    'saude',
+    'localizacao',
+    'adocao',
+  ];
 
-  // Características
-  const caracItems: PrintSectionItem[] = [];
-  if (selectedSet.has('porte')) {
-    caracItems.push({ label: 'Porte', value: animal.porte || 'Não informado' });
-  }
-  if (selectedSet.has('dataNascimento')) {
-    const age = calculateAge(animal.dataNascimento);
-    const formattedDate = animal.dataNascimento ? formatDateToPtBr(animal.dataNascimento) : 'Não informada';
-    caracItems.push({
-      label: 'Data de Nascimento / Idade',
-      value: animal.dataNascimento ? `${formattedDate} (${age})` : 'Não informada',
-    });
-  }
-  if (selectedSet.has('peso')) {
-    caracItems.push({ label: 'Peso Inicial', value: `${animal.peso.toFixed(1)} kg` });
-  }
-  if (selectedSet.has('pesoAt')) {
-    caracItems.push({
-      label: 'Peso Atual',
-      value: animal.pesoAt != null ? `${animal.pesoAt.toFixed(1)} kg` : 'Não registrado',
-    });
-  }
-  if (caracItems.length > 0) {
-    sections.push({ title: 'Características Físicas', items: caracItems });
-  }
+  for (const category of categories) {
+    const fieldsInCategory = ANIMAL_PRINT_FIELDS.filter(
+      (f) => f.category === category && selectedSet.has(f.id),
+    );
 
-  // Saúde
-  const saudeItems: PrintSectionItem[] = [];
-  if (selectedSet.has('castrado')) {
-    saudeItems.push({ label: 'Castrado', value: animal.castrado ? 'Sim' : 'Não' });
-  }
-  if (selectedSet.has('vacinado')) {
-    saudeItems.push({ label: 'Vacinado', value: animal.vacinado ? 'Sim' : 'Não' });
-  }
-  if (selectedSet.has('obs')) {
-    saudeItems.push({
-      label: 'Observações de Saúde',
-      value: animal.obs?.trim() || 'Nenhuma observação registrada',
-      fullWidth: true,
-    });
-  }
-  if (saudeItems.length > 0) {
-    sections.push({ title: 'Saúde & Cuidados', items: saudeItems });
-  }
+    if (fieldsInCategory.length === 0) continue;
 
-  // Localização
-  const locItems: PrintSectionItem[] = [];
-  if (selectedSet.has('local')) {
-    locItems.push({
-      label: 'Localidade de Resgate',
-      value: animal.local || 'Não informada',
-      fullWidth: true,
-    });
-  }
-  if (locItems.length > 0) {
-    sections.push({ title: 'Origem & Localização', items: locItems });
-  }
+    const items: PrintSectionItem[] = [];
+    for (const field of fieldsInCategory) {
+      const rendered = field.render(animal, tutor);
+      if (Array.isArray(rendered)) {
+        items.push(...rendered);
+      } else {
+        items.push(rendered);
+      }
+    }
 
-  // Adoção & Tutor
-  const adocaoItems: PrintSectionItem[] = [];
-  if (selectedSet.has('status')) {
-    adocaoItems.push({ label: 'Status Atual', value: animal.status || 'Acolhimento' });
-  }
-  if (selectedSet.has('tutor')) {
-    if (tutor) {
-      adocaoItems.push({ label: 'Tutor Responsável', value: tutor.nome });
-      adocaoItems.push({ label: 'CPF do Tutor', value: tutor.cpf });
-      adocaoItems.push({ label: 'Telefone', value: tutor.telefone });
-      adocaoItems.push({ label: 'E-mail', value: tutor.email });
-      adocaoItems.push({ label: 'Endereço', value: tutor.endereco, fullWidth: true });
-    } else {
-      adocaoItems.push({
-        label: 'Tutor Responsável',
-        value: 'Nenhum tutor vinculado (Disponível para adoção)',
-        fullWidth: true,
+    if (items.length > 0) {
+      sections.push({
+        title: CATEGORY_LABELS[category],
+        items,
       });
     }
-  }
-  if (adocaoItems.length > 0) {
-    sections.push({ title: 'Situação de Adoção & Tutor', items: adocaoItems });
   }
 
   return sections;
