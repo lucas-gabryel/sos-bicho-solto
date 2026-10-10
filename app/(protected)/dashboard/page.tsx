@@ -64,12 +64,12 @@ export default function DashboardPage() {
           loading={isStatsLoading}
         />
         <MetricCard
-          label="Tutores"
-          value={stats?.tutores ?? 0}
-          sub="cadastrados no sistema"
+          label="Acolhedores"
+          value={stats?.acolhedores ?? 0}
+          sub={`${stats?.tutores ?? 0} tutores · ${stats?.adotantes ?? 0} adotantes`}
           icon={Users}
           color="purple"
-          href="/tutores"
+          href="/acolhedores"
           loading={isStatsLoading}
         />
       </div>

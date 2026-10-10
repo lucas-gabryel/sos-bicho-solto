@@ -2,19 +2,17 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { acolhedorKeys } from '@/hooks/use-acolhedores';
 import { dashboardStatsKeys } from '@/hooks/use-dashboard-stats';
-import { deleteAnimal } from '@/services/animal.service';
+import { createAcolhedor } from '@/services/acolhedor.service';
 
-export function useDeleteAnimal() {
+export function useCreateAcolhedor() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deleteAnimal,
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['animals'] });
-      // A situação do acolhedor (Tutor/Adotante) depende dos animais ativos vinculados.
+    mutationFn: createAcolhedor,
+    onSuccess: (createdAcolhedor) => {
       queryClient.invalidateQueries({ queryKey: acolhedorKeys.all });
       queryClient.invalidateQueries({ queryKey: dashboardStatsKeys.all });
-      queryClient.removeQueries({ queryKey: ['animal', id] });
+      queryClient.setQueryData(acolhedorKeys.detail(createdAcolhedor.id), createdAcolhedor);
     },
   });
 }

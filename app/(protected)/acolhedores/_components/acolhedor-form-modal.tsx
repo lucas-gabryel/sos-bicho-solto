@@ -4,66 +4,31 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { z } from 'zod/v3';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { formatCpf, formatPhone, isValidCpf, onlyDigits } from '@/lib/tutor';
-import type { Tutor, TutorFormValues } from '@/types/tutor';
+import { formatCpf, formatPhone } from '@/lib/acolhedor';
+import { acolhedorSchema, defaultAcolhedorFormValues } from '@/lib/validations/acolhedor';
+import type { Acolhedor, AcolhedorFormValues } from '@/types/acolhedor';
 
-const tutorSchema = z.object({
-  nome: z.string().trim().min(1, 'Nome obrigatório'),
-  cpf: z
-    .string()
-    .min(1, 'CPF obrigatório')
-    .refine((value) => onlyDigits(value).length === 11 && isValidCpf(value), 'CPF inválido'),
-  telefone: z
-    .string()
-    .min(1, 'Telefone obrigatório')
-    .refine((value) => {
-      const digits = onlyDigits(value);
-
-      return digits.length === 10 || digits.length === 11;
-    }, 'Telefone inválido'),
-  email: z.string().trim().min(1, 'E-mail obrigatório').email('E-mail inválido'),
-  endereco: z.string().trim().min(1, 'Endereço obrigatório'),
-  dataNascimento: z
-    .string()
-    .min(1, 'Data de nascimento obrigatória')
-    .refine((value) => {
-      const date = new Date(`${value}T00:00:00`);
-
-      return !Number.isNaN(date.getTime()) && date <= new Date();
-    }, 'Data de nascimento inválida'),
-});
-
-const defaultValues: TutorFormValues = {
-  nome: '',
-  cpf: '',
-  telefone: '',
-  email: '',
-  endereco: '',
-  dataNascimento: '',
-};
-
-interface TutorFormModalProps {
+interface AcolhedorFormModalProps {
   open: boolean;
   mode: 'create' | 'edit';
-  tutor: Tutor | null;
+  acolhedor: Acolhedor | null;
   isPending?: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (values: TutorFormValues) => Promise<void>;
+  onSubmit: (values: AcolhedorFormValues) => Promise<void>;
 }
 
-export function TutorFormModal({
+export function AcolhedorFormModal({
   open,
   mode,
-  tutor,
+  acolhedor,
   isPending = false,
   onOpenChange,
   onSubmit,
-}: TutorFormModalProps) {
+}: AcolhedorFormModalProps) {
 
   const {
     control,
@@ -72,9 +37,9 @@ export function TutorFormModal({
     reset,
     setValue,
     formState: { errors },
-  } = useForm<TutorFormValues>({
-    resolver: zodResolver(tutorSchema),
-    defaultValues,
+  } = useForm<AcolhedorFormValues>({
+    resolver: zodResolver(acolhedorSchema),
+    defaultValues: defaultAcolhedorFormValues,
   });
 
   useEffect(() => {
@@ -83,18 +48,18 @@ export function TutorFormModal({
     }
 
     reset(
-      tutor
+      acolhedor
         ? {
-            nome: tutor.nome,
-            cpf: tutor.cpf,
-            telefone: tutor.telefone,
-            email: tutor.email,
-            endereco: tutor.endereco,
-            dataNascimento: tutor.dataNascimento,
+            nome: acolhedor.nome,
+            cpf: acolhedor.cpf,
+            telefone: acolhedor.telefone,
+            email: acolhedor.email,
+            endereco: acolhedor.endereco,
+            dataNascimento: acolhedor.dataNascimento,
           }
-        : defaultValues,
+        : defaultAcolhedorFormValues,
     );
-  }, [open, tutor, reset]);
+  }, [open, acolhedor, reset]);
 
   useEffect(() => {
     if (!open) {
@@ -146,16 +111,18 @@ export function TutorFormModal({
       <div
         role="dialog"
         aria-modal="true"
-        aria-labelledby="tutor-form-title"
+        aria-labelledby="acolhedor-form-title"
         className="relative z-10 w-full max-w-2xl overflow-hidden rounded-[18px] border border-border bg-card shadow-2xl"
       >
         <div className="flex items-start justify-between border-b border-border px-5 py-4">
           <div>
-            <h2 id="tutor-form-title" className="text-lg font-semibold text-foreground">
-              {mode === 'create' ? 'Cadastrar tutor' : 'Editar tutor'}
+            <h2 id="acolhedor-form-title" className="text-lg font-semibold text-foreground">
+              {mode === 'create' ? 'Cadastrar adotante' : 'Editar acolhedor'}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Preencha os dados obrigatórios para salvar o tutor no sistema.
+              {mode === 'create'
+                ? 'Todo cadastro começa como adotante e passa a tutor ao receber um animal.'
+                : 'Preencha os dados obrigatórios para salvar o acolhedor no sistema.'}
             </p>
           </div>
 
@@ -175,7 +142,7 @@ export function TutorFormModal({
           <div className="grid gap-4 md:grid-cols-2">
             <div className="flex flex-col gap-1.5 md:col-span-2">
               <Label htmlFor="nome">Nome completo</Label>
-              <Input id="nome" placeholder="Digite o nome do tutor" aria-invalid={!!errors.nome} {...register('nome')} />
+              <Input id="nome" placeholder="Digite o nome completo" aria-invalid={!!errors.nome} {...register('nome')} />
               {errors.nome ? <p className="text-xs text-destructive">{errors.nome.message}</p> : null}
             </div>
 
@@ -220,7 +187,7 @@ export function TutorFormModal({
               <Input
                 id="email"
                 type="email"
-                placeholder="tutor@email.com"
+                placeholder="nome@email.com"
                 autoComplete="email"
                 aria-invalid={!!errors.email}
                 {...register('email')}
@@ -258,7 +225,7 @@ export function TutorFormModal({
               Cancelar
             </Button>
             <Button type="submit" variant="primary" disabled={isPending}>
-              {isPending ? 'Salvando...' : mode === 'create' ? 'Cadastrar tutor' : 'Salvar alterações'}
+              {isPending ? 'Salvando...' : mode === 'create' ? 'Cadastrar adotante' : 'Salvar alterações'}
             </Button>
           </div>
         </form>

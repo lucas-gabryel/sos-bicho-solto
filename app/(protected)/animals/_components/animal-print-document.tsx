@@ -4,11 +4,11 @@ import React from 'react';
 
 import { getAnimalPrintSections } from '@/lib/print-animal';
 import type { Animal } from '@/services/animal.service';
-import type { Tutor } from '@/types/tutor';
+import type { Acolhedor } from '@/types/acolhedor';
 
 interface AnimalPrintDocumentProps {
   animal: Animal;
-  tutor?: Tutor | null;
+  tutor?: Acolhedor | null;
   selectedFieldIds: string[];
   emissionDate?: string;
 }
