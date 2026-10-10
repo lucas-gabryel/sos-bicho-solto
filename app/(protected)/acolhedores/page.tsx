@@ -104,7 +104,7 @@ function AcolhedoresPageContent() {
           </div>
 
           <div
-            role="tablist"
+            role="group"
             aria-label="Filtrar por situação"
             className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5"
           >
@@ -115,8 +115,7 @@ function AcolhedoresPageContent() {
                 <button
                   key={tab.label}
                   type="button"
-                  role="tab"
-                  aria-selected={isActive}
+                  aria-pressed={isActive}
                   onClick={() => {
                     setSituacao(tab.value);
                     setPage(1);
