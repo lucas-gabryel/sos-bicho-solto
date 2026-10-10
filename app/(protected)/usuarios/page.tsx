@@ -14,7 +14,7 @@ import { useCreateUser } from '@/hooks/use-create-user';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDeleteUser } from '@/hooks/use-delete-user';
 import { useUsers } from '@/hooks/use-users';
-import { formatDateToPtBr } from '@/lib/acolhedor';
+import { formatDateToPtBr } from '@/lib/date';
 import { getRoleLabel } from '@/lib/user';
 import type { CreateUserFormValues } from '@/types/user';
 import { DeleteConfirmationModal } from '../animals/_components/delete-confirmation-modal';

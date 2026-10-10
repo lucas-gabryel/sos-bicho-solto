@@ -4,48 +4,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { z } from 'zod/v3';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { formatCpf, formatPhone, isValidCpf, onlyDigits } from '@/lib/acolhedor';
+import { formatCpf, formatPhone } from '@/lib/acolhedor';
+import { acolhedorSchema, defaultAcolhedorFormValues } from '@/lib/validations/acolhedor';
 import type { Acolhedor, AcolhedorFormValues } from '@/types/acolhedor';
-
-const acolhedorSchema = z.object({
-  nome: z.string().trim().min(1, 'Nome obrigatório'),
-  cpf: z
-    .string()
-    .min(1, 'CPF obrigatório')
-    .refine((value) => onlyDigits(value).length === 11 && isValidCpf(value), 'CPF inválido'),
-  telefone: z
-    .string()
-    .min(1, 'Telefone obrigatório')
-    .refine((value) => {
-      const digits = onlyDigits(value);
-
-      return digits.length === 10 || digits.length === 11;
-    }, 'Telefone inválido'),
-  email: z.string().trim().min(1, 'E-mail obrigatório').email('E-mail inválido'),
-  endereco: z.string().trim().min(1, 'Endereço obrigatório'),
-  dataNascimento: z
-    .string()
-    .min(1, 'Data de nascimento obrigatória')
-    .refine((value) => {
-      const date = new Date(`${value}T00:00:00`);
-
-      return !Number.isNaN(date.getTime()) && date <= new Date();
-    }, 'Data de nascimento inválida'),
-});
-
-const defaultValues: AcolhedorFormValues = {
-  nome: '',
-  cpf: '',
-  telefone: '',
-  email: '',
-  endereco: '',
-  dataNascimento: '',
-};
 
 interface AcolhedorFormModalProps {
   open: boolean;
@@ -74,7 +39,7 @@ export function AcolhedorFormModal({
     formState: { errors },
   } = useForm<AcolhedorFormValues>({
     resolver: zodResolver(acolhedorSchema),
-    defaultValues,
+    defaultValues: defaultAcolhedorFormValues,
   });
 
   useEffect(() => {
@@ -92,7 +57,7 @@ export function AcolhedorFormModal({
             endereco: acolhedor.endereco,
             dataNascimento: acolhedor.dataNascimento,
           }
-        : defaultValues,
+        : defaultAcolhedorFormValues,
     );
   }, [open, acolhedor, reset]);
 

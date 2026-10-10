@@ -14,7 +14,7 @@ import { useDeleteAcolhedor } from '@/hooks/use-delete-acolhedor';
 import { useAcolhedor } from '@/hooks/use-acolhedor';
 import { useAcolhedorAnimals } from '@/hooks/use-acolhedor-animals';
 import { useUpdateAcolhedor } from '@/hooks/use-update-acolhedor';
-import { formatDateToPtBr, getAge } from '@/lib/acolhedor';
+import { formatDateToPtBr, getAge } from '@/lib/date';
 import { cn } from '@/lib/utils';
 import type { Animal } from '@/services/animal.service';
 import type { AcolhedorFormValues } from '@/types/acolhedor';

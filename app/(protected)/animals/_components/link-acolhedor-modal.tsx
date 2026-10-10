@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Check, Search, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { z } from 'zod/v3';
 
 import { SituacaoBadge } from '@/components/situacao-badge';
 import { Button } from '@/components/ui/button';
@@ -13,41 +12,9 @@ import { Label } from '@/components/ui/label';
 import { useCreateAcolhedor } from '@/hooks/use-create-acolhedor';
 import { useLinkAnimalToAcolhedor } from '@/hooks/use-link-animal-to-acolhedor';
 import { useAcolhedores } from '@/hooks/use-acolhedores';
-import { formatCpf, formatPhone, getAcolhedorInitials, isValidCpf, onlyDigits } from '@/lib/acolhedor';
+import { formatCpf, formatPhone, getAcolhedorInitials } from '@/lib/acolhedor';
+import { acolhedorSchema, defaultAcolhedorFormValues } from '@/lib/validations/acolhedor';
 import type { AcolhedorFormValues } from '@/types/acolhedor';
-
-const acolhedorSchema = z.object({
-  nome: z.string().trim().min(1, 'Nome obrigatório'),
-  cpf: z
-    .string()
-    .min(1, 'CPF obrigatório')
-    .refine((value) => onlyDigits(value).length === 11 && isValidCpf(value), 'CPF inválido'),
-  telefone: z
-    .string()
-    .min(1, 'Telefone obrigatório')
-    .refine((value) => {
-      const digits = onlyDigits(value);
-      return digits.length === 10 || digits.length === 11;
-    }, 'Telefone inválido'),
-  email: z.string().trim().min(1, 'E-mail obrigatório').email('E-mail inválido'),
-  endereco: z.string().trim().min(1, 'Endereço obrigatório'),
-  dataNascimento: z
-    .string()
-    .min(1, 'Data de nascimento obrigatória')
-    .refine((value) => {
-      const date = new Date(`${value}T00:00:00`);
-      return !Number.isNaN(date.getTime()) && date <= new Date();
-    }, 'Data de nascimento inválida'),
-});
-
-const defaultValues: AcolhedorFormValues = {
-  nome: '',
-  cpf: '',
-  telefone: '',
-  email: '',
-  endereco: '',
-  dataNascimento: '',
-};
 
 type Tab = 'select' | 'create';
 
@@ -81,7 +48,7 @@ export function LinkAcolhedorModal({ open, animalId, animalName, onOpenChange, o
     formState: { errors },
   } = useForm<AcolhedorFormValues>({
     resolver: zodResolver(acolhedorSchema),
-    defaultValues,
+    defaultValues: defaultAcolhedorFormValues,
   });
 
   const cpfValue = useWatch({ control, name: 'cpf' }) ?? '';

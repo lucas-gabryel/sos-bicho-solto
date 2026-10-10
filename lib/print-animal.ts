@@ -1,4 +1,4 @@
-import { formatDateToPtBr } from '@/lib/acolhedor';
+import { formatDateToPtBr } from '@/lib/date';
 import type { Animal } from '@/services/animal.service';
 import type { Acolhedor } from '@/types/acolhedor';
 
