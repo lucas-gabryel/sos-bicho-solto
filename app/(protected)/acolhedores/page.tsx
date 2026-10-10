@@ -10,23 +10,23 @@ import { useCreateAcolhedor } from '@/hooks/use-create-acolhedor';
 import { useAcolhedores } from '@/hooks/use-acolhedores';
 import { useUpdateAcolhedor } from '@/hooks/use-update-acolhedor';
 import type { Acolhedor, AcolhedorFormValues } from '@/types/acolhedor';
-import { TutorCard, TutorCardSkeleton } from './_components/tutor-card';
-import { TutorFormModal } from './_components/tutor-form-modal';
+import { AcolhedorCard, AcolhedorCardSkeleton } from './_components/acolhedor-card';
+import { AcolhedorFormModal } from './_components/acolhedor-form-modal';
 
 const PAGE_SIZE = 9;
 
 type ModalState =
-  | { open: false; mode: 'create'; tutor: null }
-  | { open: true; mode: 'create'; tutor: null }
-  | { open: true; mode: 'edit'; tutor: Acolhedor };
+  | { open: false; mode: 'create'; acolhedor: null }
+  | { open: true; mode: 'create'; acolhedor: null }
+  | { open: true; mode: 'edit'; acolhedor: Acolhedor };
 
 const initialModalState: ModalState = {
   open: false,
   mode: 'create',
-  tutor: null,
+  acolhedor: null,
 };
 
-function TutorsPageContent() {
+function AcolhedoresPageContent() {
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [page, setPage] = useState(1);
@@ -38,14 +38,14 @@ function TutorsPageContent() {
     busca: deferredSearch.trim() || undefined,
   });
 
-  const createTutor = useCreateAcolhedor();
-  const updateTutor = useUpdateAcolhedor();
+  const createAcolhedor = useCreateAcolhedor();
+  const updateAcolhedor = useUpdateAcolhedor();
 
-  const tutors = data?.data ?? [];
+  const acolhedores = data?.data ?? [];
   const totalPages = data?.meta.totalPages ?? 0;
 
   const openCreateModal = () => {
-    setModalState({ open: true, mode: 'create', tutor: null });
+    setModalState({ open: true, mode: 'create', acolhedor: null });
   };
 
   const closeModal = () => {
@@ -54,29 +54,29 @@ function TutorsPageContent() {
 
   const handleSubmit = async (values: AcolhedorFormValues) => {
     if (modalState.mode === 'create') {
-      await createTutor.mutateAsync(values);
+      await createAcolhedor.mutateAsync(values);
       return;
     }
 
-    await updateTutor.mutateAsync({ id: modalState.tutor.id, values });
+    await updateAcolhedor.mutateAsync({ id: modalState.acolhedor.id, values });
   };
 
-  const isPending = createTutor.isPending || updateTutor.isPending;
+  const isPending = createAcolhedor.isPending || updateAcolhedor.isPending;
 
   return (
     <>
       <div className="p-4 md:p-7">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-[22px] font-semibold text-foreground">Tutores</h1>
+            <h1 className="text-[22px] font-semibold text-foreground">Acolhedores</h1>
             <p className="mt-0.5 text-[13px] text-muted-foreground">
-              Cadastro e acompanhamento de responsáveis por adoções
+              Cadastro e acompanhamento de quem acolhe os animais
             </p>
           </div>
 
           <Button variant="primary" size="default" onClick={openCreateModal}>
             <Plus className="size-4" />
-            Cadastrar tutor
+            Cadastrar adotante
           </Button>
         </div>
 
@@ -98,13 +98,13 @@ function TutorsPageContent() {
         {isLoading ? (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-3.5">
             {Array.from({ length: PAGE_SIZE }).map((_, index) => (
-              <TutorCardSkeleton key={index} />
+              <AcolhedorCardSkeleton key={index} />
             ))}
           </div>
-        ) : tutors.length === 0 ? (
+        ) : acolhedores.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-[14px] border border-dashed border-border py-16 text-muted-foreground">
             <Users className="size-10 opacity-30" />
-            <p className="text-sm">Nenhum tutor encontrado</p>
+            <p className="text-sm">Nenhum acolhedor encontrado</p>
           </div>
         ) : (
           <>
@@ -113,8 +113,8 @@ function TutorsPageContent() {
                 isFetching ? 'opacity-60 transition-opacity' : 'transition-opacity'
               }`}
             >
-              {tutors.map((tutor) => (
-                <TutorCard key={tutor.id} tutor={tutor} />
+              {acolhedores.map((acolhedor) => (
+                <AcolhedorCard key={acolhedor.id} acolhedor={acolhedor} />
               ))}
             </div>
 
@@ -128,10 +128,10 @@ function TutorsPageContent() {
       </div>
 
       {modalState.open ? (
-        <TutorFormModal
+        <AcolhedorFormModal
           open={modalState.open}
           mode={modalState.mode}
-          tutor={modalState.tutor}
+          acolhedor={modalState.acolhedor}
           isPending={isPending}
           onOpenChange={(open) => {
             if (!open) {
@@ -145,13 +145,13 @@ function TutorsPageContent() {
       {isPending ? (
         <div className="pointer-events-none fixed bottom-4 right-4 z-60 flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground shadow-lg">
           <LoaderCircle className="size-4 animate-spin" />
-          Salvando tutor...
+          Salvando acolhedor...
         </div>
       ) : null}
     </>
   );
 }
 
-export default function TutorsPage() {
-  return <TutorsPageContent />;
+export default function AcolhedoresPage() {
+  return <AcolhedoresPageContent />;
 }

@@ -18,7 +18,7 @@ import { formatDateToPtBr, getAcolhedorInitials } from '@/lib/acolhedor';
 import { cn } from '@/lib/utils';
 import { AnimalFormModal } from '../_components/animal-form-modal';
 import { DeleteConfirmationModal } from '../_components/delete-confirmation-modal';
-import { LinkTutorModal } from '../_components/link-tutor-modal';
+import { LinkAcolhedorModal } from '../_components/link-acolhedor-modal';
 import { PrintAnimalModal } from '../_components/print-animal-modal';
 
 const CAT_FALLBACK_IMAGE = process.env.NEXT_PUBLIC_FALLBACK_CAT_IMAGE_URL || 'https://cataas.com/cat?width=500&height=500';
@@ -35,7 +35,7 @@ export default function AnimalDetailsPage() {
   const deleteAnimal = useDeleteAnimal();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isLinkTutorOpen, setIsLinkTutorOpen] = useState(false);
+  const [isLinkAcolhedorOpen, setIsLinkAcolhedorOpen] = useState(false);
   const [isPrintOpen, setIsPrintOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -147,10 +147,10 @@ export default function AnimalDetailsPage() {
                 size="sm"
                 className="border-transparent bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50 dark:bg-green-950/40 dark:text-green-400 dark:hover:bg-green-950/60"
                 disabled={adopted}
-                onClick={() => !adopted && setIsLinkTutorOpen(true)}
+                onClick={() => !adopted && setIsLinkAcolhedorOpen(true)}
               >
                 <Link2 className="size-3.5" />
-                Vincular tutor
+                Vincular acolhedor
               </Button>
 
               <Button variant="destructive" size="sm" onClick={() => setIsDeleteOpen(true)}>
@@ -245,7 +245,7 @@ export default function AnimalDetailsPage() {
         <SectionTitle className="mt-6">Vinculação de adoção</SectionTitle>
         {adopted && tutor ? (
           <Link
-            href={`/tutores/${tutor.id}`}
+            href={`/acolhedores/${tutor.id}`}
             className="flex flex-wrap items-center gap-3 rounded-lg bg-green-50 px-4 py-3.5 transition-colors hover:bg-green-100 dark:bg-green-950/30 dark:hover:bg-green-950/50"
           >
             <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-green-600 text-sm font-bold text-white">
@@ -296,12 +296,12 @@ export default function AnimalDetailsPage() {
         tutor={tutor}
       />
 
-      {isLinkTutorOpen && (
-        <LinkTutorModal
-          open={isLinkTutorOpen}
+      {isLinkAcolhedorOpen && (
+        <LinkAcolhedorModal
+          open={isLinkAcolhedorOpen}
           animalId={animal.id}
           animalName={animal.nome}
-          onOpenChange={setIsLinkTutorOpen}
+          onOpenChange={setIsLinkAcolhedorOpen}
         />
       )}
     </div>

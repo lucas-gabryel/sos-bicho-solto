@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod/v3';
 
+import { SituacaoBadge } from '@/components/situacao-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,7 +16,7 @@ import { useAcolhedores } from '@/hooks/use-acolhedores';
 import { formatCpf, formatPhone, getAcolhedorInitials, isValidCpf, onlyDigits } from '@/lib/acolhedor';
 import type { AcolhedorFormValues } from '@/types/acolhedor';
 
-const tutorSchema = z.object({
+const acolhedorSchema = z.object({
   nome: z.string().trim().min(1, 'Nome obrigatório'),
   cpf: z
     .string()
@@ -50,7 +51,7 @@ const defaultValues: AcolhedorFormValues = {
 
 type Tab = 'select' | 'create';
 
-interface LinkTutorModalProps {
+interface LinkAcolhedorModalProps {
   open: boolean;
   animalId: string;
   animalName: string;
@@ -58,19 +59,19 @@ interface LinkTutorModalProps {
   onSuccess?: () => void;
 }
 
-export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuccess }: LinkTutorModalProps) {
+export function LinkAcolhedorModal({ open, animalId, animalName, onOpenChange, onSuccess }: LinkAcolhedorModalProps) {
   const [activeTab, setActiveTab] = useState<Tab>('select');
   const [search, setSearch] = useState('');
-  const [selectedTutorId, setSelectedTutorId] = useState<string | null>(null);
+  const [selectedAcolhedorId, setSelectedAcolhedorId] = useState<string | null>(null);
 
-  const { data: tutorsPage, isLoading: isLoadingTutors } = useAcolhedores({
+  const { data: acolhedoresPage, isLoading: isLoadingAcolhedores } = useAcolhedores({
     limit: 20,
     busca: search.trim() || undefined,
   });
   const linkMutation = useLinkAnimalToAcolhedor();
-  const createTutor = useCreateAcolhedor();
+  const createAcolhedor = useCreateAcolhedor();
 
-  const isPending = linkMutation.isPending || createTutor.isPending;
+  const isPending = linkMutation.isPending || createAcolhedor.isPending;
 
   const {
     control,
@@ -79,7 +80,7 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
     setValue,
     formState: { errors },
   } = useForm<AcolhedorFormValues>({
-    resolver: zodResolver(tutorSchema),
+    resolver: zodResolver(acolhedorSchema),
     defaultValues,
   });
 
@@ -106,12 +107,12 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
     };
   }, [open, isPending, onOpenChange]);
 
-  const filteredTutors = tutorsPage?.data ?? [];
+  const filteredAcolhedores = acolhedoresPage?.data ?? [];
 
   const handleConfirmLink = async () => {
-    if (!selectedTutorId) return;
+    if (!selectedAcolhedorId) return;
     try {
-      await linkMutation.mutateAsync({ acolhedorId: selectedTutorId, animalId });
+      await linkMutation.mutateAsync({ acolhedorId: selectedAcolhedorId, animalId });
       onOpenChange(false);
       onSuccess?.();
     } catch {
@@ -121,8 +122,8 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
 
   const handleCreateAndLink = handleSubmit(async (values) => {
     try {
-      const newTutor = await createTutor.mutateAsync(values);
-      await linkMutation.mutateAsync({ acolhedorId: newTutor.id, animalId });
+      const newAcolhedor = await createAcolhedor.mutateAsync(values);
+      await linkMutation.mutateAsync({ acolhedorId: newAcolhedor.id, animalId });
       onOpenChange(false);
       onSuccess?.();
     } catch {
@@ -144,16 +145,16 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
       <div
         role="dialog"
         aria-modal="true"
-        aria-labelledby="link-tutor-title"
+        aria-labelledby="link-acolhedor-title"
         className="relative z-10 flex w-full max-w-2xl flex-col overflow-hidden rounded-[18px] border border-border bg-card shadow-2xl"
       >
         <div className="flex items-start justify-between border-b border-border px-5 py-4">
           <div>
-            <h2 id="link-tutor-title" className="text-lg font-semibold text-foreground">
-              Vincular tutor
+            <h2 id="link-acolhedor-title" className="text-lg font-semibold text-foreground">
+              Vincular acolhedor
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Selecione ou cadastre um tutor para vincular a <strong className="text-foreground">{animalName}</strong>.
+              Selecione um acolhedor ou cadastre um adotante para vincular a <strong className="text-foreground">{animalName}</strong>.
             </p>
           </div>
           <Button
@@ -180,7 +181,7 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {tab === 'select' ? 'Selecionar existente' : 'Cadastrar novo'}
+              {tab === 'select' ? 'Selecionar existente' : 'Cadastrar adotante'}
             </button>
           ))}
         </div>
@@ -198,25 +199,25 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
             </div>
 
             <div className="max-h-72 overflow-y-auto rounded-[14px] border border-border">
-              {isLoadingTutors ? (
+              {isLoadingAcolhedores ? (
                 <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
-                  Carregando tutores...
+                  Carregando acolhedores...
                 </div>
-              ) : filteredTutors.length === 0 ? (
+              ) : filteredAcolhedores.length === 0 ? (
                 <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
-                  {search ? 'Nenhum tutor encontrado para esta busca.' : 'Nenhum tutor cadastrado.'}
+                  {search ? 'Nenhum acolhedor encontrado para esta busca.' : 'Nenhum acolhedor cadastrado.'}
                 </div>
               ) : (
                 <ul>
-                  {filteredTutors.map((tutor, index) => {
-                    const isSelected = selectedTutorId === tutor.id;
+                  {filteredAcolhedores.map((acolhedor, index) => {
+                    const isSelected = selectedAcolhedorId === acolhedor.id;
                     return (
-                      <li key={tutor.id}>
+                      <li key={acolhedor.id}>
                         <button
                           type="button"
-                          onClick={() => setSelectedTutorId(isSelected ? null : tutor.id)}
+                          onClick={() => setSelectedAcolhedorId(isSelected ? null : acolhedor.id)}
                           className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors ${
-                            index !== filteredTutors.length - 1 ? 'border-b border-border' : ''
+                            index !== filteredAcolhedores.length - 1 ? 'border-b border-border' : ''
                           } ${isSelected ? 'bg-primary/10' : 'hover:bg-muted/50'}`}
                         >
                           <div
@@ -226,14 +227,15 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
                                 : 'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400'
                             }`}
                           >
-                            {isSelected ? <Check className="size-4" /> : getAcolhedorInitials(tutor.nome)}
+                            {isSelected ? <Check className="size-4" /> : getAcolhedorInitials(acolhedor.nome)}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium text-foreground">{tutor.nome}</p>
+                            <p className="truncate text-sm font-medium text-foreground">{acolhedor.nome}</p>
                             <p className="truncate text-[12px] text-muted-foreground">
-                              {tutor.cpf} · {tutor.email}
+                              {acolhedor.cpf} · {acolhedor.email}
                             </p>
                           </div>
+                          <SituacaoBadge situacao={acolhedor.situacao} />
                         </button>
                       </li>
                     );
@@ -250,7 +252,7 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
                 type="button"
                 variant="primary"
                 onClick={handleConfirmLink}
-                disabled={!selectedTutorId || isPending}
+                disabled={!selectedAcolhedorId || isPending}
               >
                 {linkMutation.isPending ? 'Vinculando...' : 'Confirmar vinculação'}
               </Button>
@@ -266,7 +268,7 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
                   <Label htmlFor="link-nome">Nome completo</Label>
                   <Input
                     id="link-nome"
-                    placeholder="Digite o nome do tutor"
+                    placeholder="Digite o nome completo"
                     aria-invalid={!!errors.nome}
                     {...register('nome')}
                   />
@@ -314,7 +316,7 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
                   <Input
                     id="link-email"
                     type="email"
-                    placeholder="tutor@email.com"
+                    placeholder="nome@email.com"
                     autoComplete="email"
                     aria-invalid={!!errors.email}
                     {...register('email')}

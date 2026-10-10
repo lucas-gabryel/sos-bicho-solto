@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { formatCpf, formatPhone, isValidCpf, onlyDigits } from '@/lib/acolhedor';
 import type { Acolhedor, AcolhedorFormValues } from '@/types/acolhedor';
 
-const tutorSchema = z.object({
+const acolhedorSchema = z.object({
   nome: z.string().trim().min(1, 'Nome obrigatório'),
   cpf: z
     .string()
@@ -47,23 +47,23 @@ const defaultValues: AcolhedorFormValues = {
   dataNascimento: '',
 };
 
-interface TutorFormModalProps {
+interface AcolhedorFormModalProps {
   open: boolean;
   mode: 'create' | 'edit';
-  tutor: Acolhedor | null;
+  acolhedor: Acolhedor | null;
   isPending?: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (values: AcolhedorFormValues) => Promise<void>;
 }
 
-export function TutorFormModal({
+export function AcolhedorFormModal({
   open,
   mode,
-  tutor,
+  acolhedor,
   isPending = false,
   onOpenChange,
   onSubmit,
-}: TutorFormModalProps) {
+}: AcolhedorFormModalProps) {
 
   const {
     control,
@@ -73,7 +73,7 @@ export function TutorFormModal({
     setValue,
     formState: { errors },
   } = useForm<AcolhedorFormValues>({
-    resolver: zodResolver(tutorSchema),
+    resolver: zodResolver(acolhedorSchema),
     defaultValues,
   });
 
@@ -83,18 +83,18 @@ export function TutorFormModal({
     }
 
     reset(
-      tutor
+      acolhedor
         ? {
-            nome: tutor.nome,
-            cpf: tutor.cpf,
-            telefone: tutor.telefone,
-            email: tutor.email,
-            endereco: tutor.endereco,
-            dataNascimento: tutor.dataNascimento,
+            nome: acolhedor.nome,
+            cpf: acolhedor.cpf,
+            telefone: acolhedor.telefone,
+            email: acolhedor.email,
+            endereco: acolhedor.endereco,
+            dataNascimento: acolhedor.dataNascimento,
           }
         : defaultValues,
     );
-  }, [open, tutor, reset]);
+  }, [open, acolhedor, reset]);
 
   useEffect(() => {
     if (!open) {
@@ -146,16 +146,18 @@ export function TutorFormModal({
       <div
         role="dialog"
         aria-modal="true"
-        aria-labelledby="tutor-form-title"
+        aria-labelledby="acolhedor-form-title"
         className="relative z-10 w-full max-w-2xl overflow-hidden rounded-[18px] border border-border bg-card shadow-2xl"
       >
         <div className="flex items-start justify-between border-b border-border px-5 py-4">
           <div>
-            <h2 id="tutor-form-title" className="text-lg font-semibold text-foreground">
-              {mode === 'create' ? 'Cadastrar tutor' : 'Editar tutor'}
+            <h2 id="acolhedor-form-title" className="text-lg font-semibold text-foreground">
+              {mode === 'create' ? 'Cadastrar adotante' : 'Editar acolhedor'}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Preencha os dados obrigatórios para salvar o tutor no sistema.
+              {mode === 'create'
+                ? 'Todo cadastro começa como adotante e passa a tutor ao receber um animal.'
+                : 'Preencha os dados obrigatórios para salvar o acolhedor no sistema.'}
             </p>
           </div>
 
@@ -175,7 +177,7 @@ export function TutorFormModal({
           <div className="grid gap-4 md:grid-cols-2">
             <div className="flex flex-col gap-1.5 md:col-span-2">
               <Label htmlFor="nome">Nome completo</Label>
-              <Input id="nome" placeholder="Digite o nome do tutor" aria-invalid={!!errors.nome} {...register('nome')} />
+              <Input id="nome" placeholder="Digite o nome completo" aria-invalid={!!errors.nome} {...register('nome')} />
               {errors.nome ? <p className="text-xs text-destructive">{errors.nome.message}</p> : null}
             </div>
 
@@ -220,7 +222,7 @@ export function TutorFormModal({
               <Input
                 id="email"
                 type="email"
-                placeholder="tutor@email.com"
+                placeholder="nome@email.com"
                 autoComplete="email"
                 aria-invalid={!!errors.email}
                 {...register('email')}
@@ -258,7 +260,7 @@ export function TutorFormModal({
               Cancelar
             </Button>
             <Button type="submit" variant="primary" disabled={isPending}>
-              {isPending ? 'Salvando...' : mode === 'create' ? 'Cadastrar tutor' : 'Salvar alterações'}
+              {isPending ? 'Salvando...' : mode === 'create' ? 'Cadastrar adotante' : 'Salvar alterações'}
             </Button>
           </div>
         </form>
