@@ -9,7 +9,6 @@ export interface Acolhedor {
   email: string;
   endereco: string;
   dataNascimento: string;
-  animaisAdotadosIds: string[];
   totalAnimaisAdotados: number;
   situacao: SituacaoAcolhedor;
 }

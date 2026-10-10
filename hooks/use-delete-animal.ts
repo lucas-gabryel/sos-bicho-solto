@@ -13,7 +13,6 @@ export function useDeleteAnimal() {
       queryClient.invalidateQueries({ queryKey: ['animals'] });
       // A situação do acolhedor (Tutor/Adotante) depende dos animais ativos vinculados.
       queryClient.invalidateQueries({ queryKey: acolhedorKeys.all });
-      queryClient.invalidateQueries({ queryKey: ['acolhedor-animals'] });
       queryClient.invalidateQueries({ queryKey: dashboardStatsKeys.all });
       queryClient.removeQueries({ queryKey: ['animal', id] });
     },

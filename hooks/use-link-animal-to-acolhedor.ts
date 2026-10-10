@@ -10,10 +10,8 @@ export function useLinkAnimalToAcolhedor() {
   return useMutation({
     mutationFn: ({ acolhedorId, animalId }: { acolhedorId: string; animalId: string }) =>
       linkAnimalToAcolhedor(acolhedorId, animalId),
-    onSuccess: (updatedAcolhedor, { animalId }) => {
-      queryClient.setQueryData(acolhedorKeys.detail(updatedAcolhedor.id), updatedAcolhedor);
+    onSuccess: (_, { animalId }) => {
       queryClient.invalidateQueries({ queryKey: acolhedorKeys.all });
-      queryClient.invalidateQueries({ queryKey: ['acolhedor-animals'] });
       queryClient.invalidateQueries({ queryKey: ['animals'] });
       queryClient.invalidateQueries({ queryKey: ['animal', animalId] });
       queryClient.invalidateQueries({ queryKey: dashboardStatsKeys.all });

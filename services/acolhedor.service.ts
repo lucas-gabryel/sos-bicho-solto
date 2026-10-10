@@ -1,6 +1,5 @@
-import { apiRequest, LIST_LIMIT, type RespostaPaginada } from '@/lib/api';
+import { apiRequest, type RespostaPaginada } from '@/lib/api';
 import { formatCpf, normalizeAcolhedorValues } from '@/lib/acolhedor';
-import type { AnimalApi } from '@/services/animal.service';
 import type { Acolhedor, AcolhedorFormValues, SituacaoAcolhedor } from '@/types/acolhedor';
 
 // A API ainda expõe o recurso como "tutores"; este service é o único ponto que conhece esse contrato.
@@ -27,7 +26,7 @@ function toDateOnly(value: string): string {
   return new Date(value).toISOString().slice(0, 10);
 }
 
-function mapAcolhedor(tutor: TutorApi, animaisAdotadosIds: string[] = []): Acolhedor {
+function mapAcolhedor(tutor: TutorApi): Acolhedor {
   return {
     id: tutor.id,
     codigo: tutor.codigo,
@@ -37,8 +36,7 @@ function mapAcolhedor(tutor: TutorApi, animaisAdotadosIds: string[] = []): Acolh
     email: tutor.email,
     endereco: tutor.endereco,
     dataNascimento: toDateOnly(tutor.dataNascimento),
-    animaisAdotadosIds,
-    totalAnimaisAdotados: tutor.totalAnimaisAdotados ?? animaisAdotadosIds.length,
+    totalAnimaisAdotados: tutor.totalAnimaisAdotados,
     situacao: tutor.situacao,
   };
 }
@@ -58,17 +56,10 @@ export async function getAcolhedores(params: ListAcolhedoresParams = {}): Promis
   return { data: data.map((tutor) => mapAcolhedor(tutor)), meta };
 }
 
-export async function getAcolhedorById(id: string): Promise<Acolhedor | null> {
+export async function getAcolhedorById(id: string): Promise<Acolhedor> {
   const tutor = await apiRequest<TutorApi>(`/tutores/${id}`);
 
-  const { data: animais } = await apiRequest<RespostaPaginada<AnimalApi>>(`/tutores/${id}/animais`, {
-    query: { limit: LIST_LIMIT },
-  });
-
-  return mapAcolhedor(
-    tutor,
-    animais.map((animal) => animal.id),
-  );
+  return mapAcolhedor(tutor);
 }
 
 function toRequestBody(values: AcolhedorFormValues) {
@@ -114,17 +105,9 @@ export async function deleteAcolhedor({ id, senhaAdmin }: DeleteAcolhedorInput):
   });
 }
 
-export async function linkAnimalToAcolhedor(acolhedorId: string, animalId: string): Promise<Acolhedor> {
+export async function linkAnimalToAcolhedor(acolhedorId: string, animalId: string): Promise<void> {
   await apiRequest('/adocoes', {
     method: 'POST',
     body: { tutorId: acolhedorId, animalId },
   });
-
-  const acolhedor = await getAcolhedorById(acolhedorId);
-
-  if (!acolhedor) {
-    throw new Error('Acolhedor não encontrado.');
-  }
-
-  return acolhedor;
 }
