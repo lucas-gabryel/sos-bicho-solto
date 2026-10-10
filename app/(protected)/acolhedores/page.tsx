@@ -9,11 +9,18 @@ import { Pagination } from '@/components/ui/pagination';
 import { useCreateAcolhedor } from '@/hooks/use-create-acolhedor';
 import { useAcolhedores } from '@/hooks/use-acolhedores';
 import { useUpdateAcolhedor } from '@/hooks/use-update-acolhedor';
-import type { Acolhedor, AcolhedorFormValues } from '@/types/acolhedor';
+import { cn } from '@/lib/utils';
+import type { Acolhedor, AcolhedorFormValues, SituacaoAcolhedor } from '@/types/acolhedor';
 import { AcolhedorCard, AcolhedorCardSkeleton } from './_components/acolhedor-card';
 import { AcolhedorFormModal } from './_components/acolhedor-form-modal';
 
 const PAGE_SIZE = 9;
+
+const SITUACAO_TABS: { value: SituacaoAcolhedor | undefined; label: string }[] = [
+  { value: undefined, label: 'Todos' },
+  { value: 'ADOTANTE', label: 'Adotantes' },
+  { value: 'TUTOR', label: 'Tutores' },
+];
 
 type ModalState =
   | { open: false; mode: 'create'; acolhedor: null }
@@ -30,12 +37,14 @@ function AcolhedoresPageContent() {
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [page, setPage] = useState(1);
+  const [situacao, setSituacao] = useState<SituacaoAcolhedor | undefined>(undefined);
   const [modalState, setModalState] = useState<ModalState>(initialModalState);
 
   const { data, isLoading, isFetching } = useAcolhedores({
     page,
     limit: PAGE_SIZE,
     busca: deferredSearch.trim() || undefined,
+    situacao,
   });
 
   const createAcolhedor = useCreateAcolhedor();
@@ -92,6 +101,35 @@ function AcolhedoresPageContent() {
                 setPage(1);
               }}
             />
+          </div>
+
+          <div
+            role="tablist"
+            aria-label="Filtrar por situação"
+            className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5"
+          >
+            {SITUACAO_TABS.map((tab) => {
+              const isActive = situacao === tab.value;
+
+              return (
+                <button
+                  key={tab.label}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => {
+                    setSituacao(tab.value);
+                    setPage(1);
+                  }}
+                  className={cn(
+                    'rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors',
+                    isActive ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
