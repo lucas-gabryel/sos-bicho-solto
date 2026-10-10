@@ -1,6 +1,6 @@
-import { formatDateToPtBr } from '@/lib/tutor';
+import { formatDateToPtBr } from '@/lib/acolhedor';
 import type { Animal } from '@/services/animal.service';
-import type { Tutor } from '@/types/tutor';
+import type { Acolhedor } from '@/types/acolhedor';
 
 export type AnimalPrintCategory =
   | 'identificacao'
@@ -24,7 +24,7 @@ export interface AnimalPrintFieldOption {
   id: string;
   label: string;
   category: AnimalPrintCategory;
-  render: (animal: Animal, tutor?: Tutor | null) => PrintSectionItem | PrintSectionItem[];
+  render: (animal: Animal, tutor?: Acolhedor | null) => PrintSectionItem | PrintSectionItem[];
 }
 
 export const CATEGORY_LABELS: Record<AnimalPrintCategory, string> = {
@@ -250,7 +250,7 @@ export const DEFAULT_SELECTED_FIELDS: string[] = ANIMAL_PRINT_FIELDS.map((f) => 
 
 export function getAnimalPrintSections(
   animal: Animal,
-  tutor: Tutor | null | undefined,
+  tutor: Acolhedor | null | undefined,
   selectedFieldIds: string[],
 ): PrintSection[] {
   const selectedSet = new Set(selectedFieldIds);

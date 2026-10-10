@@ -1,4 +1,4 @@
-import type { TutorFormValues } from '@/types/tutor';
+import type { AcolhedorFormValues, SituacaoAcolhedor } from '@/types/acolhedor';
 
 export function onlyDigits(value: string) {
   return value.replace(/\D/g, '');
@@ -76,7 +76,7 @@ export function getAge(value: string) {
   return age;
 }
 
-export function getTutorInitials(name: string) {
+export function getAcolhedorInitials(name: string) {
   const initials = name
     .trim()
     .split(/\s+/)
@@ -88,7 +88,7 @@ export function getTutorInitials(name: string) {
   return initials || '--';
 }
 
-export function normalizeTutorValues(values: TutorFormValues): TutorFormValues {
+export function normalizeAcolhedorValues(values: AcolhedorFormValues): AcolhedorFormValues {
   return {
     nome: values.nome.trim(),
     cpf: formatCpf(values.cpf),
@@ -98,3 +98,8 @@ export function normalizeTutorValues(values: TutorFormValues): TutorFormValues {
     dataNascimento: values.dataNascimento,
   };
 }
+
+export const SITUACAO_LABELS: Record<SituacaoAcolhedor, string> = {
+  ADOTANTE: 'Adotante',
+  TUTOR: 'Tutor',
+};

@@ -9,8 +9,8 @@ import { z } from 'zod/v3';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { formatCpf, formatPhone, isValidCpf, onlyDigits } from '@/lib/tutor';
-import type { Tutor, TutorFormValues } from '@/types/tutor';
+import { formatCpf, formatPhone, isValidCpf, onlyDigits } from '@/lib/acolhedor';
+import type { Acolhedor, AcolhedorFormValues } from '@/types/acolhedor';
 
 const tutorSchema = z.object({
   nome: z.string().trim().min(1, 'Nome obrigatório'),
@@ -38,7 +38,7 @@ const tutorSchema = z.object({
     }, 'Data de nascimento inválida'),
 });
 
-const defaultValues: TutorFormValues = {
+const defaultValues: AcolhedorFormValues = {
   nome: '',
   cpf: '',
   telefone: '',
@@ -50,10 +50,10 @@ const defaultValues: TutorFormValues = {
 interface TutorFormModalProps {
   open: boolean;
   mode: 'create' | 'edit';
-  tutor: Tutor | null;
+  tutor: Acolhedor | null;
   isPending?: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (values: TutorFormValues) => Promise<void>;
+  onSubmit: (values: AcolhedorFormValues) => Promise<void>;
 }
 
 export function TutorFormModal({
@@ -72,7 +72,7 @@ export function TutorFormModal({
     reset,
     setValue,
     formState: { errors },
-  } = useForm<TutorFormValues>({
+  } = useForm<AcolhedorFormValues>({
     resolver: zodResolver(tutorSchema),
     defaultValues,
   });

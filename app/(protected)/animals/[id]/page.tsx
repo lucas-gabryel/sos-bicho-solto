@@ -13,8 +13,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAnimal } from '@/hooks/use-animal';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDeleteAnimal } from '@/hooks/use-delete-animal';
-import { useTutor } from '@/hooks/use-tutor';
-import { formatDateToPtBr, getTutorInitials } from '@/lib/tutor';
+import { useAcolhedor } from '@/hooks/use-acolhedor';
+import { formatDateToPtBr, getAcolhedorInitials } from '@/lib/acolhedor';
 import { cn } from '@/lib/utils';
 import { AnimalFormModal } from '../_components/animal-form-modal';
 import { DeleteConfirmationModal } from '../_components/delete-confirmation-modal';
@@ -31,7 +31,7 @@ export default function AnimalDetailsPage() {
 
   const { data: animal, isLoading: isLoadingAnimal } = useAnimal(animalId);
   const { data: currentUser, isLoading: isLoadingUser } = useCurrentUser();
-  const { data: tutor } = useTutor(animal?.tutorId ?? '');
+  const { data: tutor } = useAcolhedor(animal?.tutorId ?? '');
   const deleteAnimal = useDeleteAnimal();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -249,7 +249,7 @@ export default function AnimalDetailsPage() {
             className="flex flex-wrap items-center gap-3 rounded-lg bg-green-50 px-4 py-3.5 transition-colors hover:bg-green-100 dark:bg-green-950/30 dark:hover:bg-green-950/50"
           >
             <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-green-600 text-sm font-bold text-white">
-              {getTutorInitials(tutor.nome)}
+              {getAcolhedorInitials(tutor.nome)}
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-green-700 dark:text-green-400">{tutor.nome}</p>

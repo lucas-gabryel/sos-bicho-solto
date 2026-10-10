@@ -5,10 +5,10 @@ import Link from 'next/link';
 
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Tutor } from '@/types/tutor';
+import type { Acolhedor } from '@/types/acolhedor';
 
 interface TutorCardProps {
-  tutor: Tutor;
+  tutor: Acolhedor;
 }
 
 export function TutorCard({ tutor }: TutorCardProps) {

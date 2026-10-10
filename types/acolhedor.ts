@@ -1,4 +1,6 @@
-export interface Tutor {
+export type SituacaoAcolhedor = 'ADOTANTE' | 'TUTOR';
+
+export interface Acolhedor {
   id: string;
   codigo: number;
   nome: string;
@@ -9,9 +11,10 @@ export interface Tutor {
   dataNascimento: string;
   animaisAdotadosIds: string[];
   totalAnimaisAdotados: number;
+  situacao: SituacaoAcolhedor;
 }
 
-export interface TutorFormValues {
+export interface AcolhedorFormValues {
   nome: string;
   cpf: string;
   telefone: string;

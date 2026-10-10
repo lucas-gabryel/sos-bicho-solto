@@ -9,14 +9,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useDeleteTutor } from '@/hooks/use-delete-tutor';
-import { useTutor } from '@/hooks/use-tutor';
-import { useTutorAnimals } from '@/hooks/use-tutor-animals';
-import { useUpdateTutor } from '@/hooks/use-update-tutor';
-import { formatDateToPtBr, getAge } from '@/lib/tutor';
+import { useDeleteAcolhedor } from '@/hooks/use-delete-acolhedor';
+import { useAcolhedor } from '@/hooks/use-acolhedor';
+import { useAcolhedorAnimals } from '@/hooks/use-acolhedor-animals';
+import { useUpdateAcolhedor } from '@/hooks/use-update-acolhedor';
+import { formatDateToPtBr, getAge } from '@/lib/acolhedor';
 import { cn } from '@/lib/utils';
 import type { Animal } from '@/services/animal.service';
-import type { TutorFormValues } from '@/types/tutor';
+import type { AcolhedorFormValues } from '@/types/acolhedor';
 import { AnimalCard, AnimalCardSkeleton } from '../../animals/_components/animal-card';
 import { DeleteConfirmationModal } from '../../animals/_components/delete-confirmation-modal';
 import { PrintAnimalModal } from '../../animals/_components/print-animal-modal';
@@ -28,10 +28,10 @@ function TutorDetailPageContent() {
   const tutorId = typeof params.id === 'string' ? params.id : '';
 
   const { data: currentUser } = useCurrentUser();
-  const { data: tutor, isLoading: isTutorLoading } = useTutor(tutorId);
-  const { data: adoptedAnimals = [], isLoading: isAnimalsLoading } = useTutorAnimals(tutorId);
-  const updateTutor = useUpdateTutor();
-  const deleteTutor = useDeleteTutor();
+  const { data: tutor, isLoading: isTutorLoading } = useAcolhedor(tutorId);
+  const { data: adoptedAnimals = [], isLoading: isAnimalsLoading } = useAcolhedorAnimals(tutorId);
+  const updateTutor = useUpdateAcolhedor();
+  const deleteTutor = useDeleteAcolhedor();
 
   const isAdmin = currentUser?.role === 'admin';
 
@@ -95,7 +95,7 @@ function TutorDetailPageContent() {
 
   const age = getAge(tutor.dataNascimento);
 
-  const handleUpdateTutor = async (values: TutorFormValues) => {
+  const handleUpdateTutor = async (values: AcolhedorFormValues) => {
     await updateTutor.mutateAsync({
       id: tutor.id,
       values,

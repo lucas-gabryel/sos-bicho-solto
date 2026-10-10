@@ -9,11 +9,11 @@ import { z } from 'zod/v3';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useCreateTutor } from '@/hooks/use-create-tutor';
-import { useLinkAnimalToTutor } from '@/hooks/use-link-animal-to-tutor';
-import { useTutors } from '@/hooks/use-tutors';
-import { formatCpf, formatPhone, getTutorInitials, isValidCpf, onlyDigits } from '@/lib/tutor';
-import type { TutorFormValues } from '@/types/tutor';
+import { useCreateAcolhedor } from '@/hooks/use-create-acolhedor';
+import { useLinkAnimalToAcolhedor } from '@/hooks/use-link-animal-to-acolhedor';
+import { useAcolhedores } from '@/hooks/use-acolhedores';
+import { formatCpf, formatPhone, getAcolhedorInitials, isValidCpf, onlyDigits } from '@/lib/acolhedor';
+import type { AcolhedorFormValues } from '@/types/acolhedor';
 
 const tutorSchema = z.object({
   nome: z.string().trim().min(1, 'Nome obrigatório'),
@@ -39,7 +39,7 @@ const tutorSchema = z.object({
     }, 'Data de nascimento inválida'),
 });
 
-const defaultValues: TutorFormValues = {
+const defaultValues: AcolhedorFormValues = {
   nome: '',
   cpf: '',
   telefone: '',
@@ -63,12 +63,12 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
   const [search, setSearch] = useState('');
   const [selectedTutorId, setSelectedTutorId] = useState<string | null>(null);
 
-  const { data: tutorsPage, isLoading: isLoadingTutors } = useTutors({
+  const { data: tutorsPage, isLoading: isLoadingTutors } = useAcolhedores({
     limit: 20,
     busca: search.trim() || undefined,
   });
-  const linkMutation = useLinkAnimalToTutor();
-  const createTutor = useCreateTutor();
+  const linkMutation = useLinkAnimalToAcolhedor();
+  const createTutor = useCreateAcolhedor();
 
   const isPending = linkMutation.isPending || createTutor.isPending;
 
@@ -78,7 +78,7 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm<TutorFormValues>({
+  } = useForm<AcolhedorFormValues>({
     resolver: zodResolver(tutorSchema),
     defaultValues,
   });
@@ -111,7 +111,7 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
   const handleConfirmLink = async () => {
     if (!selectedTutorId) return;
     try {
-      await linkMutation.mutateAsync({ tutorId: selectedTutorId, animalId });
+      await linkMutation.mutateAsync({ acolhedorId: selectedTutorId, animalId });
       onOpenChange(false);
       onSuccess?.();
     } catch {
@@ -122,7 +122,7 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
   const handleCreateAndLink = handleSubmit(async (values) => {
     try {
       const newTutor = await createTutor.mutateAsync(values);
-      await linkMutation.mutateAsync({ tutorId: newTutor.id, animalId });
+      await linkMutation.mutateAsync({ acolhedorId: newTutor.id, animalId });
       onOpenChange(false);
       onSuccess?.();
     } catch {
@@ -226,7 +226,7 @@ export function LinkTutorModal({ open, animalId, animalName, onOpenChange, onSuc
                                 : 'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400'
                             }`}
                           >
-                            {isSelected ? <Check className="size-4" /> : getTutorInitials(tutor.nome)}
+                            {isSelected ? <Check className="size-4" /> : getAcolhedorInitials(tutor.nome)}
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-medium text-foreground">{tutor.nome}</p>

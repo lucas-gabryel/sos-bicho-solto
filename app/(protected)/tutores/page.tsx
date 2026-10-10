@@ -6,10 +6,10 @@ import { useDeferredValue, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
-import { useCreateTutor } from '@/hooks/use-create-tutor';
-import { useTutors } from '@/hooks/use-tutors';
-import { useUpdateTutor } from '@/hooks/use-update-tutor';
-import type { Tutor, TutorFormValues } from '@/types/tutor';
+import { useCreateAcolhedor } from '@/hooks/use-create-acolhedor';
+import { useAcolhedores } from '@/hooks/use-acolhedores';
+import { useUpdateAcolhedor } from '@/hooks/use-update-acolhedor';
+import type { Acolhedor, AcolhedorFormValues } from '@/types/acolhedor';
 import { TutorCard, TutorCardSkeleton } from './_components/tutor-card';
 import { TutorFormModal } from './_components/tutor-form-modal';
 
@@ -18,7 +18,7 @@ const PAGE_SIZE = 9;
 type ModalState =
   | { open: false; mode: 'create'; tutor: null }
   | { open: true; mode: 'create'; tutor: null }
-  | { open: true; mode: 'edit'; tutor: Tutor };
+  | { open: true; mode: 'edit'; tutor: Acolhedor };
 
 const initialModalState: ModalState = {
   open: false,
@@ -32,14 +32,14 @@ function TutorsPageContent() {
   const [page, setPage] = useState(1);
   const [modalState, setModalState] = useState<ModalState>(initialModalState);
 
-  const { data, isLoading, isFetching } = useTutors({
+  const { data, isLoading, isFetching } = useAcolhedores({
     page,
     limit: PAGE_SIZE,
     busca: deferredSearch.trim() || undefined,
   });
 
-  const createTutor = useCreateTutor();
-  const updateTutor = useUpdateTutor();
+  const createTutor = useCreateAcolhedor();
+  const updateTutor = useUpdateAcolhedor();
 
   const tutors = data?.data ?? [];
   const totalPages = data?.meta.totalPages ?? 0;
@@ -52,7 +52,7 @@ function TutorsPageContent() {
     setModalState(initialModalState);
   };
 
-  const handleSubmit = async (values: TutorFormValues) => {
+  const handleSubmit = async (values: AcolhedorFormValues) => {
     if (modalState.mode === 'create') {
       await createTutor.mutateAsync(values);
       return;
