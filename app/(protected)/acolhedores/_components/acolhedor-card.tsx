@@ -3,43 +3,45 @@
 import { ChevronRight, Mail, PawPrint, Phone } from 'lucide-react';
 import Link from 'next/link';
 
+import { SituacaoBadge } from '@/components/situacao-badge';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Tutor } from '@/types/tutor';
+import type { Acolhedor } from '@/types/acolhedor';
 
-interface TutorCardProps {
-  tutor: Tutor;
+interface AcolhedorCardProps {
+  acolhedor: Acolhedor;
 }
 
-export function TutorCard({ tutor }: TutorCardProps) {
-  const adoptedCount = tutor.totalAnimaisAdotados;
+export function AcolhedorCard({ acolhedor }: AcolhedorCardProps) {
+  const adoptedCount = acolhedor.totalAnimaisAdotados;
 
   return (
-    <Link href={`/tutores/${tutor.id}`} className="block">
+    <Link href={`/acolhedores/${acolhedor.id}`} className="block">
       <Card className="gap-0 rounded-[14px] border border-border p-0 ring-0 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md">
         <div className="p-4.5">
           <div className="mb-2.75 flex items-center gap-2.75">
             <div className="flex size-10.5 shrink-0 items-center justify-center rounded-full bg-orange-100 text-[17px] font-bold text-orange-700 dark:bg-orange-950/40 dark:text-orange-400">
-              {tutor.nome.charAt(0)}
+              {acolhedor.nome.charAt(0)}
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-foreground">{tutor.nome}</p>
-              <p className="truncate font-mono text-[11px] text-muted-foreground/70">{tutor.cpf}</p>
+              <p className="truncate text-sm font-semibold text-foreground">{acolhedor.nome}</p>
+              <p className="truncate font-mono text-[11px] text-muted-foreground/70">{acolhedor.cpf}</p>
             </div>
 
+            <SituacaoBadge situacao={acolhedor.situacao} />
             <ChevronRight className="size-3 shrink-0 text-muted-foreground/70" />
           </div>
 
           <div className="flex flex-col gap-1 text-[12px] text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <Mail className="size-3.5 shrink-0 text-muted-foreground/70" />
-              <span className="truncate">{tutor.email}</span>
+              <span className="truncate">{acolhedor.email}</span>
             </div>
 
             <div className="flex items-center gap-1.5">
               <Phone className="size-3.5 shrink-0 text-muted-foreground/70" />
-              <span>{tutor.telefone}</span>
+              <span>{acolhedor.telefone}</span>
             </div>
           </div>
         </div>
@@ -55,7 +57,7 @@ export function TutorCard({ tutor }: TutorCardProps) {
   );
 }
 
-export function TutorCardSkeleton() {
+export function AcolhedorCardSkeleton() {
   return (
     <Card className="gap-0 rounded-[14px] border border-border p-0 ring-0">
       <div className="p-4.5">

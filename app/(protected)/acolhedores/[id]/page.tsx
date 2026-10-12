@@ -5,33 +5,34 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { SituacaoBadge } from '@/components/situacao-badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useDeleteTutor } from '@/hooks/use-delete-tutor';
-import { useTutor } from '@/hooks/use-tutor';
-import { useTutorAnimals } from '@/hooks/use-tutor-animals';
-import { useUpdateTutor } from '@/hooks/use-update-tutor';
-import { formatDateToPtBr, getAge } from '@/lib/tutor';
+import { useDeleteAcolhedor } from '@/hooks/use-delete-acolhedor';
+import { useAcolhedor } from '@/hooks/use-acolhedor';
+import { useAcolhedorAnimals } from '@/hooks/use-acolhedor-animals';
+import { useUpdateAcolhedor } from '@/hooks/use-update-acolhedor';
+import { formatDateToPtBr, getAge } from '@/lib/date';
 import { cn } from '@/lib/utils';
 import type { Animal } from '@/services/animal.service';
-import type { TutorFormValues } from '@/types/tutor';
+import type { AcolhedorFormValues } from '@/types/acolhedor';
 import { AnimalCard, AnimalCardSkeleton } from '../../animals/_components/animal-card';
 import { DeleteConfirmationModal } from '../../animals/_components/delete-confirmation-modal';
 import { PrintAnimalModal } from '../../animals/_components/print-animal-modal';
-import { TutorFormModal } from '../_components/tutor-form-modal';
+import { AcolhedorFormModal } from '../_components/acolhedor-form-modal';
 
-function TutorDetailPageContent() {
+function AcolhedorDetailPageContent() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const tutorId = typeof params.id === 'string' ? params.id : '';
+  const acolhedorId = typeof params.id === 'string' ? params.id : '';
 
   const { data: currentUser } = useCurrentUser();
-  const { data: tutor, isLoading: isTutorLoading } = useTutor(tutorId);
-  const { data: adoptedAnimals = [], isLoading: isAnimalsLoading } = useTutorAnimals(tutorId);
-  const updateTutor = useUpdateTutor();
-  const deleteTutor = useDeleteTutor();
+  const { data: acolhedor, isLoading: isAcolhedorLoading } = useAcolhedor(acolhedorId);
+  const { data: adoptedAnimals = [], isLoading: isAnimalsLoading } = useAcolhedorAnimals(acolhedorId);
+  const updateAcolhedor = useUpdateAcolhedor();
+  const deleteAcolhedor = useDeleteAcolhedor();
 
   const isAdmin = currentUser?.role === 'admin';
 
@@ -39,7 +40,7 @@ function TutorDetailPageContent() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [animalToPrint, setAnimalToPrint] = useState<Animal | null>(null);
 
-  if (isTutorLoading) {
+  if (isAcolhedorLoading) {
     return (
       <div className="p-4 md:p-7">
         <div className="mb-6 flex items-center gap-3">
@@ -75,17 +76,17 @@ function TutorDetailPageContent() {
     );
   }
 
-  if (!tutor) {
+  if (!acolhedor) {
     return (
       <div className="p-4 md:p-7">
         <Card className="rounded-[16px] border border-border py-0 ring-0">
           <CardHeader className="border-b border-border px-5 py-5">
-            <CardTitle>Tutor não encontrado</CardTitle>
+            <CardTitle>Acolhedor não encontrado</CardTitle>
             <CardDescription>O registro solicitado não existe mais ou não foi encontrado.</CardDescription>
           </CardHeader>
           <CardContent className="px-5 py-5">
             <Button asChild variant="primary">
-              <Link href="/tutores">Voltar para tutores</Link>
+              <Link href="/acolhedores">Voltar para acolhedores</Link>
             </Button>
           </CardContent>
         </Card>
@@ -93,18 +94,18 @@ function TutorDetailPageContent() {
     );
   }
 
-  const age = getAge(tutor.dataNascimento);
+  const age = getAge(acolhedor.dataNascimento);
 
-  const handleUpdateTutor = async (values: TutorFormValues) => {
-    await updateTutor.mutateAsync({
-      id: tutor.id,
+  const handleUpdateAcolhedor = async (values: AcolhedorFormValues) => {
+    await updateAcolhedor.mutateAsync({
+      id: acolhedor.id,
       values,
     });
   };
 
   const handleConfirmDelete = async (password: string) => {
-    await deleteTutor.mutateAsync({ id: tutor.id, senhaAdmin: password });
-    router.push('/tutores');
+    await deleteAcolhedor.mutateAsync({ id: acolhedor.id, senhaAdmin: password });
+    router.push('/acolhedores');
   };
 
   return (
@@ -112,13 +113,13 @@ function TutorDetailPageContent() {
       <div className="p-4 md:p-7">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <Link href="/tutores">
+            <Link href="/acolhedores">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="size-5" />
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl font-semibold text-foreground">Detalhe do tutor</h1>
+              <h1 className="text-2xl font-semibold text-foreground">Detalhe do acolhedor</h1>
               <p className="text-sm text-muted-foreground">Informações completas</p>
             </div>
           </div>
@@ -130,7 +131,7 @@ function TutorDetailPageContent() {
                 size="sm"
                 className="border-transparent bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-950/60"
                 onClick={() => setIsEditModalOpen(true)}
-                disabled={updateTutor.isPending}
+                disabled={updateAcolhedor.isPending}
               >
                 <PencilLine className="size-3.5" />
                 Editar
@@ -140,10 +141,10 @@ function TutorDetailPageContent() {
                 variant="destructive"
                 size="sm"
                 onClick={() => setIsDeleteModalOpen(true)}
-                disabled={deleteTutor.isPending}
+                disabled={deleteAcolhedor.isPending}
               >
                 <Trash2 className="size-3.5" />
-                {deleteTutor.isPending ? 'Excluindo...' : 'Excluir'}
+                {deleteAcolhedor.isPending ? 'Excluindo...' : 'Excluir'}
               </Button>
             </div>
           )}
@@ -152,12 +153,15 @@ function TutorDetailPageContent() {
         <Card className="rounded-2xl p-6">
           <div className="flex flex-wrap items-center gap-5">
             <div className="flex size-18 shrink-0 items-center justify-center rounded-full bg-orange-100 text-[28px] font-bold text-orange-700 dark:bg-orange-950/40 dark:text-orange-400">
-              {tutor.nome.charAt(0)}
+              {acolhedor.nome.charAt(0)}
             </div>
 
             <div className="min-w-0 flex-1">
-              <h2 className="text-xl font-semibold text-foreground">{tutor.nome}</h2>
-              <p className="mt-0.5 font-mono text-[13px] text-muted-foreground">{tutor.cpf}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-xl font-semibold text-foreground">{acolhedor.nome}</h2>
+                <SituacaoBadge situacao={acolhedor.situacao} />
+              </div>
+              <p className="mt-0.5 font-mono text-[13px] text-muted-foreground">{acolhedor.cpf}</p>
             </div>
           </div>
 
@@ -165,15 +169,15 @@ function TutorDetailPageContent() {
 
           <SectionTitle>Dados pessoais</SectionTitle>
           <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
-            <InfoField label="Nome completo" value={tutor.nome} />
-            <InfoField label="CPF" value={<span className="font-mono">{tutor.cpf}</span>} />
+            <InfoField label="Nome completo" value={acolhedor.nome} />
+            <InfoField label="CPF" value={<span className="font-mono">{acolhedor.cpf}</span>} />
             <InfoField
               label="Data de nascimento"
-              value={`${formatDateToPtBr(tutor.dataNascimento)}${age !== null ? ` · ${age} anos` : ''}`}
+              value={`${formatDateToPtBr(acolhedor.dataNascimento)}${age !== null ? ` · ${age} anos` : ''}`}
             />
-            <InfoField label="Telefone" value={tutor.telefone} />
-            <InfoField label="E-mail" value={tutor.email} />
-            <InfoField label="Endereço completo" value={tutor.endereco} />
+            <InfoField label="Telefone" value={acolhedor.telefone} />
+            <InfoField label="E-mail" value={acolhedor.email} />
+            <InfoField label="Endereço completo" value={acolhedor.endereco} />
           </div>
 
           <SectionTitle className="mt-6">Animais adotados ({adoptedAnimals.length})</SectionTitle>
@@ -186,7 +190,7 @@ function TutorDetailPageContent() {
           ) : adoptedAnimals.length === 0 ? (
             <div className="flex items-center gap-3 rounded-lg bg-muted/60 px-4 py-3.5 text-sm text-muted-foreground">
               <Info className="size-4 shrink-0 text-blue-600 dark:text-blue-400" />
-              <span>Nenhum animal adotado foi vinculado a este tutor.</span>
+              <span>Nenhum animal vinculado a este acolhedor.</span>
             </div>
           ) : (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3.5">
@@ -199,13 +203,13 @@ function TutorDetailPageContent() {
       </div>
 
       {isEditModalOpen ? (
-        <TutorFormModal
+        <AcolhedorFormModal
           open={isEditModalOpen}
           mode="edit"
-          tutor={tutor}
-          isPending={updateTutor.isPending}
+          acolhedor={acolhedor}
+          isPending={updateAcolhedor.isPending}
           onOpenChange={setIsEditModalOpen}
-          onSubmit={handleUpdateTutor}
+          onSubmit={handleUpdateAcolhedor}
         />
       ) : null}
 
@@ -213,9 +217,9 @@ function TutorDetailPageContent() {
         open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
         onConfirm={handleConfirmDelete}
-        title="Excluir tutor"
-        description={`Deseja excluir o tutor ${tutor.nome}? Essa ação desativa o cadastro no sistema.`}
-        isLoading={deleteTutor.isPending}
+        title="Excluir acolhedor"
+        description={`Deseja excluir o acolhedor ${acolhedor.nome}? Essa ação desativa o cadastro no sistema.`}
+        isLoading={deleteAcolhedor.isPending}
       />
 
       <PrintAnimalModal
@@ -224,7 +228,7 @@ function TutorDetailPageContent() {
           if (!open) setAnimalToPrint(null);
         }}
         animal={animalToPrint}
-        tutor={tutor}
+        tutor={acolhedor}
       />
     </>
   );
@@ -255,6 +259,6 @@ function InfoField({
   );
 }
 
-export default function TutorDetailPage() {
-  return <TutorDetailPageContent />;
+export default function AcolhedorDetailPage() {
+  return <AcolhedorDetailPageContent />;
 }

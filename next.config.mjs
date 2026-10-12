@@ -5,6 +5,12 @@ const nextConfig = {
       { protocol: 'http', hostname: '**' },
     ],
   },
+  async redirects() {
+    return [
+      { source: '/tutores', destination: '/acolhedores', permanent: true },
+      { source: '/tutores/:id', destination: '/acolhedores/:id', permanent: true },
+    ];
+  },
 }
 
 export default nextConfig

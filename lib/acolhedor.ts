@@ -1,8 +1,5 @@
-import type { TutorFormValues } from '@/types/tutor';
-
-export function onlyDigits(value: string) {
-  return value.replace(/\D/g, '');
-}
+import { onlyDigits } from '@/lib/utils';
+import type { AcolhedorFormValues, SituacaoAcolhedor } from '@/types/acolhedor';
 
 export function formatCpf(value: string) {
   const digits = onlyDigits(value).slice(0, 11);
@@ -45,38 +42,7 @@ export function isValidCpf(value: string) {
   return getVerifier(9) === numbers[9] && getVerifier(10) === numbers[10];
 }
 
-export function formatDateToPtBr(value: string) {
-  if (!value) return '-';
-
-  const date = new Date(`${value}T00:00:00`);
-
-  if (Number.isNaN(date.getTime())) return '-';
-
-  return new Intl.DateTimeFormat('pt-BR', {
-    timeZone: 'UTC',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(date);
-}
-
-export function getAge(value: string) {
-  const birthDate = new Date(`${value}T00:00:00`);
-
-  if (Number.isNaN(birthDate.getTime())) return null;
-
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age -= 1;
-  }
-
-  return age;
-}
-
-export function getTutorInitials(name: string) {
+export function getAcolhedorInitials(name: string) {
   const initials = name
     .trim()
     .split(/\s+/)
@@ -88,7 +54,7 @@ export function getTutorInitials(name: string) {
   return initials || '--';
 }
 
-export function normalizeTutorValues(values: TutorFormValues): TutorFormValues {
+export function normalizeAcolhedorValues(values: AcolhedorFormValues): AcolhedorFormValues {
   return {
     nome: values.nome.trim(),
     cpf: formatCpf(values.cpf),
@@ -98,3 +64,8 @@ export function normalizeTutorValues(values: TutorFormValues): TutorFormValues {
     dataNascimento: values.dataNascimento,
   };
 }
+
+export const SITUACAO_LABELS: Record<SituacaoAcolhedor, string> = {
+  ADOTANTE: 'Adotante',
+  TUTOR: 'Tutor',
+};

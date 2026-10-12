@@ -13,25 +13,25 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useTutor } from '@/hooks/use-tutor';
+import { useAcolhedor } from '@/hooks/use-acolhedor';
 import { ANIMAL_PRINT_FIELDS, CATEGORY_LABELS, DEFAULT_SELECTED_FIELDS } from '@/lib/print-animal';
 import { cn } from '@/lib/utils';
 import type { Animal } from '@/services/animal.service';
-import type { Tutor } from '@/types/tutor';
+import type { Acolhedor } from '@/types/acolhedor';
 import { AnimalPrintDocument } from './animal-print-document';
 
 interface PrintAnimalModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   animal: Animal | null;
-  tutor?: Tutor | null;
+  tutor?: Acolhedor | null;
 }
 
 export function PrintAnimalModal({ open, onOpenChange, animal, tutor }: PrintAnimalModalProps) {
   const [selectedFields, setSelectedFields] = useState<string[]>(DEFAULT_SELECTED_FIELDS);
   const printContentRef = useRef<HTMLDivElement>(null);
 
-  const { data: fetchedTutor } = useTutor(animal?.tutorId ?? '');
+  const { data: fetchedTutor } = useAcolhedor(animal?.tutorId ?? '');
   const activeTutor = tutor !== undefined ? tutor : fetchedTutor;
 
   const handlePrint = useReactToPrint({

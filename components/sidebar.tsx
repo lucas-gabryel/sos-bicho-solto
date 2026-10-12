@@ -22,7 +22,7 @@ const NAV_GROUPS = [
   {
     section: 'Gestão',
     items: [
-      { href: '/tutores', label: 'Tutores', icon: Users },
+      { href: '/acolhedores', label: 'Acolhedores', icon: Users },
       { href: '/usuarios', label: 'Usuários do Sistema', icon: UserCog, adminOnly: true },
     ],
   },
@@ -31,7 +31,7 @@ const NAV_GROUPS = [
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
   '/animals': 'Animais',
-  '/tutores': 'Tutores',
+  '/acolhedores': 'Acolhedores',
   '/adocoes': 'Histórico de Adoções',
   '/usuarios': 'Usuários do Sistema',
 };
