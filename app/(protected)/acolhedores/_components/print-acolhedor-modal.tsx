@@ -1,0 +1,246 @@
+'use client';
+
+import { FileText, Printer, Square } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
+import { useReactToPrint } from 'react-to-print';
+
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { useAcolhedorAnimals } from '@/hooks/use-acolhedor-animals';
+import {
+  ACOLHEDOR_CATEGORY_LABELS,
+  ACOLHEDOR_PRINT_FIELDS,
+  DEFAULT_ACOLHEDOR_PRINT_FIELDS,
+} from '@/lib/print-acolhedor';
+import { cn } from '@/lib/utils';
+import type { Animal } from '@/services/animal.service';
+import type { Acolhedor } from '@/types/acolhedor';
+import { AcolhedorPrintDocument } from './acolhedor-print-document';
+
+interface PrintAcolhedorModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  acolhedor: Acolhedor | null;
+  animais?: Animal[];
+}
+
+export function PrintAcolhedorModal({
+  open,
+  onOpenChange,
+  acolhedor,
+  animais,
+}: PrintAcolhedorModalProps) {
+  const [selectedFields, setSelectedFields] = useState<string[]>(DEFAULT_ACOLHEDOR_PRINT_FIELDS);
+  const printContentRef = useRef<HTMLDivElement>(null);
+
+  const { data: fetchedAnimals } = useAcolhedorAnimals(acolhedor?.id ?? '');
+  const activeAnimals = animais !== undefined ? animais : fetchedAnimals;
+
+  const isAdotante = acolhedor?.situacao === 'ADOTANTE';
+  const labelTipo = isAdotante ? 'Adotante' : 'Tutor';
+
+  const handlePrint = useReactToPrint({
+    contentRef: printContentRef,
+    documentTitle: `Ficha_${labelTipo}_${acolhedor?.nome ? acolhedor.nome.replace(/\s+/g, '_') : 'Acolhedor'}`,
+    onAfterPrint: () => {
+      onOpenChange(false);
+    },
+  });
+
+  const categories = useMemo(() => {
+    const map = new Map<string, typeof ACOLHEDOR_PRINT_FIELDS>();
+    for (const field of ACOLHEDOR_PRINT_FIELDS) {
+      const current = map.get(field.category) ?? [];
+      current.push(field);
+      map.set(field.category, current);
+    }
+    return Array.from(map.entries()).map(([cat, fields]) => ({
+      categoryKey: cat as keyof typeof ACOLHEDOR_CATEGORY_LABELS,
+      label: ACOLHEDOR_CATEGORY_LABELS[cat as keyof typeof ACOLHEDOR_CATEGORY_LABELS] || cat,
+      fields,
+    }));
+  }, []);
+
+  const totalFields = ACOLHEDOR_PRINT_FIELDS.length;
+  const selectedCount = selectedFields.length;
+  const isAllSelected = selectedCount === totalFields;
+  const isNoneSelected = selectedCount === 0;
+
+  const toggleField = (id: string) => {
+    setSelectedFields((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
+  };
+
+  const handleSelectAll = () => {
+    setSelectedFields(ACOLHEDOR_PRINT_FIELDS.map((f) => f.id));
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedFields([]);
+  };
+
+  const onConfirmPrint = () => {
+    if (selectedFields.length === 0 || !acolhedor) return;
+    handlePrint();
+  };
+
+  if (!acolhedor) {
+    return null;
+  }
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center gap-2 text-foreground">
+              <div className="flex size-9 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
+                <Printer className="size-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg font-bold">
+                  Imprimir Ficha do {labelTipo}
+                </DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground">
+                  Selecione as informações de <strong className="text-foreground">{acolhedor.nome}</strong> que deseja
+                  incluir na impressão.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 p-2.5 text-xs">
+              <div className="flex items-center gap-1.5 font-medium text-foreground">
+                <FileText className="size-4 text-muted-foreground" />
+                <span>
+                  {selectedCount} de {totalFields} {selectedCount === 1 ? 'campo selecionado' : 'campos selecionados'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  aria-pressed={isAllSelected}
+                  className={cn(
+                    'h-7 px-2.5 text-xs transition-colors',
+                    isAllSelected
+                      ? 'font-semibold text-orange-600 hover:bg-orange-500/10 disabled:opacity-100 dark:text-orange-400 dark:hover:bg-orange-400/10 dark:disabled:opacity-100'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  )}
+                  onClick={handleSelectAll}
+                  disabled={isAllSelected}
+                >
+                  <Square
+                    className={cn(
+                      'size-3.5',
+                      isAllSelected && 'fill-orange-500 text-orange-500 dark:fill-orange-400 dark:text-orange-400',
+                    )}
+                  />
+                  Marcar todos
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  aria-pressed={isNoneSelected}
+                  className={cn(
+                    'h-7 px-2.5 text-xs transition-colors',
+                    isNoneSelected
+                      ? 'font-semibold text-orange-600 hover:bg-orange-500/10 disabled:opacity-100 dark:text-orange-400 dark:hover:bg-orange-400/10 dark:disabled:opacity-100'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  )}
+                  onClick={handleDeselectAll}
+                  disabled={isNoneSelected}
+                >
+                  <Square
+                    className={cn(
+                      'size-3.5',
+                      isNoneSelected && 'fill-orange-500 text-orange-500 dark:fill-orange-400 dark:text-orange-400',
+                    )}
+                  />
+                  Desmarcar todos
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {categories.map(({ categoryKey, label, fields }) => (
+                <div key={categoryKey} className="space-y-2">
+                  <p className="border-b border-border pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {label}
+                  </p>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {fields.map((field) => {
+                      const isChecked = selectedFields.includes(field.id);
+                      return (
+                        <label
+                          key={field.id}
+                          className="flex cursor-pointer select-none items-center gap-2.5 rounded-md border border-border/60 bg-card p-2 text-xs font-medium text-foreground transition-colors hover:bg-muted/50"
+                        >
+                          <input
+                            type="checkbox"
+                            className="size-4 rounded border-input accent-orange-600"
+                            checked={isChecked}
+                            onChange={() => toggleField(field.id)}
+                          />
+                          <span className="flex-1 truncate">{field.label}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={onConfirmPrint}
+              disabled={selectedCount === 0}
+            >
+              <Printer className="size-4" />
+              Imprimir ({selectedCount})
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Offscreen print document container for react-to-print */}
+      {open && (
+        <div
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            top: 0,
+            width: '210mm',
+            overflow: 'hidden',
+          }}
+          aria-hidden="true"
+        >
+          <AcolhedorPrintDocument
+            ref={printContentRef}
+            acolhedor={acolhedor}
+            animais={activeAnimals}
+            selectedFieldIds={selectedFields}
+          />
+        </div>
+      )}
+    </>
+  );
+}

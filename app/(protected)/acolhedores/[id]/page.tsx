@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Info, PencilLine, Trash2 } from 'lucide-react';
+import { ArrowLeft, Info, PencilLine, Printer, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -22,6 +22,7 @@ import { AnimalCard, AnimalCardSkeleton } from '../../animals/_components/animal
 import { DeleteConfirmationModal } from '../../animals/_components/delete-confirmation-modal';
 import { PrintAnimalModal } from '../../animals/_components/print-animal-modal';
 import { AcolhedorFormModal } from '../_components/acolhedor-form-modal';
+import { PrintAcolhedorModal } from '../_components/print-acolhedor-modal';
 
 function AcolhedorDetailPageContent() {
   const params = useParams<{ id: string }>();
@@ -38,6 +39,7 @@ function AcolhedorDetailPageContent() {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isPrintAcolhedorOpen, setIsPrintAcolhedorOpen] = useState(false);
   const [animalToPrint, setAnimalToPrint] = useState<Animal | null>(null);
 
   if (isAcolhedorLoading) {
@@ -124,30 +126,41 @@ function AcolhedorDetailPageContent() {
             </div>
           </div>
 
-          {isAdmin && (
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-transparent bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-950/60"
-                onClick={() => setIsEditModalOpen(true)}
-                disabled={updateAcolhedor.isPending}
-              >
-                <PencilLine className="size-3.5" />
-                Editar
-              </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsPrintAcolhedorOpen(true)}
+            >
+              <Printer className="size-3.5" />
+              Imprimir
+            </Button>
 
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setIsDeleteModalOpen(true)}
-                disabled={deleteAcolhedor.isPending}
-              >
-                <Trash2 className="size-3.5" />
-                {deleteAcolhedor.isPending ? 'Excluindo...' : 'Excluir'}
-              </Button>
-            </div>
-          )}
+            {isAdmin && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-transparent bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-950/60"
+                  onClick={() => setIsEditModalOpen(true)}
+                  disabled={updateAcolhedor.isPending}
+                >
+                  <PencilLine className="size-3.5" />
+                  Editar
+                </Button>
+
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  disabled={deleteAcolhedor.isPending}
+                >
+                  <Trash2 className="size-3.5" />
+                  {deleteAcolhedor.isPending ? 'Excluindo...' : 'Excluir'}
+                </Button>
+              </>
+            )}
+          </div>
         </div>
 
         <Card className="rounded-2xl p-6">
@@ -229,6 +242,13 @@ function AcolhedorDetailPageContent() {
         }}
         animal={animalToPrint}
         tutor={acolhedor}
+      />
+
+      <PrintAcolhedorModal
+        open={isPrintAcolhedorOpen}
+        onOpenChange={setIsPrintAcolhedorOpen}
+        acolhedor={acolhedor}
+        animais={adoptedAnimals}
       />
     </>
   );
