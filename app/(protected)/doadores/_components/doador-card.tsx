@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, Mail, MapPin, Phone, User } from 'lucide-react';
+import { Building2, Mail, MapPin, Pencil, Phone, User } from 'lucide-react';
 
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,8 +21,22 @@ export function DoadorCard({ doador, onEdit }: DoadorCardProps) {
   return (
     <Card
       onClick={() => onEdit?.(doador)}
-      className="group relative gap-0 rounded-[14px] border border-border p-0 ring-0 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md"
+      className="group relative cursor-pointer gap-0 rounded-[14px] border border-border p-0 ring-0 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md"
     >
+      {onEdit && (
+        <button
+          type="button"
+          aria-label={`Editar ${doador.nome}`}
+          title={`Editar ${doador.nome}`}
+          className="absolute right-2.5 top-2.5 z-10 flex size-7 items-center justify-center rounded-full bg-background/85 text-muted-foreground shadow-xs backdrop-blur-xs transition hover:bg-background hover:text-orange-600 dark:bg-background/90"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(doador);
+          }}
+        >
+          <Pencil className="size-3.5" />
+        </button>
+      )}
       <div className="p-4.5">
         <div className="mb-3 flex items-center gap-3">
           <div className="flex size-10.5 shrink-0 items-center justify-center rounded-full bg-orange-100 text-[17px] font-bold text-orange-700 dark:bg-orange-950/40 dark:text-orange-400">
