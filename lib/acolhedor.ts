@@ -1,15 +1,8 @@
+import { formatCpf, formatCpfCnpj, formatCnpj, isValidCpf, isValidCpfCnpj, isValidCnpj } from '@/lib/documentos';
 import { onlyDigits } from '@/lib/utils';
 import type { AcolhedorFormValues, SituacaoAcolhedor } from '@/types/acolhedor';
 
-export function formatCpf(value: string) {
-  const digits = onlyDigits(value).slice(0, 11);
-
-  if (digits.length <= 3) return digits;
-  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
-  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
-
-  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
-}
+export { formatCpf, formatCpfCnpj, formatCnpj, isValidCpf, isValidCpfCnpj, isValidCnpj };
 
 export function formatPhone(value: string) {
   const digits = onlyDigits(value).slice(0, 11);
@@ -21,26 +14,6 @@ export function formatPhone(value: string) {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
-export function isValidCpf(value: string) {
-  const digits = onlyDigits(value);
-
-  if (digits.length !== 11 || /^(\d)\1+$/.test(digits)) {
-    return false;
-  }
-
-  const numbers = digits.split('').map(Number);
-
-  const getVerifier = (sliceLength: number) => {
-    const total = numbers
-      .slice(0, sliceLength)
-      .reduce((sum, digit, index) => sum + digit * (sliceLength + 1 - index), 0);
-    const remainder = (total * 10) % 11;
-
-    return remainder === 10 ? 0 : remainder;
-  };
-
-  return getVerifier(9) === numbers[9] && getVerifier(10) === numbers[10];
-}
 
 export function getAcolhedorInitials(name: string) {
   const initials = name
