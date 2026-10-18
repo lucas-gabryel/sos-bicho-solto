@@ -6,6 +6,7 @@ import { useDeferredValue, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCreateDoador, useUpdateDoador } from '@/hooks/use-doador-mutation';
 import { useDoadores } from '@/hooks/use-doadores';
 import type { Doador, DoadorFormValues } from '@/types/doador';
@@ -31,6 +32,9 @@ export default function DoadoresPage() {
   const [page, setPage] = useState(1);
   const [modalState, setModalState] = useState<ModalState>(initialModalState);
 
+  const { data: currentUser } = useCurrentUser();
+  const isAdmin = currentUser?.role === 'admin';
+
   const { data, isLoading, isFetching } = useDoadores({
     page,
     limit: PAGE_SIZE,
@@ -48,6 +52,7 @@ export default function DoadoresPage() {
   };
 
   const openEditModal = (doador: Doador) => {
+    if (!isAdmin) return;
     setModalState({ open: true, mode: 'edit', doador });
   };
 
@@ -122,7 +127,11 @@ export default function DoadoresPage() {
               }`}
             >
               {doadores.map((doador) => (
-                <DoadorCard key={doador.id} doador={doador} onEdit={openEditModal} />
+                <DoadorCard
+                  key={doador.id}
+                  doador={doador}
+                  onEdit={isAdmin ? openEditModal : undefined}
+                />
               ))}
             </div>
 
@@ -135,7 +144,7 @@ export default function DoadoresPage() {
         )}
       </div>
 
-      {modalState.open ? (
+      {modalState.open && (modalState.mode !== 'edit' || isAdmin) ? (
         <DoadorFormModal
           open={modalState.open}
           mode={modalState.mode}

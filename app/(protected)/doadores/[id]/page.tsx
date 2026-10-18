@@ -211,7 +211,7 @@ function DoadorDetailPageContent() {
         </Card>
       </div>
 
-      {isEditModalOpen ? (
+      {isEditModalOpen && isAdmin ? (
         <DoadorFormModal
           open={isEditModalOpen}
           mode="edit"
