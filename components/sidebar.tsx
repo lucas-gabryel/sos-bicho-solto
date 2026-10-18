@@ -5,7 +5,7 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useLogout } from '@/hooks/use-logout';
 import { getRoleLabel } from '@/lib/user';
 import { cn } from '@/lib/utils';
-import { HeartHandshake, LayoutDashboard, LogOut, Menu, Moon, PawPrint, Sun, UserCog, Users, X } from 'lucide-react';
+import { HandHeart, LayoutDashboard, LogOut, Menu, Moon, PawPrint, Sun, UserCog, Users, X } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -23,7 +23,7 @@ const NAV_GROUPS = [
     section: 'Gestão',
     items: [
       { href: '/acolhedores', label: 'Acolhedores', icon: Users },
-      { href: '/doadores', label: 'Doadores', icon: HeartHandshake },
+      { href: '/doadores', label: 'Doadores', icon: HandHeart },
       { href: '/usuarios', label: 'Usuários do Sistema', icon: UserCog, adminOnly: true },
     ],
   },
