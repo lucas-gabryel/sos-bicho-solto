@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Building2, PencilLine, Trash2, User } from 'lucide-react';
+import { ArrowLeft, Building2, PencilLine, Plus, Trash2, User } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -9,11 +9,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useCreateDoacao } from '@/hooks/use-doacao-mutation';
+import { useDoacoes } from '@/hooks/use-doacoes';
 import { useDeleteDoador, useUpdateDoador } from '@/hooks/use-doador-mutation';
 import { useDoador } from '@/hooks/use-doadores';
 import { cn, onlyDigits } from '@/lib/utils';
 import type { DoadorFormValues } from '@/types/doador';
 import { DeleteConfirmationModal } from '../../animals/_components/delete-confirmation-modal';
+import { DoacaoCard } from '../../doacoes/_components/doacao-card';
+import { DoacaoFormModal } from '../../doacoes/_components/doacao-form-modal';
 import { DoadorFormModal } from '../_components/doador-form-modal';
 
 function formatDisplayDate(value?: string) {
@@ -42,6 +46,13 @@ function DoadorDetailPageContent() {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDoacaoModalOpen, setIsDoacaoModalOpen] = useState(false);
+
+  const { data: doacoesData, isLoading: isLoadingDoacoes } = useDoacoes({
+    doadorId: doadorId || undefined,
+    limit: 10,
+  });
+  const createDoacao = useCreateDoacao();
 
   if (isDoadorLoading) {
     return (
@@ -131,6 +142,15 @@ function DoadorDetailPageContent() {
           </div>
 
           <div className="flex flex-wrap gap-2">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setIsDoacaoModalOpen(true)}
+            >
+              <Plus className="size-3.5" />
+              Registrar Doação
+            </Button>
+
             {isAdmin && (
               <>
                 <Button
@@ -209,7 +229,57 @@ function DoadorDetailPageContent() {
             ) : null}
           </div>
         </Card>
+
+        {/* Histórico de Doações do Doador */}
+        <div className="mt-7">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Doações vinculadas</h3>
+              <p className="text-xs text-muted-foreground">
+                Histórico de contribuições recebidas deste doador
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsDoacaoModalOpen(true)}
+            >
+              <Plus className="size-3.5" />
+              Nova doação
+            </Button>
+          </div>
+
+          {isLoadingDoacoes ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <Skeleton className="h-32 rounded-2xl" />
+              <Skeleton className="h-32 rounded-2xl" />
+            </div>
+          ) : (doacoesData?.data ?? []).length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border py-10 text-center">
+              <p className="text-sm font-medium text-foreground">Nenhuma doação registrada para este doador</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Clique em &quot;Registrar Doação&quot; para adicionar a primeira contribuição.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+              {doacoesData?.data.map((doacao) => (
+                <DoacaoCard key={doacao.id} doacao={doacao} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
+
+      <DoacaoFormModal
+        open={isDoacaoModalOpen}
+        preSelectedDoador={doador}
+        isPending={createDoacao.isPending}
+        onOpenChange={setIsDoacaoModalOpen}
+        onSubmit={async (values) => {
+          await createDoacao.mutateAsync(values);
+        }}
+      />
 
       {isEditModalOpen && isAdmin ? (
         <DoadorFormModal
