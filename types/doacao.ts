@@ -1,9 +1,4 @@
-export type TipoDoacao =
-  | 'DINHEIRO'
-  | 'RACAO'
-  | 'MEDICAMENTO'
-  | 'PRODUTO_LIMPEZA'
-  | 'OUTRO';
+export type TipoDoacao = 'DINHEIRO' | 'RACAO' | 'MEDICAMENTO' | 'PRODUTO_LIMPEZA' | 'OUTRO';
 
 export const TIPO_DOACAO_LABELS: Record<TipoDoacao, string> = {
   DINHEIRO: 'Dinheiro',
@@ -49,4 +44,37 @@ export interface DoacaoFormValues {
   unidadeMedida?: string;
   descricao?: string;
   dataRecebimento: string;
+}
+
+export interface RelatorioDoacoesFilterParams {
+  dataInicio?: string;
+  dataFim?: string;
+  tipo?: TipoDoacao | '';
+}
+
+export interface ItemAgrupadoRelatorio {
+  tipo: TipoDoacao;
+  tipoLabel: string;
+  quantidadeTotal: number;
+  unidadeMedida?: string | null;
+}
+
+export interface ResumoRelatorio {
+  totalDinheiro: number;
+  totalDinheiroFormatado: string;
+  itensAgrupados: ItemAgrupadoRelatorio[];
+  totalRegistros: number;
+}
+
+export interface FiltrosRelatorio {
+  dataInicio?: string | null;
+  dataFim?: string | null;
+  tipo?: TipoDoacao | null;
+}
+
+export interface RelatorioDoacoesResponse {
+  resumo: ResumoRelatorio;
+  filtros: FiltrosRelatorio;
+  doacoes: Doacao[];
+  geradoEm: string;
 }

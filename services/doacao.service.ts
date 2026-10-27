@@ -1,5 +1,11 @@
-import { apiRequest, type RespostaPaginada } from '@/lib/api';
-import type { Doacao, DoacaoFormValues, TipoDoacao } from '@/types/doacao';
+import { apiDownloadBlob, apiRequest, type RespostaPaginada } from '@/lib/api';
+import type {
+  Doacao,
+  DoacaoFormValues,
+  RelatorioDoacoesFilterParams,
+  RelatorioDoacoesResponse,
+  TipoDoacao,
+} from '@/types/doacao';
 
 export interface ListDoacoesParams {
   page?: number;
@@ -48,5 +54,27 @@ export async function createDoacao(values: DoacaoFormValues): Promise<Doacao> {
   return apiRequest<Doacao>('/doacoes', {
     method: 'POST',
     body,
+  });
+}
+
+export async function getRelatorioDoacoes(
+  params: RelatorioDoacoesFilterParams = {},
+): Promise<RelatorioDoacoesResponse> {
+  return apiRequest<RelatorioDoacoesResponse>('/doacoes/relatorio', {
+    query: {
+      dataInicio: params.dataInicio || undefined,
+      dataFim: params.dataFim || undefined,
+      tipo: params.tipo || undefined,
+    },
+  });
+}
+
+export async function downloadRelatorioDoacoesPdf(params: RelatorioDoacoesFilterParams = {}): Promise<Blob> {
+  return apiDownloadBlob('/doacoes/relatorio/pdf', {
+    query: {
+      dataInicio: params.dataInicio || undefined,
+      dataFim: params.dataFim || undefined,
+      tipo: params.tipo || undefined,
+    },
   });
 }

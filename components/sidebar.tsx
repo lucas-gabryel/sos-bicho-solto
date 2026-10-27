@@ -5,7 +5,20 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useLogout } from '@/hooks/use-logout';
 import { getRoleLabel } from '@/lib/user';
 import { cn } from '@/lib/utils';
-import { Gift, HandHeart, LayoutDashboard, LogOut, Menu, Moon, PawPrint, Sun, UserCog, Users, X } from 'lucide-react';
+import {
+  Gift,
+  HandHeart,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Moon,
+  PawPrint,
+  Sun,
+  UserCog,
+  Users,
+  X,
+} from 'lucide-react';
+
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -30,6 +43,7 @@ const NAV_GROUPS = [
   },
 ] as const;
 
+
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
   '/animals': 'Animais',
@@ -39,6 +53,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/adocoes': 'Histórico de Adoções',
   '/usuarios': 'Usuários do Sistema',
 };
+
 
 export function Sidebar() {
   const router = useRouter();

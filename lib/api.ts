@@ -99,11 +99,50 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   const data = rawText ? (JSON.parse(rawText) as unknown) : null;
 
   if (!response.ok) {
-    throw new ApiError(
-      extractErrorMessage(data as ErrorBody | null, 'Ocorreu um erro inesperado.'),
-      response.status,
-    );
+    throw new ApiError(extractErrorMessage(data as ErrorBody | null, 'Ocorreu um erro inesperado.'), response.status);
   }
 
   return data as T;
+}
+
+export async function apiDownloadBlob(path: string, options: ApiRequestOptions = {}): Promise<Blob> {
+  const { method = 'GET', body, query, auth = true } = options;
+
+  const headers: Record<string, string> = {};
+
+  if (body !== undefined) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  if (auth) {
+    const token = getAuthToken();
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+  }
+
+  let response: Response;
+
+  try {
+    response = await fetch(buildUrl(path, query), {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    throw new ApiError('Não foi possível conectar à API. Verifique sua conexão e tente novamente.', 0);
+  }
+
+  if (!response.ok) {
+    const rawText = await response.text();
+    let data: ErrorBody | null = null;
+    try {
+      data = rawText ? (JSON.parse(rawText) as ErrorBody) : null;
+    } catch {
+      // ignore JSON parse error on non-json error responses
+    }
+    throw new ApiError(extractErrorMessage(data, 'Erro ao processar o download do arquivo.'), response.status);
+  }
+
+  return response.blob();
 }
