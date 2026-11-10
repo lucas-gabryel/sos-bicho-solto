@@ -1,21 +1,31 @@
 'use client';
 
-import { HeartHandshake, LoaderCircle, Plus, Search } from 'lucide-react';
-import { useDeferredValue, useState } from 'react';
+import {
+  Boxes,
+  Gift,
+  HeartHandshake,
+  LoaderCircle,
+  Plus,
+  Search,
+} from 'lucide-react';
+import { useState, useDeferredValue } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
 import { useCreateDoacao } from '@/hooks/use-doacao-mutation';
 import { useDoacoes } from '@/hooks/use-doacoes';
+import { cn } from '@/lib/utils';
 import type { DoacaoFormValues, TipoDoacao } from '@/types/doacao';
 import { TIPO_DOACAO_LABELS } from '@/types/doacao';
 import { DoacaoCard, DoacaoCardSkeleton } from './_components/doacao-card';
 import { DoacaoFormModal } from './_components/doacao-form-modal';
+import { EstoqueView } from './_components/estoque-view';
 
 const PAGE_SIZE = 9;
 
 export default function DoacoesPage() {
+  const [activeTab, setActiveTab] = useState<'doacoes' | 'estoque'>('doacoes');
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [tipoFilter, setTipoFilter] = useState<TipoDoacao | ''>('');
@@ -43,19 +53,69 @@ export default function DoacoesPage() {
       <div className="p-4 md:p-7">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-[22px] font-semibold text-foreground">Doações</h1>
+            <h1 className="text-[22px] font-semibold text-foreground">
+              {activeTab === 'doacoes' ? 'Doações' : 'Estoque e Consumo'}
+            </h1>
             <p className="mt-0.5 text-[13px] text-muted-foreground">
-              Acompanhamento e registro de doações financeiras e materiais recebidas pela ONG
+              {activeTab === 'doacoes'
+                ? 'Acompanhamento e registro de doações financeiras e materiais recebidas pela ONG'
+                : 'Controle de saldo, consumo e prevenção de desabastecimento de insumos'}
             </p>
           </div>
 
-          <Button variant="primary" size="default" onClick={() => setIsModalOpen(true)}>
-            <Plus className="size-4" />
-            Registrar Doação
-          </Button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Abas de Navegação */}
+            <div
+              role="tablist"
+              aria-label="Visualização do módulo"
+              className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'doacoes'}
+                onClick={() => setActiveTab('doacoes')}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                  activeTab === 'doacoes'
+                    ? 'bg-card text-foreground shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                <Gift className="size-3.5" />
+                <span>Doações</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'estoque'}
+                onClick={() => setActiveTab('estoque')}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                  activeTab === 'estoque'
+                    ? 'bg-card text-foreground shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                <Boxes className="size-3.5" />
+                <span>Estoque & Consumo</span>
+              </button>
+            </div>
+
+            {activeTab === 'doacoes' && (
+              <Button variant="primary" size="default" onClick={() => setIsModalOpen(true)}>
+                <Plus className="size-4" />
+                Registrar Doação
+              </Button>
+            )}
+          </div>
         </div>
 
-        <div className="mb-5 flex flex-wrap items-center gap-3">
+        {activeTab === 'estoque' ? (
+          <EstoqueView />
+        ) : (
+          <>
+            <div className="mb-5 flex flex-wrap items-center gap-3">
           <div className="relative min-w-52 flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -123,6 +183,8 @@ export default function DoacoesPage() {
                 <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
               </div>
             )}
+          </>
+        )}
           </>
         )}
       </div>
