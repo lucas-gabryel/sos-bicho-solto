@@ -110,7 +110,7 @@ export const ANIMAL_LIST_PRINT_COLUMNS: AnimalListPrintColumnOption[] = [
     label: 'Cadastro',
     defaultSelected: false,
     align: 'center',
-    render: (animal) => animal.data || formatDateToPtBr(animal.dataNascimento || ''),
+    render: (animal) => animal.data || '—',
   },
 ];
 

@@ -14,11 +14,15 @@ export const doadorKeys = {
   detail: (id: string) => [...doadorKeys.details(), id] as const,
 };
 
-export function useDoadores(params: ListDoadoresParams = {}) {
+export function useDoadores(
+  params: ListDoadoresParams = {},
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: doadorKeys.list(params),
     queryFn: () => getDoadores(params),
     placeholderData: keepPreviousData,
+    enabled: options?.enabled ?? true,
   });
 }
 

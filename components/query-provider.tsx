@@ -18,10 +18,6 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       new QueryClient({
         queryCache: new QueryCache({
           onError: (error) => {
-            // Não poluir a interface do usuário com toast vermelho caso o recurso apenas não tenha sido encontrado
-            if (error instanceof ApiError && error.status === 404) {
-              return;
-            }
             toast.error(getErrorMessage(error));
           },
         }),

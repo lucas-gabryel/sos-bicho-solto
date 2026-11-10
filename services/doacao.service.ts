@@ -1,4 +1,5 @@
-import { apiRequest, ApiError, type RespostaPaginada } from '@/lib/api';
+import { apiRequest, type RespostaPaginada } from '@/lib/api';
+import { parseNumericInput } from '@/lib/utils';
 import type { Doacao, DoacaoFormValues, TipoDoacao } from '@/types/doacao';
 
 export interface ListDoacoesParams {
@@ -9,38 +10,16 @@ export interface ListDoacoesParams {
   doadorId?: string;
 }
 
-function parseNumber(value?: string | number): number | undefined {
-  if (value === undefined || value === null || value === '') return undefined;
-  if (typeof value === 'number') return value;
-  const parsed = parseFloat(String(value).replace(/\./g, '').replace(',', '.'));
-  return Number.isNaN(parsed) ? undefined : parsed;
-}
-
 export async function getDoacoes(params: ListDoacoesParams = {}): Promise<RespostaPaginada<Doacao>> {
-  try {
-    return await apiRequest<RespostaPaginada<Doacao>>('/doacoes', {
-      query: {
-        page: params.page,
-        limit: params.limit,
-        busca: params.busca,
-        tipo: params.tipo,
-        doadorId: params.doadorId,
-      },
-    });
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 404) {
-      return {
-        data: [],
-        meta: {
-          page: params.page || 1,
-          limit: params.limit || 10,
-          total: 0,
-          totalPages: 0,
-        },
-      };
-    }
-    throw error;
-  }
+  return apiRequest<RespostaPaginada<Doacao>>('/doacoes', {
+    query: {
+      page: params.page,
+      limit: params.limit,
+      busca: params.busca,
+      tipo: params.tipo,
+      doadorId: params.doadorId,
+    },
+  });
 }
 
 export async function getDoacaoById(id: string): Promise<Doacao> {
@@ -53,8 +32,8 @@ export async function createDoacao(values: DoacaoFormValues): Promise<Doacao> {
     tipo: values.tipo,
     anonima: values.anonima,
     doadorId: values.anonima ? undefined : values.doadorId || undefined,
-    valor: isDinheiro ? parseNumber(values.valor) : undefined,
-    quantidade: !isDinheiro ? parseNumber(values.quantidade) : undefined,
+    valor: isDinheiro ? parseNumericInput(values.valor) : undefined,
+    quantidade: !isDinheiro ? parseNumericInput(values.quantidade) : undefined,
     unidadeMedida: !isDinheiro && values.unidadeMedida ? values.unidadeMedida.trim() : undefined,
     descricao: values.descricao ? values.descricao.trim() : undefined,
     dataRecebimento: values.dataRecebimento,

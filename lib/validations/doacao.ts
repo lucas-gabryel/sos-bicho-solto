@@ -1,4 +1,5 @@
 import { z } from 'zod/v3';
+import { getTodayDateString, parseNumericInput } from '@/lib/utils';
 import type { DoacaoFormValues } from '@/types/doacao';
 
 export const doacaoSchema = z
@@ -24,12 +25,9 @@ export const doacaoSchema = z
     }
 
     if (data.tipo === 'DINHEIRO') {
-      const numVal =
-        typeof data.valor === 'number'
-          ? data.valor
-          : parseFloat(String(data.valor || '').replace(/\./g, '').replace(',', '.'));
+      const numVal = parseNumericInput(data.valor);
 
-      if (Number.isNaN(numVal) || numVal <= 0) {
+      if (numVal === undefined || numVal <= 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['valor'],
@@ -37,12 +35,9 @@ export const doacaoSchema = z
         });
       }
     } else {
-      const numQtd =
-        typeof data.quantidade === 'number'
-          ? data.quantidade
-          : parseFloat(String(data.quantidade || '').replace(',', '.'));
+      const numQtd = parseNumericInput(data.quantidade);
 
-      if (Number.isNaN(numQtd) || numQtd <= 0) {
+      if (numQtd === undefined || numQtd <= 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['quantidade'],
@@ -52,6 +47,19 @@ export const doacaoSchema = z
     }
   });
 
+export function getDefaultDoacaoFormValues(): DoacaoFormValues {
+  return {
+    tipo: 'DINHEIRO',
+    anonima: false,
+    doadorId: '',
+    valor: '',
+    quantidade: '',
+    unidadeMedida: '',
+    descricao: '',
+    dataRecebimento: getTodayDateString(),
+  };
+}
+
 export const defaultDoacaoFormValues: DoacaoFormValues = {
   tipo: 'DINHEIRO',
   anonima: false,
@@ -60,5 +68,7 @@ export const defaultDoacaoFormValues: DoacaoFormValues = {
   quantidade: '',
   unidadeMedida: '',
   descricao: '',
-  dataRecebimento: new Date().toISOString().slice(0, 10),
+  get dataRecebimento() {
+    return getTodayDateString();
+  },
 };

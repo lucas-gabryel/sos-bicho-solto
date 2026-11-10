@@ -15,8 +15,5 @@ export function useCreateDoacao() {
       queryClient.setQueryData(doacaoKeys.detail(createdDoacao.id), createdDoacao);
       toast.success('Doação registrada com sucesso!');
     },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Erro ao registrar doação. Tente novamente.');
-    },
   });
 }

@@ -30,12 +30,25 @@ export function DoacaoFormModal({
   onSubmit,
 }: DoacaoFormModalProps) {
   const [doadorSearch, setDoadorSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [pickedDoador, setPickedDoador] = useState<Doador | null>(null);
 
-  const { data: doadoresPage, isLoading: isLoadingDoadores } = useDoadores({
-    limit: 10,
-    busca: doadorSearch.trim() || undefined,
-  });
+  // Debounce de 300ms para busca de doador durante digitação
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(doadorSearch);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [doadorSearch]);
+
+  // Consulta ativada SOMENTE quando o modal estiver aberto
+  const { data: doadoresPage, isLoading: isLoadingDoadores } = useDoadores(
+    {
+      limit: 10,
+      busca: debouncedSearch.trim() || undefined,
+    },
+    { enabled: open },
+  );
 
   const {
     control,

@@ -1,4 +1,4 @@
-import { apiRequest, type RespostaPaginada } from '@/lib/api';
+import { apiRequest, fetchAllPages, type RespostaPaginada } from '@/lib/api';
 import { formatCpf, normalizeAcolhedorValues } from '@/lib/acolhedor';
 import type { Acolhedor, AcolhedorFormValues, SituacaoAcolhedor } from '@/types/acolhedor';
 
@@ -115,22 +115,9 @@ export async function linkAnimalToAcolhedor(acolhedorId: string, animalId: strin
 export async function getAllAcolhedores(
   params: Omit<ListAcolhedoresParams, 'page' | 'limit'> = {},
 ): Promise<Acolhedor[]> {
-  const all: Acolhedor[] = [];
-  let currentPage = 1;
-  const pageSize = 100;
-  let totalPages = 1;
-
-  do {
-    const res = await getAcolhedores({
-      ...params,
-      page: currentPage,
-      limit: pageSize,
-    });
-    all.push(...res.data);
-    totalPages = res.meta.totalPages;
-    currentPage += 1;
-  } while (currentPage <= totalPages);
-
-  return all;
+  return fetchAllPages(
+    ({ page, limit }) => getAcolhedores({ ...params, page, limit }),
+    100,
+  );
 }
 

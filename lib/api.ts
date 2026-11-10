@@ -24,6 +24,28 @@ export interface RespostaPaginada<T> {
 
 export const LIST_LIMIT = 100;
 
+/**
+ * Utilitário genérico e seguro para acumular todas as páginas de um endpoint paginado
+ * em um único array, com proteção contra loops infinitos.
+ */
+export async function fetchAllPages<T>(
+  fetchPageFn: (params: { page: number; limit: number }) => Promise<RespostaPaginada<T>>,
+  pageSize = LIST_LIMIT,
+): Promise<T[]> {
+  const all: T[] = [];
+  let currentPage = 1;
+  let totalPages = 1;
+
+  do {
+    const res = await fetchPageFn({ page: currentPage, limit: pageSize });
+    all.push(...res.data);
+    totalPages = res.meta?.totalPages || 1;
+    currentPage += 1;
+  } while (currentPage <= totalPages);
+
+  return all;
+}
+
 interface ApiRequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   body?: unknown;
@@ -55,26 +77,28 @@ function extractErrorMessage(
   status: number,
   fallback: string,
 ): string {
+  if (body) {
+    let message = '';
+    if (Array.isArray(body.message)) {
+      message = body.message.join(' ');
+    } else {
+      message = body.message ?? body.error ?? '';
+    }
+
+    if (message.startsWith('Cannot GET') || message.startsWith('Cannot POST')) {
+      return 'Serviço temporariamente indisponível. Tente novamente mais tarde.';
+    }
+
+    if (message.trim()) {
+      return message;
+    }
+  }
+
   if (status === 404) {
     return 'O recurso solicitado não foi encontrado ou ainda não está disponível.';
   }
 
-  if (!body) {
-    return fallback;
-  }
-
-  let message = '';
-  if (Array.isArray(body.message)) {
-    message = body.message.join(' ');
-  } else {
-    message = body.message ?? body.error ?? '';
-  }
-
-  if (message.startsWith('Cannot GET') || message.startsWith('Cannot POST')) {
-    return 'Serviço temporariamente indisponível. Tente novamente mais tarde.';
-  }
-
-  return message || fallback;
+  return fallback;
 }
 
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {

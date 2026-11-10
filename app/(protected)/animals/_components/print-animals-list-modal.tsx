@@ -3,6 +3,7 @@
 import { FileText, Loader2, Printer, Square } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -98,6 +99,11 @@ export function PrintAnimalsListModal({
       }, 250);
     } catch (err) {
       console.error('Erro ao carregar dados dos animais para impressão:', err);
+      toast.error(
+        err instanceof Error
+          ? `Falha ao preparar impressão: ${err.message}`
+          : 'Não foi possível carregar os dados dos animais para impressão.',
+      );
       setIsLoadingData(false);
     }
   };

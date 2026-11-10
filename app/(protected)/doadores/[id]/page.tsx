@@ -7,6 +7,7 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useCreateDoacao } from '@/hooks/use-doacao-mutation';
@@ -47,10 +48,12 @@ function DoadorDetailPageContent() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDoacaoModalOpen, setIsDoacaoModalOpen] = useState(false);
+  const [doacoesPage, setDoacoesPage] = useState(1);
 
   const { data: doacoesData, isLoading: isLoadingDoacoes } = useDoacoes({
     doadorId: doadorId || undefined,
-    limit: 10,
+    page: doacoesPage,
+    limit: 9,
   });
   const createDoacao = useCreateDoacao();
 
@@ -262,11 +265,26 @@ function DoadorDetailPageContent() {
               </p>
             </div>
           ) : (
-            <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
-              {doacoesData?.data.map((doacao) => (
-                <DoacaoCard key={doacao.id} doacao={doacao} />
-              ))}
-            </div>
+            <>
+              <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+                {doacoesData?.data.map((doacao) => (
+                  <DoacaoCard key={doacao.id} doacao={doacao} />
+                ))}
+              </div>
+
+              {doacoesData?.meta && doacoesData.meta.totalPages > 1 && (
+                <div className="mt-6 flex flex-col items-center justify-between gap-3 sm:flex-row">
+                  <p className="text-xs text-muted-foreground">
+                    Exibindo {doacoesData.data.length} de {doacoesData.meta.total} doações vinculadas
+                  </p>
+                  <Pagination
+                    page={doacoesPage}
+                    totalPages={doacoesData.meta.totalPages}
+                    onPageChange={setDoacoesPage}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
