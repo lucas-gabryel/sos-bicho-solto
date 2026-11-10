@@ -111,3 +111,26 @@ export async function linkAnimalToAcolhedor(acolhedorId: string, animalId: strin
     body: { tutorId: acolhedorId, animalId },
   });
 }
+
+export async function getAllAcolhedores(
+  params: Omit<ListAcolhedoresParams, 'page' | 'limit'> = {},
+): Promise<Acolhedor[]> {
+  const all: Acolhedor[] = [];
+  let currentPage = 1;
+  const pageSize = 100;
+  let totalPages = 1;
+
+  do {
+    const res = await getAcolhedores({
+      ...params,
+      page: currentPage,
+      limit: pageSize,
+    });
+    all.push(...res.data);
+    totalPages = res.meta.totalPages;
+    currentPage += 1;
+  } while (currentPage <= totalPages);
+
+  return all;
+}
+

@@ -1,6 +1,6 @@
 'use client';
 
-import { LoaderCircle, Plus, Search, Users } from 'lucide-react';
+import { LoaderCircle, Plus, Printer, Search, Users } from 'lucide-react';
 import { useDeferredValue, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 import type { Acolhedor, AcolhedorFormValues, SituacaoAcolhedor } from '@/types/acolhedor';
 import { AcolhedorCard, AcolhedorCardSkeleton } from './_components/acolhedor-card';
 import { AcolhedorFormModal } from './_components/acolhedor-form-modal';
+import { PrintAcolhedoresListModal } from './_components/print-acolhedores-list-modal';
 
 const PAGE_SIZE = 9;
 
@@ -39,6 +40,7 @@ function AcolhedoresPageContent() {
   const [page, setPage] = useState(1);
   const [situacao, setSituacao] = useState<SituacaoAcolhedor | undefined>(undefined);
   const [modalState, setModalState] = useState<ModalState>(initialModalState);
+  const [isPrintListOpen, setIsPrintListOpen] = useState(false);
 
   const { data, isLoading, isFetching } = useAcolhedores({
     page,
@@ -83,10 +85,21 @@ function AcolhedoresPageContent() {
             </p>
           </div>
 
-          <Button variant="primary" size="default" onClick={openCreateModal}>
-            <Plus className="size-4" />
-            Cadastrar adotante
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="default"
+              onClick={() => setIsPrintListOpen(true)}
+              title="Imprimir / Exportar lista de acolhedores em PDF"
+            >
+              <Printer className="size-4" />
+              Imprimir listagem
+            </Button>
+            <Button variant="primary" size="default" onClick={openCreateModal}>
+              <Plus className="size-4" />
+              Cadastrar adotante
+            </Button>
+          </div>
         </div>
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -178,6 +191,16 @@ function AcolhedoresPageContent() {
           onSubmit={handleSubmit}
         />
       ) : null}
+
+      <PrintAcolhedoresListModal
+        open={isPrintListOpen}
+        onOpenChange={setIsPrintListOpen}
+        currentFilters={{
+          busca: deferredSearch.trim() || undefined,
+          situacao,
+        }}
+        currentPageAcolhedores={acolhedores}
+      />
 
       {isPending ? (
         <div className="pointer-events-none fixed bottom-4 right-4 z-60 flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground shadow-lg">
