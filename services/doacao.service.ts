@@ -1,4 +1,4 @@
-import { apiRequest, type RespostaPaginada } from '@/lib/api';
+import { apiRequest, ApiError, type RespostaPaginada } from '@/lib/api';
 import type { Doacao, DoacaoFormValues, TipoDoacao } from '@/types/doacao';
 
 export interface ListDoacoesParams {
@@ -17,15 +17,30 @@ function parseNumber(value?: string | number): number | undefined {
 }
 
 export async function getDoacoes(params: ListDoacoesParams = {}): Promise<RespostaPaginada<Doacao>> {
-  return apiRequest<RespostaPaginada<Doacao>>('/doacoes', {
-    query: {
-      page: params.page,
-      limit: params.limit,
-      busca: params.busca,
-      tipo: params.tipo,
-      doadorId: params.doadorId,
-    },
-  });
+  try {
+    return await apiRequest<RespostaPaginada<Doacao>>('/doacoes', {
+      query: {
+        page: params.page,
+        limit: params.limit,
+        busca: params.busca,
+        tipo: params.tipo,
+        doadorId: params.doadorId,
+      },
+    });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      return {
+        data: [],
+        meta: {
+          page: params.page || 1,
+          limit: params.limit || 10,
+          total: 0,
+          totalPages: 0,
+        },
+      };
+    }
+    throw error;
+  }
 }
 
 export async function getDoacaoById(id: string): Promise<Doacao> {

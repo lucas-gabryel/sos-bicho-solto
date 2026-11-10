@@ -50,16 +50,31 @@ function buildUrl(path: string, query?: ApiRequestOptions['query']) {
   return url.toString();
 }
 
-function extractErrorMessage(body: ErrorBody | null, fallback: string): string {
+function extractErrorMessage(
+  body: ErrorBody | null,
+  status: number,
+  fallback: string,
+): string {
+  if (status === 404) {
+    return 'O recurso solicitado não foi encontrado ou ainda não está disponível.';
+  }
+
   if (!body) {
     return fallback;
   }
 
+  let message = '';
   if (Array.isArray(body.message)) {
-    return body.message.join(' ');
+    message = body.message.join(' ');
+  } else {
+    message = body.message ?? body.error ?? '';
   }
 
-  return body.message ?? body.error ?? fallback;
+  if (message.startsWith('Cannot GET') || message.startsWith('Cannot POST')) {
+    return 'Serviço temporariamente indisponível. Tente novamente mais tarde.';
+  }
+
+  return message || fallback;
 }
 
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
@@ -100,7 +115,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
 
   if (!response.ok) {
     throw new ApiError(
-      extractErrorMessage(data as ErrorBody | null, 'Ocorreu um erro inesperado.'),
+      extractErrorMessage(data as ErrorBody | null, response.status, 'Ocorreu um erro inesperado.'),
       response.status,
     );
   }
