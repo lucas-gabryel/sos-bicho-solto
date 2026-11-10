@@ -1,4 +1,4 @@
-import { apiRequest, LIST_LIMIT, type RespostaPaginada } from '@/lib/api';
+import { apiRequest, fetchAllPages, LIST_LIMIT, type RespostaPaginada } from '@/lib/api';
 
 export type AnimalStatus = 'Adotado' | 'Acolhimento';
 export type AnimalEsp = 'Cão' | 'Gato';
@@ -253,3 +253,13 @@ export async function deleteAnimal({ id, senhaAdmin }: DeleteAnimalInput): Promi
     body: { senhaAdmin },
   });
 }
+
+export async function getAllAnimals(
+  params: Omit<ListAnimalsParams, 'page' | 'limit'> = {},
+): Promise<Animal[]> {
+  return fetchAllPages(
+    ({ page, limit }) => getAnimals({ ...params, page, limit }),
+    LIST_LIMIT,
+  );
+}
+

@@ -1,5 +1,5 @@
 import { z } from 'zod/v3';
-import { parseNumericInput } from '@/lib/utils';
+import { getTodayDateString, parseNumericInput } from '@/lib/utils';
 import type { DoacaoFormValues } from '@/types/doacao';
 
 export const doacaoSchema = z
@@ -47,6 +47,19 @@ export const doacaoSchema = z
     }
   });
 
+export function getDefaultDoacaoFormValues(): DoacaoFormValues {
+  return {
+    tipo: 'DINHEIRO',
+    anonima: false,
+    doadorId: '',
+    valor: '',
+    quantidade: '',
+    unidadeMedida: '',
+    descricao: '',
+    dataRecebimento: getTodayDateString(),
+  };
+}
+
 export const defaultDoacaoFormValues: DoacaoFormValues = {
   tipo: 'DINHEIRO',
   anonima: false,
@@ -55,5 +68,7 @@ export const defaultDoacaoFormValues: DoacaoFormValues = {
   quantidade: '',
   unidadeMedida: '',
   descricao: '',
-  dataRecebimento: new Date().toISOString().slice(0, 10),
+  get dataRecebimento() {
+    return getTodayDateString();
+  },
 };

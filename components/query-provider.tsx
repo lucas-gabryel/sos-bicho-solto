@@ -4,6 +4,8 @@ import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@ta
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+import { ApiError } from '@/lib/api';
+
 const FIVE_MINUTES = 5 * 60 * 1000;
 
 function getErrorMessage(error: unknown) {
@@ -15,7 +17,9 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
     () =>
       new QueryClient({
         queryCache: new QueryCache({
-          onError: (error) => toast.error(getErrorMessage(error)),
+          onError: (error) => {
+            toast.error(getErrorMessage(error));
+          },
         }),
         mutationCache: new MutationCache({
           onError: (error) => toast.error(getErrorMessage(error)),

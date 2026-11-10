@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, Search } from 'lucide-react';
+import { Plus, Printer, Search } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import type { Animal, AnimalEsp, AnimalStatus } from '@/services/animal.service'
 import { AnimalCard, AnimalCardSkeleton } from './_components/animal-card';
 import { AnimalFormModal } from './_components/animal-form-modal';
 import { PrintAnimalModal } from './_components/print-animal-modal';
+import { PrintAnimalsListModal } from './_components/print-animals-list-modal';
 
 const PAGE_SIZE = 12;
 
@@ -21,6 +22,7 @@ export default function AnimalsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPrintListOpen, setIsPrintListOpen] = useState(false);
   const [animalToPrint, setAnimalToPrint] = useState<Animal | null>(null);
 
   const { data, isLoading, isFetching } = useAnimals({
@@ -46,10 +48,21 @@ export default function AnimalsPage() {
           <h1 className="text-[22px] font-semibold text-foreground">Animais</h1>
           <p className="mt-0.5 text-[13px] text-muted-foreground">Gerenciamento de animais resgatados</p>
         </div>
-        <Button variant="primary" size="default" onClick={() => setIsModalOpen(true)}>
-          <Plus className="size-4" />
-          Registrar animal
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="default"
+            onClick={() => setIsPrintListOpen(true)}
+            title="Imprimir / Exportar lista em PDF"
+          >
+            <Printer className="size-4" />
+            Imprimir listagem
+          </Button>
+          <Button variant="primary" size="default" onClick={() => setIsModalOpen(true)}>
+            <Plus className="size-4" />
+            Registrar animal
+          </Button>
+        </div>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -121,6 +134,17 @@ export default function AnimalsPage() {
           if (!open) setAnimalToPrint(null);
         }}
         animal={animalToPrint}
+      />
+
+      <PrintAnimalsListModal
+        open={isPrintListOpen}
+        onOpenChange={setIsPrintListOpen}
+        currentFilters={{
+          busca: search.trim() || undefined,
+          especie: species === 'all' ? undefined : (species as AnimalEsp),
+          status: statusFilter === 'all' ? undefined : (statusFilter as AnimalStatus),
+        }}
+        currentPageAnimals={animals}
       />
     </div>
   );

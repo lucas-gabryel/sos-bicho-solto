@@ -1,4 +1,4 @@
-import { apiRequest, type RespostaPaginada } from '@/lib/api';
+import { apiRequest, fetchAllPages, type RespostaPaginada } from '@/lib/api';
 import { formatCpf, normalizeAcolhedorValues } from '@/lib/acolhedor';
 import type { Acolhedor, AcolhedorFormValues, SituacaoAcolhedor } from '@/types/acolhedor';
 
@@ -111,3 +111,13 @@ export async function linkAnimalToAcolhedor(acolhedorId: string, animalId: strin
     body: { tutorId: acolhedorId, animalId },
   });
 }
+
+export async function getAllAcolhedores(
+  params: Omit<ListAcolhedoresParams, 'page' | 'limit'> = {},
+): Promise<Acolhedor[]> {
+  return fetchAllPages(
+    ({ page, limit }) => getAcolhedores({ ...params, page, limit }),
+    100,
+  );
+}
+
