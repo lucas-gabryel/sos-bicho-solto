@@ -44,12 +44,8 @@ export function EstoqueView() {
   const [itemSelecionado, setItemSelecionado] = useState<ItemSaldoEstoque | null>(null);
   const [tipoModal, setTipoModal] = useState<TipoMovimentacaoEstoque>('SAIDA');
 
-  const { data: resumo, isLoading: loadingResumo, refetch: refetchResumo } = useResumoSaldos();
-  const {
-    data: movimentacoesData,
-    isLoading: loadingMovs,
-    refetch: refetchMovs,
-  } = useMovimentacoesEstoque({
+  const { data: resumo, isLoading: loadingResumo } = useResumoSaldos();
+  const { data: movimentacoesData, isLoading: loadingMovs } = useMovimentacoesEstoque({
     page: paginaMov,
     limit: 8,
     tipo: filtroTipoMov || undefined,
@@ -68,8 +64,6 @@ export function EstoqueView() {
 
   const handleSalvarMovimentacao = async (values: RegistrarMovimentacaoFormValues) => {
     await registrarMut.mutateAsync(values);
-    refetchResumo();
-    refetchMovs();
   };
 
   const itensFiltrados = (resumo?.itens || []).filter((item) =>

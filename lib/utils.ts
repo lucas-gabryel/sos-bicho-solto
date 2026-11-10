@@ -8,3 +8,25 @@ export function cn(...inputs: ClassValue[]) {
 export function onlyDigits(value: string) {
   return value.replace(/\D/g, '');
 }
+
+/**
+ * Converte entradas numéricas (string, number) em number de forma determinística,
+ * suportando formatos decimais com ponto (1.5) ou vírgula (1,5 / 1.250,50).
+ */
+export function parseNumericInput(value?: string | number | null): number | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+  if (typeof value === 'number') return Number.isNaN(value) ? undefined : value;
+  const str = String(value).trim();
+  if (!str) return undefined;
+
+  // Se contiver vírgula, assume padrão brasileiro (ex: 1.250,50 ou 1,5)
+  if (str.includes(',')) {
+    const cleaned = str.replace(/\./g, '').replace(',', '.');
+    const num = parseFloat(cleaned);
+    return Number.isNaN(num) ? undefined : num;
+  }
+
+  // Se não contiver vírgula, assume formato decimal comum com ponto (ex: 1.5 ou 10)
+  const num = parseFloat(str);
+  return Number.isNaN(num) ? undefined : num;
+}

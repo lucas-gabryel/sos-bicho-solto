@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LoaderCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { parseNumericInput } from '@/lib/utils';
 import type { ItemSaldoEstoque, RegistrarMovimentacaoFormValues, TipoMovimentacaoEstoque } from '@/types/estoque';
 
 interface RegistrarMovimentacaoModalProps {
@@ -40,22 +41,30 @@ export function RegistrarMovimentacaoModal({
   const [motivo, setMotivo] = useState('');
   const [erro, setErro] = useState<string | null>(null);
 
-  // Sincroniza quando o modal abre com item selecionado
-  const handleOpenChange = (isOpen: boolean) => {
-    if (isOpen && itemPreSelecionado) {
-      setTipo(tipoMovimentoPadrao);
-      setTipoItem(itemPreSelecionado.tipoItem);
-      setDescricaoItem(itemPreSelecionado.descricaoItem);
-      setUnidadeMedida(itemPreSelecionado.unidadeMedida);
-      setQuantidade('');
-      setMotivo('');
-      setErro(null);
-    } else if (isOpen) {
-      setTipo(tipoMovimentoPadrao);
-      setQuantidade('');
-      setMotivo('');
-      setErro(null);
+  // Sincroniza e reseta os estados sempre que o modal for aberto pelo componente pai
+  useEffect(() => {
+    if (open) {
+      if (itemPreSelecionado) {
+        setTipo(tipoMovimentoPadrao);
+        setTipoItem(itemPreSelecionado.tipoItem);
+        setDescricaoItem(itemPreSelecionado.descricaoItem);
+        setUnidadeMedida(itemPreSelecionado.unidadeMedida);
+        setQuantidade('');
+        setMotivo('');
+        setErro(null);
+      } else {
+        setTipo(tipoMovimentoPadrao);
+        setTipoItem('RACAO');
+        setDescricaoItem('');
+        setUnidadeMedida('KG');
+        setQuantidade('');
+        setMotivo('');
+        setErro(null);
+      }
     }
+  }, [open, itemPreSelecionado, tipoMovimentoPadrao]);
+
+  const handleOpenChange = (isOpen: boolean) => {
     onOpenChange(isOpen);
   };
 
@@ -63,8 +72,18 @@ export function RegistrarMovimentacaoModal({
     e.preventDefault();
     setErro(null);
 
-    const qtdNum = parseFloat(quantidade.replace(',', '.'));
-    if (!qtdNum || qtdNum <= 0) {
+    const qtdNum = parseNumericInput(quantidade);
+    if (qtdNum === undefined || Number.isNaN(qtdNum)) {
+      setErro('Informe uma quantidade numérica válida.');
+      return;
+    }
+
+    if (tipo === 'AJUSTE') {
+      if (qtdNum < 0) {
+        setErro('A quantidade para ajuste deve ser maior ou igual a zero.');
+        return;
+      }
+    } else if (qtdNum <= 0) {
       setErro('A quantidade deve ser um número maior que zero.');
       return;
     }
@@ -179,10 +198,10 @@ export function RegistrarMovimentacaoModal({
               <Input
                 type="number"
                 step="0.01"
-                min="0.01"
+                min={tipo === 'AJUSTE' ? '0' : '0.01'}
                 value={quantidade}
                 onChange={(e) => setQuantidade(e.target.value)}
-                placeholder="Ex: 2.5"
+                placeholder={tipo === 'AJUSTE' ? 'Ex: 0 ou 10.5' : 'Ex: 2.5'}
                 required
               />
             </div>

@@ -1,4 +1,5 @@
 import { apiRequest, type RespostaPaginada } from '@/lib/api';
+import { parseNumericInput } from '@/lib/utils';
 import type { TipoDoacao } from '@/types/doacao';
 import type {
   ItemSaldoEstoque,
@@ -14,13 +15,6 @@ export interface ListMovimentacoesParams {
   busca?: string;
   tipo?: TipoMovimentacaoEstoque;
   tipoItem?: TipoDoacao;
-}
-
-function parseNumber(value?: string | number): number | undefined {
-  if (value === undefined || value === null || value === '') return undefined;
-  if (typeof value === 'number') return value;
-  const parsed = parseFloat(String(value).replace(/\./g, '').replace(',', '.'));
-  return Number.isNaN(parsed) ? undefined : parsed;
 }
 
 export async function getResumoSaldos(): Promise<ResumoEstoqueResponse> {
@@ -44,7 +38,7 @@ export async function getMovimentacoes(
 export async function registrarMovimentacao(
   values: RegistrarMovimentacaoFormValues,
 ): Promise<MovimentacaoEstoque> {
-  const parsedQtd = parseNumber(values.quantidade);
+  const parsedQtd = parseNumericInput(values.quantidade);
   const body = {
     tipo: values.tipo,
     tipoItem: values.tipoItem,

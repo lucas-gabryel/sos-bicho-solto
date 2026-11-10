@@ -1,11 +1,18 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Check, Search, UserCheck, UserX, X } from 'lucide-react';
+import { Check, Search, UserCheck, UserX } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useDoadores } from '@/hooks/use-doadores';
@@ -67,25 +74,6 @@ export function DoacaoFormModal({
     );
   }, [open, preSelectedDoador, reset]);
 
-  useEffect(() => {
-    if (!open) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isPending) {
-        onOpenChange(false);
-      }
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener('keydown', onKeyDown);
-    };
-  }, [open, isPending, onOpenChange]);
-
   const doadoresList = doadoresPage?.data ?? [];
 
   const selectedDoador =
@@ -119,40 +107,14 @@ export function DoacaoFormModal({
   const isDinheiro = tipo === 'DINHEIRO';
 
   return (
-    <div className="fixed inset-0 z-70 flex items-center justify-center p-4">
-      <button
-        type="button"
-        aria-label="Fechar modal"
-        onClick={() => !isPending && onOpenChange(false)}
-        className="absolute inset-0 bg-black/45 backdrop-blur-sm"
-      />
-
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="doacao-form-title"
-        className="relative z-10 flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-[18px] border border-border bg-card shadow-2xl"
-      >
-        <div className="flex items-start justify-between border-b border-border px-5 py-4">
-          <div>
-            <h2 id="doacao-form-title" className="text-lg font-semibold text-foreground">
-              Registrar doação
-            </h2>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Cadastre o recebimento de doações em dinheiro, ração, medicamentos ou materiais.
-            </p>
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => onOpenChange(false)}
-            disabled={isPending}
-            aria-label="Fechar"
-          >
-            <X className="size-4" />
-          </Button>
-        </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] max-w-xl overflow-hidden p-0">
+        <DialogHeader className="border-b border-border px-5 py-4">
+          <DialogTitle>Registrar doação</DialogTitle>
+          <DialogDescription>
+            Cadastre o recebimento de doações em dinheiro, ração, medicamentos ou materiais.
+          </DialogDescription>
+        </DialogHeader>
 
         <form onSubmit={submit} noValidate className="flex flex-1 flex-col overflow-y-auto px-5 py-5">
           <div className="space-y-5">
@@ -377,7 +339,7 @@ export function DoacaoFormModal({
             </Button>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
