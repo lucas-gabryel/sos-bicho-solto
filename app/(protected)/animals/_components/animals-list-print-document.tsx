@@ -29,6 +29,8 @@ export const AnimalsListPrintDocument = React.forwardRef<
   const totalGatos = animals.filter((a) => a.esp === 'Gato').length;
   const totalAdotados = animals.filter((a) => a.status === 'Adotado').length;
   const totalAcolhimento = animals.filter((a) => a.status === 'Acolhimento').length;
+  const totalTransferidos = animals.filter((a) => a.status === 'Transferido').length;
+  const totalObitos = animals.filter((a) => a.status === 'Óbito').length;
 
   const filterBadges: string[] = [];
   if (filters?.busca) filterBadges.push(`Busca: "${filters.busca}"`);
@@ -123,6 +125,22 @@ export const AnimalsListPrintDocument = React.forwardRef<
           <span>
             <strong>Adotados:</strong> {totalAdotados}
           </span>
+          {totalTransferidos > 0 && (
+            <>
+              <span>•</span>
+              <span>
+                <strong>Transferidos:</strong> {totalTransferidos}
+              </span>
+            </>
+          )}
+          {totalObitos > 0 && (
+            <>
+              <span>•</span>
+              <span>
+                <strong>Óbitos:</strong> {totalObitos}
+              </span>
+            </>
+          )}
         </div>
 
         {filterBadges.length > 0 && (
@@ -204,7 +222,11 @@ export const AnimalsListPrintDocument = React.forwardRef<
                             className={`inline-block rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${
                               animal.status === 'Adotado'
                                 ? 'bg-green-100 text-green-800'
-                                : 'bg-blue-100 text-blue-800'
+                                : animal.status === 'Transferido'
+                                  ? 'bg-amber-100 text-amber-800'
+                                  : animal.status === 'Óbito'
+                                    ? 'bg-slate-200 text-slate-800'
+                                    : 'bg-blue-100 text-blue-800'
                             }`}
                           >
                             {value}

@@ -1,29 +1,48 @@
 'use client';
 
-import { ArrowLeft, ArrowRight, Edit2, Info, Link2, Mars, Printer, Trash2, Venus } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Clock,
+  Edit2,
+  Info,
+  Link2,
+  Mars,
+  Plus,
+  Printer,
+  Trash2,
+  Venus,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { AnimalStatusBadge } from '@/components/animal-status-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAcolhedor } from '@/hooks/use-acolhedor';
 import { useAnimal } from '@/hooks/use-animal';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useDeleteAnimal } from '@/hooks/use-delete-animal';
-import { useAcolhedor } from '@/hooks/use-acolhedor';
 import { getAcolhedorInitials } from '@/lib/acolhedor';
 import { formatDateToPtBr } from '@/lib/date';
 import { cn } from '@/lib/utils';
+
 import { AnimalFormModal } from '../_components/animal-form-modal';
+import { AnimalTimeline } from '../_components/animal-timeline';
 import { DeleteConfirmationModal } from '../_components/delete-confirmation-modal';
 import { LinkAcolhedorModal } from '../_components/link-acolhedor-modal';
 import { PrintAnimalModal } from '../_components/print-animal-modal';
 
-const CAT_FALLBACK_IMAGE = process.env.NEXT_PUBLIC_FALLBACK_CAT_IMAGE_URL || 'https://cataas.com/cat?width=500&height=500';
-const DOG_FALLBACK_IMAGE = process.env.NEXT_PUBLIC_FALLBACK_DOG_IMAGE_URL || 'https://placedog.net/500/500';
+const CAT_FALLBACK_IMAGE =
+  process.env.NEXT_PUBLIC_FALLBACK_CAT_IMAGE_URL ||
+  'https://cataas.com/cat?width=500&height=500';
+const DOG_FALLBACK_IMAGE =
+  process.env.NEXT_PUBLIC_FALLBACK_DOG_IMAGE_URL ||
+  'https://placedog.net/500/500';
 
 export default function AnimalDetailsPage() {
   const params = useParams();
@@ -34,8 +53,12 @@ export default function AnimalDetailsPage() {
   const { data: currentUser, isLoading: isLoadingUser } = useCurrentUser();
   const { data: tutor } = useAcolhedor(animal?.tutorId ?? '');
   const deleteAnimal = useDeleteAnimal();
+
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editModalState, setEditModalState] = useState<{
+    open: boolean;
+    section: 'dados' | 'timeline';
+  }>({ open: false, section: 'dados' });
   const [isLinkAcolhedorOpen, setIsLinkAcolhedorOpen] = useState(false);
   const [isPrintOpen, setIsPrintOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -100,12 +123,15 @@ export default function AnimalDetailsPage() {
   }
 
   const adopted = animal.status === 'Adotado';
-  const fallbackSrc = animal.esp === 'Gato' ? CAT_FALLBACK_IMAGE : DOG_FALLBACK_IMAGE;
+  const canAdopt = animal.status === 'Acolhimento';
+  const fallbackSrc =
+    animal.esp === 'Gato' ? CAT_FALLBACK_IMAGE : DOG_FALLBACK_IMAGE;
   const imageSrc = !imageError && animal.foto ? animal.foto : fallbackSrc;
+  const eventosCount = animal.eventos?.length ?? 0;
 
   return (
-    <div className="p-4 md:p-7">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+    <div className="space-y-6 p-4 md:p-7">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <Link href="/animals">
             <Button variant="ghost" size="icon">
@@ -116,7 +142,9 @@ export default function AnimalDetailsPage() {
             <h1 className="text-2xl font-semibold text-foreground">
               Prontuário <span className="text-muted-foreground">— {animal.nome}</span>
             </h1>
-            <p className="text-sm text-muted-foreground">Detalhes e histórico do animal</p>
+            <p className="text-sm text-muted-foreground">
+              Detalhes e histórico do animal
+            </p>
           </div>
         </div>
 
@@ -137,7 +165,9 @@ export default function AnimalDetailsPage() {
                 variant="outline"
                 size="sm"
                 className="border-transparent bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-950/60"
-                onClick={() => setIsEditOpen(true)}
+                onClick={() =>
+                  setEditModalState({ open: true, section: 'dados' })
+                }
               >
                 <Edit2 className="size-3.5" />
                 Editar
@@ -147,14 +177,18 @@ export default function AnimalDetailsPage() {
                 variant="outline"
                 size="sm"
                 className="border-transparent bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50 dark:bg-green-950/40 dark:text-green-400 dark:hover:bg-green-950/60"
-                disabled={adopted}
-                onClick={() => !adopted && setIsLinkAcolhedorOpen(true)}
+                disabled={!canAdopt}
+                onClick={() => canAdopt && setIsLinkAcolhedorOpen(true)}
               >
                 <Link2 className="size-3.5" />
                 Vincular acolhedor
               </Button>
 
-              <Button variant="destructive" size="sm" onClick={() => setIsDeleteOpen(true)}>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setIsDeleteOpen(true)}
+              >
                 <Trash2 className="size-3.5" />
                 Excluir
               </Button>
@@ -182,25 +216,11 @@ export default function AnimalDetailsPage() {
               {animal.numeroRegistro}
             </span>
             <h2 className="mt-1.5 text-xl font-semibold text-foreground">
-              {animal.nome} · {animal.raca} <span className="text-muted-foreground">({animal.esp})</span>
+              {animal.nome} · {animal.raca}{' '}
+              <span className="text-muted-foreground">({animal.esp})</span>
             </h2>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <Badge
-                className={cn(
-                  'h-auto gap-1.5 rounded-full border-transparent px-3 py-1 text-xs font-semibold',
-                  adopted
-                    ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400'
-                    : 'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400',
-                )}
-              >
-                <span
-                  className={cn(
-                    'size-2 rounded-full',
-                    adopted ? 'bg-green-600 dark:bg-green-400' : 'bg-blue-600 dark:bg-blue-400',
-                  )}
-                />
-                {adopted ? 'Adotado' : 'Acolhimento'}
-              </Badge>
+              <AnimalStatusBadge status={animal.status} size="md" />
               <Badge className="h-auto rounded-full border-transparent bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                 Resgatado em {animal.data}
               </Badge>
@@ -231,15 +251,31 @@ export default function AnimalDetailsPage() {
           <InfoField label="Cor" value={animal.cor} />
           {animal.porte && <InfoField label="Porte" value={animal.porte} />}
           <InfoField label="Peso inicial" value={`${animal.peso.toFixed(1)} kg`} />
-          {animal.pesoAt != null && <InfoField label="Peso atual" value={`${animal.pesoAt.toFixed(1)} kg`} />}
+          {animal.pesoAt != null && (
+            <InfoField
+              label="Peso atual"
+              value={`${animal.pesoAt.toFixed(1)} kg`}
+            />
+          )}
           <InfoField label="Castrado" value={animal.castrado ? 'Sim' : 'Não'} />
           <InfoField label="Vacinado" value={animal.vacinado ? 'Sim' : 'Não'} />
           {animal.dataNascimento && (
-            <InfoField label="Data de nascimento" value={formatDateToPtBr(animal.dataNascimento)} />
+            <InfoField
+              label="Data de nascimento"
+              value={formatDateToPtBr(animal.dataNascimento)}
+            />
           )}
-          <InfoField className="sm:col-span-2 lg:col-span-3" label="Localidade de resgate" value={animal.local} />
+          <InfoField
+            className="sm:col-span-2 lg:col-span-3"
+            label="Localidade de resgate"
+            value={animal.local}
+          />
           {animal.obs && (
-            <InfoField className="sm:col-span-2 lg:col-span-3" label="Observações de saúde" value={animal.obs} />
+            <InfoField
+              className="sm:col-span-2 lg:col-span-3"
+              label="Observações de saúde"
+              value={animal.obs}
+            />
           )}
         </div>
 
@@ -253,7 +289,9 @@ export default function AnimalDetailsPage() {
               {getAcolhedorInitials(tutor.nome)}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-green-700 dark:text-green-400">{tutor.nome}</p>
+              <p className="truncate text-sm font-semibold text-green-700 dark:text-green-400">
+                {tutor.nome}
+              </p>
               <p className="truncate text-xs text-muted-foreground">
                 {tutor.cpf} · {tutor.telefone}
               </p>
@@ -271,12 +309,66 @@ export default function AnimalDetailsPage() {
               <Skeleton className="h-3 w-56" />
             </div>
           </div>
+        ) : animal.status === 'Transferido' ? (
+          <div className="flex items-center gap-3 rounded-lg bg-amber-50 px-4 py-3.5 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+            <Info className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+            <span>
+              Este animal encontra-se transferido. Confira os detalhes na linha do tempo abaixo.
+            </span>
+          </div>
+        ) : animal.status === 'Óbito' ? (
+          <div className="flex items-center gap-3 rounded-lg bg-muted/60 px-4 py-3.5 text-sm text-muted-foreground">
+            <Info className="size-4 shrink-0 text-slate-600 dark:text-slate-400" />
+            <span>
+              Prontuário encerrado por óbito do animal. Confira o histórico completo abaixo.
+            </span>
+          </div>
         ) : (
           <div className="flex items-center gap-3 rounded-lg bg-muted/60 px-4 py-3.5 text-sm text-muted-foreground">
             <Info className="size-4 shrink-0 text-blue-600 dark:text-blue-400" />
-            <span>Nenhum tutor vinculado. Este animal está disponível para adoção.</span>
+            <span>
+              Nenhum tutor vinculado. Este animal está disponível para adoção.
+            </span>
           </div>
         )}
+      </Card>
+
+      <Card className="rounded-2xl p-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400">
+              <Clock className="size-4.5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-semibold text-foreground">
+                  Linha do Tempo e Histórico Médico
+                </h3>
+                <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                  {eventosCount}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Histórico completo desde a chegada na ONG até registros médicos, fotos e movimentações
+              </p>
+            </div>
+          </div>
+
+          {!isProtector && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setEditModalState({ open: true, section: 'timeline' })
+              }
+            >
+              <Plus className="size-3.5" />
+              Adicionar evento
+            </Button>
+          )}
+        </div>
+
+        <AnimalTimeline eventos={animal.eventos} showFilter />
       </Card>
 
       <DeleteConfirmationModal
@@ -288,7 +380,14 @@ export default function AnimalDetailsPage() {
         isLoading={deleteAnimal.isPending}
       />
 
-      <AnimalFormModal open={isEditOpen} onOpenChange={setIsEditOpen} animal={animal} />
+      <AnimalFormModal
+        open={editModalState.open}
+        initialSection={editModalState.section}
+        onOpenChange={(open) =>
+          setEditModalState((prev) => ({ ...prev, open }))
+        }
+        animal={animal}
+      />
 
       <PrintAnimalModal
         open={isPrintOpen}
@@ -309,7 +408,13 @@ export default function AnimalDetailsPage() {
   );
 }
 
-function SectionTitle({ children, className }: { children: React.ReactNode; className?: string }) {
+function SectionTitle({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <p
       className={cn(

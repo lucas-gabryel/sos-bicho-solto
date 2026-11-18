@@ -95,6 +95,8 @@ export default function AnimalsPage() {
             <SelectItem value="all">Todos status</SelectItem>
             <SelectItem value="Acolhimento">Em acolhimento</SelectItem>
             <SelectItem value="Adotado">Adotado</SelectItem>
+            <SelectItem value="Transferido">Transferido</SelectItem>
+            <SelectItem value="Óbito">Óbito</SelectItem>
           </SelectContent>
         </Select>
       </div>
