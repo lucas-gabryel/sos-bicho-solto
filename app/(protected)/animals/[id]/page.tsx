@@ -1,6 +1,19 @@
 'use client';
 
-import { ArrowLeft, ArrowRight, Edit2, Info, Link2, Mars, Printer, Trash2, Undo2, Venus } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Clock,
+  Edit2,
+  Info,
+  Link2,
+  Mars,
+  Plus,
+  Printer,
+  Trash2,
+  Undo2,
+  Venus,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -177,8 +190,9 @@ export default function AnimalDetailsPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-transparent bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-950/40 dark:text-green-400 dark:hover:bg-green-950/60"
-                  onClick={() => setIsLinkAcolhedorOpen(true)}
+                  className="border-transparent bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50 dark:bg-green-950/40 dark:text-green-400 dark:hover:bg-green-950/60"
+                  disabled={!canAdopt}
+                  onClick={() => canAdopt && setIsLinkAcolhedorOpen(true)}
                 >
                   <Link2 className="size-3.5" />
                   Vincular acolhedor
