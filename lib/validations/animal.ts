@@ -22,6 +22,8 @@ export const createAnimalSchema = z.object({
   local: z.string().min(1, 'Localização é obrigatória').min(3, 'Localização deve ter ao menos 3 caracteres'),
   obs: z.string().optional(),
   fotoUrl: z.string().url('URL inválida').optional().or(z.literal('')),
+  status: z.enum(['Acolhimento', 'Adotado', 'Transferido', 'Óbito']).optional(),
+  motivoSaidaDescricao: z.string().optional(),
 });
 
 export type CreateAnimalFormData = z.infer<typeof createAnimalSchema>;

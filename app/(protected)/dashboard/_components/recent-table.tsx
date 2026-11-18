@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import type { AnimalStatus } from '@/types/animal';
+
 import { StatusBadge } from './status-badge';
 
 export interface RecentAnimal {
@@ -14,7 +16,7 @@ export interface RecentAnimal {
   nome: string;
   esp: string;
   local: string;
-  status: 'Adotado' | 'Acolhimento';
+  status: AnimalStatus;
 }
 
 export function RecentTable({ animals, isLoading = false }: { animals: RecentAnimal[]; isLoading?: boolean }) {

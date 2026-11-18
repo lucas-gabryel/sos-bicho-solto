@@ -86,7 +86,11 @@ export const AnimalPrintDocument = React.forwardRef<HTMLDivElement, AnimalPrintD
               className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
                 animal.status === 'Adotado'
                   ? 'bg-green-100 text-green-800'
-                  : 'bg-blue-100 text-blue-800'
+                  : animal.status === 'Transferido'
+                    ? 'bg-amber-100 text-amber-800'
+                    : animal.status === 'Óbito'
+                      ? 'bg-slate-200 text-slate-800'
+                      : 'bg-blue-100 text-blue-800'
               }`}
             >
               {animal.status}
