@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, ArrowRight, Edit2, Info, Link2, Mars, Printer, Trash2, Venus } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Edit2, Info, Link2, Mars, Printer, Trash2, Undo2, Venus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -21,6 +21,7 @@ import { AnimalFormModal } from '../_components/animal-form-modal';
 import { DeleteConfirmationModal } from '../_components/delete-confirmation-modal';
 import { LinkAcolhedorModal } from '../_components/link-acolhedor-modal';
 import { PrintAnimalModal } from '../_components/print-animal-modal';
+import { UndoAdocaoModal } from '../_components/undo-adocao-modal';
 
 const CAT_FALLBACK_IMAGE = process.env.NEXT_PUBLIC_FALLBACK_CAT_IMAGE_URL || 'https://cataas.com/cat?width=500&height=500';
 const DOG_FALLBACK_IMAGE = process.env.NEXT_PUBLIC_FALLBACK_DOG_IMAGE_URL || 'https://placedog.net/500/500';
@@ -37,6 +38,7 @@ export default function AnimalDetailsPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLinkAcolhedorOpen, setIsLinkAcolhedorOpen] = useState(false);
+  const [isUndoAdocaoOpen, setIsUndoAdocaoOpen] = useState(false);
   const [isPrintOpen, setIsPrintOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -143,16 +145,27 @@ export default function AnimalDetailsPage() {
                 Editar
               </Button>
 
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-transparent bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50 dark:bg-green-950/40 dark:text-green-400 dark:hover:bg-green-950/60"
-                disabled={adopted}
-                onClick={() => !adopted && setIsLinkAcolhedorOpen(true)}
-              >
-                <Link2 className="size-3.5" />
-                Vincular acolhedor
-              </Button>
+              {adopted ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-transparent bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-950/60"
+                  onClick={() => setIsUndoAdocaoOpen(true)}
+                >
+                  <Undo2 className="size-3.5" />
+                  Desfazer adoção
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-transparent bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-950/40 dark:text-green-400 dark:hover:bg-green-950/60"
+                  onClick={() => setIsLinkAcolhedorOpen(true)}
+                >
+                  <Link2 className="size-3.5" />
+                  Vincular acolhedor
+                </Button>
+              )}
 
               <Button variant="destructive" size="sm" onClick={() => setIsDeleteOpen(true)}>
                 <Trash2 className="size-3.5" />
@@ -305,6 +318,14 @@ export default function AnimalDetailsPage() {
           onOpenChange={setIsLinkAcolhedorOpen}
         />
       )}
+
+      <UndoAdocaoModal
+        open={isUndoAdocaoOpen}
+        onOpenChange={setIsUndoAdocaoOpen}
+        animalId={animal.id}
+        animalName={animal.nome}
+        tutorName={tutor?.nome}
+      />
     </div>
   );
 }
