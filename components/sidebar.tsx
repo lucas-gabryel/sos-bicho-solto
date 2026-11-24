@@ -5,7 +5,20 @@ import { useCurrentUser } from '@/hooks/use-current-user';
 import { useLogout } from '@/hooks/use-logout';
 import { getRoleLabel } from '@/lib/user';
 import { cn } from '@/lib/utils';
-import { Gift, HandHeart, LayoutDashboard, LogOut, Menu, Moon, PawPrint, Sun, UserCog, Users, X } from 'lucide-react';
+import {
+  FileText,
+  Gift,
+  HandHeart,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Moon,
+  PawPrint,
+  Sun,
+  UserCog,
+  Users,
+  X,
+} from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -25,6 +38,7 @@ const NAV_GROUPS = [
       { href: '/acolhedores', label: 'Acolhedores', icon: Users },
       { href: '/doadores', label: 'Doadores', icon: HandHeart },
       { href: '/doacoes', label: 'Doações', icon: Gift },
+      { href: '/relatorios', label: 'Relatórios', icon: FileText, adminOnly: true },
       { href: '/usuarios', label: 'Usuários do Sistema', icon: UserCog, adminOnly: true },
     ],
   },
@@ -37,6 +51,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/doadores': 'Doadores',
   '/doacoes': 'Doações',
   '/adocoes': 'Histórico de Adoções',
+  '/relatorios': 'Relatórios',
   '/usuarios': 'Usuários do Sistema',
 };
 
