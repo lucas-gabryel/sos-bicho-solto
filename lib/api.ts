@@ -2,6 +2,18 @@ import { getAuthToken } from '@/lib/auth-token';
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000').replace(/\/$/, '');
 
+export function resolveAssetUrl(url: string | null | undefined): string | null {
+  if (!url) {
+    return null;
+  }
+
+  if (/^(https?:|data:|blob:)/i.test(url)) {
+    return url;
+  }
+
+  return `${API_BASE_URL}${url.startsWith('/') ? url : `/${url}`}`;
+}
+
 export class ApiError extends Error {
   readonly status: number;
 
@@ -105,8 +117,9 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   const { method = 'GET', body, query, auth = true } = options;
 
   const headers: Record<string, string> = {};
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
 
-  if (body !== undefined) {
+  if (body !== undefined && !isFormData) {
     headers['Content-Type'] = 'application/json';
   }
 
@@ -124,7 +137,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     response = await fetch(buildUrl(path, query), {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: body !== undefined ? (isFormData ? body : JSON.stringify(body)) : undefined,
     });
   } catch {
     throw new ApiError('Não foi possível conectar à API. Verifique sua conexão e tente novamente.', 0);
