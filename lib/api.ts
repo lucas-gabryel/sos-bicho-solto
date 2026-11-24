@@ -72,11 +72,7 @@ function buildUrl(path: string, query?: ApiRequestOptions['query']) {
   return url.toString();
 }
 
-function extractErrorMessage(
-  body: ErrorBody | null,
-  status: number,
-  fallback: string,
-): string {
+function extractErrorMessage(body: ErrorBody | null, status: number, fallback: string): string {
   if (body) {
     let message = '';
     if (Array.isArray(body.message)) {
@@ -101,21 +97,42 @@ function extractErrorMessage(
   return fallback;
 }
 
+function authHeaders(auth: boolean): Record<string, string> {
+  const token = auth ? getAuthToken() : null;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+/**
+ * Baixa um arquivo binário (ex.: PDF) autenticado. Em caso de erro, a API
+ * responde JSON no formato padrão, convertido para ApiError.
+ */
+export async function apiDownload(path: string, query?: ApiRequestOptions['query']): Promise<Blob> {
+  let response: Response;
+
+  try {
+    response = await fetch(buildUrl(path, query), { headers: authHeaders(true) });
+  } catch {
+    throw new ApiError('Não foi possível conectar à API. Verifique sua conexão e tente novamente.', 0);
+  }
+
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as ErrorBody | null;
+    throw new ApiError(
+      extractErrorMessage(body, response.status, 'Não foi possível gerar o arquivo.'),
+      response.status,
+    );
+  }
+
+  return response.blob();
+}
+
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
   const { method = 'GET', body, query, auth = true } = options;
 
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = authHeaders(auth);
 
   if (body !== undefined) {
     headers['Content-Type'] = 'application/json';
-  }
-
-  if (auth) {
-    const token = getAuthToken();
-
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
   }
 
   let response: Response;
