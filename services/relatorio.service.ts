@@ -1,15 +1,13 @@
 import { apiDownload } from '@/lib/api';
 
-export type TipoRelatorio = 'animais' | 'adotantes' | 'tutores';
+export type TipoRelatorio = 'animais' | 'acolhedores' | 'doacoes';
 
-export type StatusAnimalRelatorio = 'ACOLHIMENTO' | 'ADOTADO' | 'TRANSFERIDO' | 'OBITO';
 export type EspecieAnimalRelatorio = 'CAO' | 'GATO';
 
 export interface FiltrosRelatorio {
   /** Datas no formato `YYYY-MM-DD` (dia local). Vazio = todo o histórico. */
   de?: string;
   ate?: string;
-  status?: StatusAnimalRelatorio;
   especie?: EspecieAnimalRelatorio;
 }
 
@@ -38,7 +36,7 @@ export async function baixarRelatorio(tipo: TipoRelatorio, filtros: FiltrosRelat
   const pdf = await apiDownload(`/relatorios/${tipo}`, {
     de: inicioDoDia(filtros.de),
     ate: fimDoDia(filtros.ate),
-    ...(tipo === 'animais' && { status: filtros.status, especie: filtros.especie }),
+    ...(tipo === 'animais' && { especie: filtros.especie }),
   });
 
   const sufixoPeriodo = filtros.de || filtros.ate ? `-${filtros.de ?? 'inicio'}-a-${filtros.ate ?? 'hoje'}` : '';
