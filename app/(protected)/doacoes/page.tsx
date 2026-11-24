@@ -2,6 +2,7 @@
 
 import {
   Boxes,
+  FileText,
   Gift,
   HeartHandshake,
   LoaderCircle,
@@ -13,22 +14,25 @@ import { useState, useDeferredValue } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreateDoacao } from '@/hooks/use-doacao-mutation';
 import { useDoacoes } from '@/hooks/use-doacoes';
 import { cn } from '@/lib/utils';
-import type { DoacaoFormValues, TipoDoacao } from '@/types/doacao';
+import type { DirecaoDoacao, DoacaoFormValues, TipoDoacao } from '@/types/doacao';
 import { TIPO_DOACAO_LABELS } from '@/types/doacao';
 import { DoacaoCard, DoacaoCardSkeleton } from './_components/doacao-card';
 import { DoacaoFormModal } from './_components/doacao-form-modal';
 import { EstoqueView } from './_components/estoque-view';
+import { RelatorioDoacoesView } from './_components/relatorio-doacoes-view';
 
 const PAGE_SIZE = 9;
 
 export default function DoacoesPage() {
-  const [activeTab, setActiveTab] = useState<'doacoes' | 'estoque'>('doacoes');
+  const [activeTab, setActiveTab] = useState<'doacoes' | 'relatorio' | 'estoque'>('doacoes');
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [tipoFilter, setTipoFilter] = useState<TipoDoacao | ''>('');
+  const [direcaoFilter, setDirecaoFilter] = useState<DirecaoDoacao | ''>('');
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -37,6 +41,7 @@ export default function DoacoesPage() {
     limit: PAGE_SIZE,
     busca: deferredSearch.trim() || undefined,
     tipo: tipoFilter || undefined,
+    direcao: direcaoFilter || undefined,
   });
 
   const createDoacao = useCreateDoacao();
@@ -54,17 +59,23 @@ export default function DoacoesPage() {
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-[22px] font-semibold text-foreground">
-              {activeTab === 'doacoes' ? 'Doações' : 'Estoque e Consumo'}
+              {activeTab === 'doacoes'
+                ? 'Doações'
+                : activeTab === 'relatorio'
+                  ? 'Relatório de Doações'
+                  : 'Estoque e Consumo'}
             </h1>
             <p className="mt-0.5 text-[13px] text-muted-foreground">
               {activeTab === 'doacoes'
-                ? 'Acompanhamento e registro de doações financeiras e materiais recebidas pela ONG'
-                : 'Controle de saldo, consumo e prevenção de desabastecimento de insumos'}
+                ? 'Acompanhamento e registro de doações financeiras e materiais (recebidas e feitas pela ONG)'
+                : activeTab === 'relatorio'
+                  ? 'Histórico descritivo, métricas consolidadas e exportação oficial em PDF'
+                  : 'Controle de saldo, consumo e prevenção de desabastecimento de insumos'}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            {/* Abas de Navegação */}
+            {/* Abas de Navegação Principal */}
             <div
               role="tablist"
               aria-label="Visualização do módulo"
@@ -85,6 +96,23 @@ export default function DoacoesPage() {
                 <Gift className="size-3.5" />
                 <span>Doações</span>
               </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'relatorio'}
+                onClick={() => setActiveTab('relatorio')}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                  activeTab === 'relatorio'
+                    ? 'bg-card text-foreground shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                <FileText className="size-3.5" />
+                <span>Gerar Relatório</span>
+              </button>
+
               <button
                 type="button"
                 role="tab"
@@ -98,93 +126,123 @@ export default function DoacoesPage() {
                 )}
               >
                 <Boxes className="size-3.5" />
-                <span>Estoque & Consumo</span>
+                <span>Estoque</span>
               </button>
             </div>
 
-            {activeTab === 'doacoes' && (
-              <Button variant="primary" size="default" onClick={() => setIsModalOpen(true)}>
-                <Plus className="size-4" />
-                Registrar Doação
-              </Button>
-            )}
+            <Button variant="primary" size="default" onClick={() => setIsModalOpen(true)}>
+              <Plus className="size-4" />
+              Registrar Doação
+            </Button>
           </div>
         </div>
 
         {activeTab === 'estoque' ? (
           <EstoqueView />
+        ) : activeTab === 'relatorio' ? (
+          <RelatorioDoacoesView />
         ) : (
           <>
-            <div className="mb-5 flex flex-wrap items-center gap-3">
-          <div className="relative min-w-52 flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por descrição ou doador..."
-              className="pl-9 text-[13px]"
-              value={search}
-              onChange={(event) => {
-                setSearch(event.target.value);
-                setPage(1);
-              }}
-            />
-          </div>
+            <div className="mb-5 flex flex-wrap items-center gap-2.5">
+              <div className="relative min-w-56 flex-1">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por descrição, beneficiário ou doador..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                  className="pl-9 text-[13px]"
+                />
+              </div>
 
-          <select
-            className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
-            value={tipoFilter}
-            onChange={(e) => {
-              setTipoFilter(e.target.value as TipoDoacao | '');
-              setPage(1);
-            }}
-          >
-            <option value="">Todos os tipos</option>
-            <option value="DINHEIRO">{TIPO_DOACAO_LABELS.DINHEIRO}</option>
-            <option value="RACAO">{TIPO_DOACAO_LABELS.RACAO}</option>
-            <option value="MEDICAMENTO">{TIPO_DOACAO_LABELS.MEDICAMENTO}</option>
-            <option value="PRODUTO_LIMPEZA">{TIPO_DOACAO_LABELS.PRODUTO_LIMPEZA}</option>
-            <option value="OUTRO">{TIPO_DOACAO_LABELS.OUTRO}</option>
-          </select>
-        </div>
+              {/* Filtro por Modalidade (Select limpo) */}
+              <Select
+                value={direcaoFilter || 'all'}
+                onValueChange={(val) => {
+                  setDirecaoFilter(val === 'all' ? '' : (val as DirecaoDoacao));
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="w-44 text-[13px]">
+                  <SelectValue placeholder="Todas modalidades" />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  <SelectItem value="all">Todas modalidades</SelectItem>
+                  <SelectItem value="RECEBIDA">Doações Recebidas</SelectItem>
+                  <SelectItem value="REALIZADA">Doações Feitas (ONG)</SelectItem>
+                </SelectContent>
+              </Select>
 
-        {isLoading ? (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-3.5">
-            {Array.from({ length: PAGE_SIZE }).map((_, index) => (
-              <DoacaoCardSkeleton key={index} />
-            ))}
-          </div>
-        ) : doacoes.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 rounded-[14px] border border-dashed border-border py-16 text-muted-foreground">
-            <HeartHandshake className="size-10 opacity-30" />
-            <p className="text-sm font-medium">Nenhuma doação encontrada</p>
-            {deferredSearch.trim() || tipoFilter ? (
-              <p className="text-xs text-muted-foreground/80">
-                Tente ajustar os filtros ou a busca para encontrar registros.
-              </p>
-            ) : (
-              <p className="text-xs text-muted-foreground/80">
-                Clique no botão &quot;Registrar Doação&quot; acima para cadastrar a primeira doação.
-              </p>
-            )}
-          </div>
-        ) : (
-          <>
-            <div
-              className={`grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-3.5 ${
-                isFetching ? 'opacity-60 transition-opacity' : 'transition-opacity'
-              }`}
-            >
-              {doacoes.map((doacao) => (
-                <DoacaoCard key={doacao.id} doacao={doacao} />
-              ))}
+              {/* Filtro por Tipo de Item (Select limpo) */}
+              <Select
+                value={tipoFilter || 'all'}
+                onValueChange={(val) => {
+                  setTipoFilter(val === 'all' ? '' : (val as TipoDoacao));
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="w-44 text-[13px]">
+                  <SelectValue placeholder="Todos os tipos" />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  <SelectItem value="all">Todos os tipos</SelectItem>
+                  {(Object.keys(TIPO_DOACAO_LABELS) as TipoDoacao[]).map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {TIPO_DOACAO_LABELS[t]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            {totalPages > 1 && (
-              <div className="mt-6">
-                <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            {isLoading ? (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <DoacaoCardSkeleton key={i} />
+                ))}
               </div>
+            ) : doacoes.length === 0 ? (
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border p-12 text-center">
+                <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                  <Gift className="size-6" />
+                </div>
+                <h3 className="mt-3 text-sm font-semibold text-foreground">Nenhuma doação encontrada</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {search || tipoFilter || direcaoFilter
+                    ? 'Tente ajustar os filtros de busca.'
+                    : 'Comece registrando uma doação recebida ou feita pela ONG.'}
+                </p>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="mt-4"
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  <Plus className="mr-1.5 size-4" />
+                  Registrar Doação
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {doacoes.map((d) => (
+                    <DoacaoCard key={d.id} doacao={d} />
+                  ))}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="mt-6 flex justify-center">
+                    <Pagination
+                      page={page}
+                      totalPages={totalPages}
+                      onPageChange={setPage}
+                    />
+                  </div>
+                )}
+              </>
             )}
-          </>
-        )}
           </>
         )}
       </div>
@@ -192,16 +250,9 @@ export default function DoacoesPage() {
       <DoacaoFormModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-        isPending={createDoacao.isPending}
         onSubmit={handleSubmit}
+        isPending={createDoacao.isPending}
       />
-
-      {createDoacao.isPending && (
-        <div className="pointer-events-none fixed bottom-4 right-4 z-60 flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground shadow-lg">
-          <LoaderCircle className="size-4 animate-spin" />
-          Registrando doação...
-        </div>
-      )}
     </>
   );
 }

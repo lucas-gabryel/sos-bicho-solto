@@ -1,8 +1,11 @@
 import {
+  ArrowDownLeft,
+  ArrowUpRight,
   Calendar,
   CircleDollarSign,
   HeartHandshake,
   Package,
+  Paperclip,
   Pill,
   Sparkles,
   User,
@@ -70,6 +73,7 @@ export function DoacaoCard({ doacao }: { doacao: Doacao }) {
   const config = TIPO_CONFIG[doacao.tipo] ?? TIPO_CONFIG.OUTRO;
   const Icon = config.icon;
 
+  const isRecebida = doacao.direcao === 'RECEBIDA';
   const isDinheiro = doacao.tipo === 'DINHEIRO';
   const mainHighlight = isDinheiro
     ? formatCurrency(doacao.valor)
@@ -84,9 +88,22 @@ export function DoacaoCard({ doacao }: { doacao: Doacao }) {
               <Icon className="size-5" />
             </div>
             <div>
-              <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${config.bg} ${config.text}`}>
-                {config.label}
-              </span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${config.bg} ${config.text}`}>
+                  {config.label}
+                </span>
+
+                <span
+                  className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${
+                    isRecebida
+                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
+                      : 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400'
+                  }`}
+                >
+                  {isRecebida ? <ArrowDownLeft className="size-3" /> : <ArrowUpRight className="size-3" />}
+                  {isRecebida ? 'Recebida' : 'Feita pela ONG'}
+                </span>
+              </div>
               <p className="mt-1 text-lg font-bold text-foreground">{mainHighlight}</p>
             </div>
           </div>
@@ -104,25 +121,46 @@ export function DoacaoCard({ doacao }: { doacao: Doacao }) {
         )}
       </div>
 
-      <div className="mt-4 border-t border-border pt-3.5">
+      <div className="mt-4 border-t border-border pt-3.5 space-y-2">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Origem:</span>
-          {doacao.anonima || !doacao.doador ? (
-            <span className="inline-flex items-center gap-1 rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-              <UserX className="size-3" />
-              Doação anônima
-            </span>
+          <span className="text-muted-foreground">{isRecebida ? 'Origem:' : 'Destino:'}</span>
+          {isRecebida ? (
+            doacao.anonima || !doacao.doador ? (
+              <span className="inline-flex items-center gap-1 rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                <UserX className="size-3" />
+                Doação anônima
+              </span>
+            ) : (
+              <Link
+                href={`/doadores/${doacao.doador.id}`}
+                className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+                title={`Ver doador ${doacao.doador.nome}`}
+              >
+                <User className="size-3" />
+                <span className="max-w-36 truncate">{doacao.doador.nome}</span>
+              </Link>
+            )
           ) : (
-            <Link
-              href={`/doadores/${doacao.doador.id}`}
-              className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
-              title={`Ver doador ${doacao.doador.nome}`}
-            >
-              <User className="size-3" />
-              <span className="max-w-36 truncate">{doacao.doador.nome}</span>
-            </Link>
+            <span className="font-medium text-foreground max-w-40 truncate">
+              {doacao.beneficiario || 'Beneficiário Geral'}
+            </span>
           )}
         </div>
+
+        {doacao.documentoUrl && (
+          <div className="flex items-center justify-between text-[11px] pt-1 border-t border-border/50">
+            <span className="text-muted-foreground">Comprovante:</span>
+            <a
+              href={doacao.documentoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+            >
+              <Paperclip className="size-3" />
+              <span>Ver Documento</span>
+            </a>
+          </div>
+        )}
       </div>
     </Card>
   );

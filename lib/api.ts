@@ -106,7 +106,9 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
 
   const headers: Record<string, string> = {};
 
-  if (body !== undefined) {
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
+
+  if (body !== undefined && !isFormData) {
     headers['Content-Type'] = 'application/json';
   }
 
@@ -124,7 +126,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     response = await fetch(buildUrl(path, query), {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: body !== undefined ? (isFormData ? body : JSON.stringify(body)) : undefined,
     });
   } catch {
     throw new ApiError('Não foi possível conectar à API. Verifique sua conexão e tente novamente.', 0);

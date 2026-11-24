@@ -1,9 +1,23 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Check, Search, UserCheck, UserX } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Check,
+  FileCheck,
+  FileText,
+  Loader2,
+  Paperclip,
+  Search,
+  Upload,
+  UserCheck,
+  UserX,
+  X,
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -17,7 +31,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useDoadores } from '@/hooks/use-doadores';
 import { defaultDoacaoFormValues, doacaoSchema } from '@/lib/validations/doacao';
-import type { DoacaoFormValues, TipoDoacao } from '@/types/doacao';
+import { uploadDocumentoDoacao } from '@/services/doacao.service';
+import type { DirecaoDoacao, DoacaoFormValues, TipoDoacao } from '@/types/doacao';
 import { TIPO_DOACAO_LABELS } from '@/types/doacao';
 import type { Doador } from '@/types/doador';
 
@@ -39,6 +54,8 @@ export function DoacaoFormModal({
   const [doadorSearch, setDoadorSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [pickedDoador, setPickedDoador] = useState<Doador | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Debounce de 300ms para busca de doador durante digitação
   useEffect(() => {
@@ -48,7 +65,6 @@ export function DoacaoFormModal({
     return () => clearTimeout(timer);
   }, [doadorSearch]);
 
-  // Consulta ativada SOMENTE quando o modal estiver aberto
   const { data: doadoresPage, isLoading: isLoadingDoadores } = useDoadores(
     {
       limit: 10,
@@ -69,9 +85,12 @@ export function DoacaoFormModal({
     defaultValues: defaultDoacaoFormValues,
   });
 
+  const direcao = (useWatch({ control, name: 'direcao' }) || 'RECEBIDA') as DirecaoDoacao;
   const tipo = useWatch({ control, name: 'tipo' }) as TipoDoacao;
   const isAnonima = useWatch({ control, name: 'anonima' });
   const doadorId = useWatch({ control, name: 'doadorId' });
+  const documentoUrl = useWatch({ control, name: 'documentoUrl' });
+  const documentoNome = useWatch({ control, name: 'documentoNome' });
 
   useEffect(() => {
     if (!open) return;
@@ -80,6 +99,7 @@ export function DoacaoFormModal({
       preSelectedDoador
         ? {
             ...defaultDoacaoFormValues,
+            direcao: 'RECEBIDA',
             anonima: false,
             doadorId: preSelectedDoador.id,
           }
@@ -98,257 +118,411 @@ export function DoacaoFormModal({
 
   const handleSelectDoador = (doador: Doador) => {
     setPickedDoador(doador);
-    setValue('doadorId', doador.id, { shouldValidate: true, shouldDirty: true });
+    setValue('doadorId', doador.id, { shouldValidate: true });
+    setDoadorSearch('');
   };
 
   const handleClearDoador = () => {
     setPickedDoador(null);
-    setValue('doadorId', '', { shouldValidate: true, shouldDirty: true });
+    setValue('doadorId', '', { shouldValidate: true });
+    setDoadorSearch('');
   };
 
-  const submit = handleSubmit(async (values) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('O arquivo deve ter no máximo 10 MB.');
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const res = await uploadDocumentoDoacao(file);
+      setValue('documentoUrl', res.documentoUrl);
+      setValue('documentoNome', res.documentoNome);
+      setValue('documentoTipo', res.documentoTipo);
+      toast.success('Documento comprobatório anexado com sucesso!');
+    } catch (err: any) {
+      toast.error(err?.message || 'Falha ao fazer upload do documento.');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setValue('documentoUrl', '');
+    setValue('documentoNome', '');
+    setValue('documentoTipo', '');
+  };
+
+  const handleFormSubmit = async (values: DoacaoFormValues) => {
     try {
       await onSubmit(values);
       onOpenChange(false);
     } catch {
-      // Erro gerenciado pela mutation e sonner toast
+      // Erro gerenciado pela mutation pai
     }
-  });
-
-  if (!open) return null;
-
-  const isDinheiro = tipo === 'DINHEIRO';
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-xl overflow-hidden p-0">
-        <DialogHeader className="border-b border-border px-5 py-4">
-          <DialogTitle>Registrar doação</DialogTitle>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Registrar Doação</DialogTitle>
           <DialogDescription>
-            Cadastre o recebimento de doações em dinheiro, ração, medicamentos ou materiais.
+            Lance uma doação recebida pela ONG ou registre uma doação/auxílio realizado pela instituição.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={submit} noValidate className="flex flex-1 flex-col overflow-y-auto px-5 py-5">
-          <div className="space-y-5">
-            {/* 1. Modalidade de doador: Cadastrado vs Anônimo */}
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Vínculo de Doador
-              </Label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setValue('anonima', false, { shouldValidate: true });
-                  }}
-                  className={`flex items-center justify-center gap-2 rounded-xl border p-3 text-xs font-medium transition-all ${
-                    !isAnonima
-                      ? 'border-primary bg-primary/10 text-primary shadow-xs'
-                      : 'border-border bg-card text-muted-foreground hover:bg-muted/50'
-                  }`}
-                >
-                  <UserCheck className="size-4" />
-                  Doador cadastrado
-                </button>
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+          {/* Seletor: Recebida vs Realizada */}
+          <div>
+            <Label className="text-xs font-semibold text-muted-foreground">MODALIDADE DA DOAÇÃO</Label>
+            <div className="mt-1.5 grid grid-cols-2 gap-2 rounded-lg border border-border bg-muted/40 p-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setValue('direcao', 'RECEBIDA');
+                  setValue('anonima', false);
+                }}
+                className={`flex items-center justify-center gap-2 rounded-md py-2 text-xs font-semibold transition-all ${
+                  direcao === 'RECEBIDA'
+                    ? 'bg-card text-foreground shadow-xs border border-border/80'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <ArrowDownLeft className="size-4 text-emerald-600 dark:text-emerald-400" />
+                <span>Receber Doação</span>
+              </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setValue('anonima', true, { shouldValidate: true });
-                    handleClearDoador();
-                  }}
-                  className={`flex items-center justify-center gap-2 rounded-xl border p-3 text-xs font-medium transition-all ${
-                    isAnonima
-                      ? 'border-primary bg-primary/10 text-primary shadow-xs'
-                      : 'border-border bg-card text-muted-foreground hover:bg-muted/50'
-                  }`}
-                >
-                  <UserX className="size-4" />
-                  Doação anônima
-                </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setValue('direcao', 'REALIZADA');
+                  setValue('anonima', false);
+                  setValue('doadorId', '');
+                }}
+                className={`flex items-center justify-center gap-2 rounded-md py-2 text-xs font-semibold transition-all ${
+                  direcao === 'REALIZADA'
+                    ? 'bg-card text-foreground shadow-xs border border-border/80'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <ArrowUpRight className="size-4 text-blue-600 dark:text-blue-400" />
+                <span>Fazer Doação (ONG)</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Doador ou Beneficiário */}
+          {direcao === 'RECEBIDA' ? (
+            <div className="space-y-3 rounded-lg border border-border bg-card p-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-semibold">Identificação do Doador</Label>
+                <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    className="accent-primary"
+                    {...register('anonima', {
+                      onChange: (e) => {
+                        if (e.target.checked) {
+                          handleClearDoador();
+                        }
+                      },
+                    })}
+                  />
+                  <span>Doação Anônima</span>
+                </label>
               </div>
 
-              {!isAnonima ? (
-                <div className="mt-3 space-y-2">
-                  {selectedDoador ? (
-                    <div className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/5 p-3">
-                      <div>
-                        <p className="text-sm font-semibold text-foreground">{selectedDoador.nome}</p>
-                        <p className="text-xs text-muted-foreground">{selectedDoador.cpfCnpj} · {selectedDoador.email}</p>
+              {!isAnonima && (
+                <div className="space-y-2">
+                      {selectedDoador ? (
+                    <div className="flex items-center justify-between rounded-md border border-emerald-500/30 bg-emerald-50/50 p-2 text-xs dark:bg-emerald-950/20">
+                      <div className="flex items-center gap-2">
+                        <UserCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
+                        <div>
+                          <p className="font-medium text-foreground">{selectedDoador.nome}</p>
+                          <p className="text-[11px] text-muted-foreground">Doc: {selectedDoador.cpfCnpj}</p>
+                        </div>
                       </div>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         onClick={handleClearDoador}
-                        className="h-8 text-xs text-destructive hover:bg-destructive/10"
+                        className="h-7 text-xs text-muted-foreground hover:text-destructive"
                       >
                         Trocar
                       </Button>
                     </div>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       <div className="relative">
-                        <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                        <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
                         <Input
-                          placeholder="Buscar doador por nome, CPF ou CNPJ..."
+                          placeholder="Buscar doador por nome ou CPF/CNPJ..."
                           value={doadorSearch}
                           onChange={(e) => setDoadorSearch(e.target.value)}
-                          className="pl-9 text-xs"
+                          className="pl-8 text-xs"
                         />
                       </div>
 
-                      <div className="max-h-40 overflow-y-auto rounded-xl border border-border bg-background p-1">
-                        {isLoadingDoadores ? (
-                          <p className="p-3 text-center text-xs text-muted-foreground">Buscando doadores...</p>
-                        ) : doadoresList.length === 0 ? (
-                          <p className="p-3 text-center text-xs text-muted-foreground">
-                            {doadorSearch ? 'Nenhum doador encontrado.' : 'Digite para buscar um doador.'}
-                          </p>
-                        ) : (
-                          <ul className="space-y-1">
-                            {doadoresList.map((doador) => (
-                              <li key={doador.id}>
-                                <button
-                                  type="button"
-                                  onClick={() => handleSelectDoador(doador)}
-                                  className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs transition-colors hover:bg-muted"
-                                >
-                                  <div>
-                                    <p className="font-medium text-foreground">{doador.nome}</p>
-                                    <p className="text-[11px] text-muted-foreground">{doador.cpfCnpj}</p>
-                                  </div>
-                                  <Check className="size-3.5 text-primary opacity-0 group-hover:opacity-100" />
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
+                      {isLoadingDoadores ? (
+                        <p className="p-2 text-center text-xs text-muted-foreground">Buscando doadores...</p>
+                      ) : doadoresList.length > 0 ? (
+                        <div className="max-h-36 overflow-y-auto rounded-md border border-border bg-card text-xs">
+                          {doadoresList.map((d) => (
+                            <button
+                              key={d.id}
+                              type="button"
+                              onClick={() => handleSelectDoador(d)}
+                              className="flex w-full items-center justify-between p-2 text-left hover:bg-muted/60"
+                            >
+                              <div>
+                                <p className="font-medium">{d.nome}</p>
+                                <p className="text-[10px] text-muted-foreground">{d.cpfCnpj}</p>
+                              </div>
+                              <Check className="size-3 text-muted-foreground" />
+                            </button>
+                          ))}
+                        </div>
+                      ) : debouncedSearch ? (
+                        <p className="p-2 text-center text-xs text-muted-foreground">Nenhum doador encontrado.</p>
+                      ) : null}
                     </div>
                   )}
+
                   {errors.doadorId && (
                     <p className="text-xs text-destructive">{errors.doadorId.message}</p>
                   )}
                 </div>
-              ) : (
-                <div className="rounded-xl border border-dashed border-border bg-muted/30 p-3 text-center">
-                  <p className="text-xs text-muted-foreground">
-                    Esta doação será registrada como anônima, sem nenhum doador atrelado.
-                  </p>
-                </div>
               )}
             </div>
-
-            {/* 2. Informações da doação */}
-            <div className="space-y-4">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Dados da Doação
+          ) : (
+            <div className="space-y-1.5 rounded-lg border border-border bg-card p-3">
+              <Label htmlFor="beneficiario" className="text-xs font-semibold">
+                Destinatário / Beneficiário (Opcional)
               </Label>
+              <Input
+                id="beneficiario"
+                placeholder="Ex: Família acolhedora João, Protetor parceiro, etc."
+                className="text-xs"
+                {...register('beneficiario')}
+              />
+            </div>
+          )}
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label htmlFor="tipo-doacao">Tipo de doação *</Label>
-                  <select
-                    id="tipo-doacao"
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          {/* Tipo de Doação */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Tipo do Item / Recurso</Label>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {(Object.keys(TIPO_DOACAO_LABELS) as TipoDoacao[]).map((t) => (
+                <label
+                  key={t}
+                  className={`flex cursor-pointer items-center justify-between rounded-lg border p-2.5 text-xs transition-colors ${
+                    tipo === t
+                      ? 'border-primary bg-primary/5 font-semibold text-primary'
+                      : 'border-border bg-card hover:bg-muted/40'
+                  }`}
+                >
+                  <span>{TIPO_DOACAO_LABELS[t]}</span>
+                  <input
+                    type="radio"
+                    value={t}
+                    className="accent-primary"
                     {...register('tipo')}
-                  >
-                    <option value="DINHEIRO">{TIPO_DOACAO_LABELS.DINHEIRO}</option>
-                    <option value="RACAO">{TIPO_DOACAO_LABELS.RACAO}</option>
-                    <option value="MEDICAMENTO">{TIPO_DOACAO_LABELS.MEDICAMENTO}</option>
-                    <option value="PRODUTO_LIMPEZA">{TIPO_DOACAO_LABELS.PRODUTO_LIMPEZA}</option>
-                    <option value="OUTRO">{TIPO_DOACAO_LABELS.OUTRO}</option>
-                  </select>
-                  {errors.tipo && <p className="text-xs text-destructive">{errors.tipo.message}</p>}
-                </div>
-
-                {isDinheiro ? (
-                  <div className="space-y-1.5 sm:col-span-2">
-                    <Label htmlFor="valor-doacao">Valor em dinheiro (R$) *</Label>
-                    <div className="relative">
-                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                        R$
-                      </span>
-                      <Input
-                        id="valor-doacao"
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        placeholder="0,00"
-                        className="pl-9"
-                        {...register('valor')}
-                      />
-                    </div>
-                    {errors.valor && <p className="text-xs text-destructive">{errors.valor.message}</p>}
-                  </div>
-                ) : (
-                  <>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="quantidade-doacao">Quantidade *</Label>
-                      <Input
-                        id="quantidade-doacao"
-                        type="number"
-                        step="0.1"
-                        min="0.01"
-                        placeholder="Ex: 10"
-                        {...register('quantidade')}
-                      />
-                      {errors.quantidade && (
-                        <p className="text-xs text-destructive">{errors.quantidade.message}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <Label htmlFor="unidade-doacao">Unidade de medida</Label>
-                      <Input
-                        id="unidade-doacao"
-                        placeholder="Ex: kg, pacotes, caixas, un"
-                        {...register('unidadeMedida')}
-                      />
-                      {errors.unidadeMedida && (
-                        <p className="text-xs text-destructive">{errors.unidadeMedida.message}</p>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label htmlFor="data-recebimento">Data de recebimento *</Label>
-                  <Input
-                    id="data-recebimento"
-                    type="date"
-                    {...register('dataRecebimento')}
                   />
-                  {errors.dataRecebimento && (
-                    <p className="text-xs text-destructive">{errors.dataRecebimento.message}</p>
+                </label>
+              ))}
+            </div>
+            {errors.tipo && <p className="text-xs text-destructive">{errors.tipo.message}</p>}
+          </div>
+
+          {/* Valor ou Quantidade */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {tipo === 'DINHEIRO' ? (
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="valor" className="text-xs font-semibold">
+                  Valor em Dinheiro (R$) *
+                </Label>
+                <Input
+                  id="valor"
+                  type="text"
+                  placeholder="Ex: 150,00"
+                  className="text-xs"
+                  {...register('valor')}
+                />
+                {errors.valor && <p className="text-xs text-destructive">{errors.valor.message}</p>}
+              </div>
+            ) : (
+              <>
+                <div className="space-y-1.5">
+                  <Label htmlFor="quantidade" className="text-xs font-semibold">
+                    Quantidade *
+                  </Label>
+                  <Input
+                    id="quantidade"
+                    type="text"
+                    placeholder="Ex: 15"
+                    className="text-xs"
+                    {...register('quantidade')}
+                  />
+                  {errors.quantidade && (
+                    <p className="text-xs text-destructive">{errors.quantidade.message}</p>
                   )}
                 </div>
 
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label htmlFor="descricao-doacao">Descrição / Detalhes (opcional)</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="unidadeMedida" className="text-xs font-semibold">
+                    Unidade de Medida
+                  </Label>
                   <Input
-                    id="descricao-doacao"
-                    placeholder="Ex: Ração para cães idosos sabor frango, Dipirona 50ml, etc."
-                    {...register('descricao')}
+                    id="unidadeMedida"
+                    type="text"
+                    placeholder="Ex: kg, sacos, caixas, unidades"
+                    className="text-xs"
+                    {...register('unidadeMedida')}
                   />
                 </div>
-              </div>
+              </>
+            )}
+          </div>
+
+          {/* Descrição e Data */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="dataRecebimento" className="text-xs font-semibold">
+                {direcao === 'RECEBIDA' ? 'Data de Recebimento *' : 'Data da Doação Realizada *'}
+              </Label>
+              <Input
+                id="dataRecebimento"
+                type="date"
+                className="text-xs"
+                {...register('dataRecebimento')}
+              />
+              {errors.dataRecebimento && (
+                <p className="text-xs text-destructive">{errors.dataRecebimento.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5 sm:col-span-1">
+              <Label htmlFor="descricao" className="text-xs font-semibold">
+                {direcao === 'RECEBIDA' ? 'Descrição / Observação' : 'Descrição da Doação Realizada *'}
+              </Label>
+              <Input
+                id="descricao"
+                placeholder={
+                  direcao === 'RECEBIDA'
+                    ? 'Ex: Ração Golden filhote 15kg'
+                    : 'Ex: Entrega de ração e remédios para acolhedor'
+                }
+                className="text-xs"
+                {...register('descricao')}
+              />
+              {errors.descricao && (
+                <p className="text-xs text-destructive">{errors.descricao.message}</p>
+              )}
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col-reverse gap-2 border-t border-border pt-4 sm:flex-row sm:justify-end">
+          {/* Documento Comprobatório (Imagem / PDF) */}
+          <div className="space-y-2 rounded-lg border border-dashed border-border p-3">
+            <div className="flex items-center justify-between">
+              <Label className="flex items-center gap-1.5 text-xs font-semibold">
+                <Paperclip className="size-3.5 text-primary" />
+                <span>Documento Comprobatório (Imagem ou PDF)</span>
+              </Label>
+              {isUploading && (
+                <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <Loader2 className="size-3 animate-spin" /> Enviando...
+                </span>
+              )}
+            </div>
+
+            {documentoUrl ? (
+              <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 p-2 text-xs">
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <FileCheck className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                  <span className="truncate font-medium">{documentoNome || 'Comprovante anexado'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={documentoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-primary underline"
+                  >
+                    Ver
+                  </a>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRemoveFile}
+                    className="size-6 p-0 text-muted-foreground hover:text-destructive"
+                  >
+                    <X className="size-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="comprovante-upload"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isUploading}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-xs"
+                >
+                  <Upload className="mr-1.5 size-3.5" />
+                  Selecionar Comprovante
+                </Button>
+                <span className="text-[11px] text-muted-foreground">
+                  JPG, PNG ou PDF (máximo 10 MB)
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
+              size="default"
               onClick={() => onOpenChange(false)}
-              disabled={isPending}
+              disabled={isPending || isUploading}
             >
               Cancelar
             </Button>
-            <Button type="submit" variant="primary" disabled={isPending}>
-              {isPending ? 'Registrando...' : 'Registrar doação'}
+            <Button
+              type="submit"
+              variant="primary"
+              size="default"
+              disabled={isPending || isUploading}
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                'Salvar Doação'
+              )}
             </Button>
           </div>
         </form>
